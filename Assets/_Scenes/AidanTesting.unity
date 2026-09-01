@@ -1348,20 +1348,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 8761720251271159043, guid: 53c9280b3290c544ea21b27c0f5b0925, type: 3}
   m_PrefabInstance: {fileID: 50488134319224511}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2128339008
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2128339007}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 001ee96ee52648c4ea070130e416865e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PoolStick
-  _cueBall: {fileID: 2013109314}
-  _shotForce: 200
 --- !u!114 &2128339009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1393,8 +1379,8 @@ MonoBehaviour:
     m_ActionName: 'Gameplay/Rotate[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2128339008}
-        m_TargetAssemblyTypeName: PoolStick, Assembly-CSharp
+      - m_Target: {fileID: 2128339010}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
         m_MethodName: Shoot
         m_Mode: 0
         m_Arguments:
@@ -1412,6 +1398,20 @@ MonoBehaviour:
   m_DefaultActionMap: Gameplay
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &2128339010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2128339007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 886ae034b6f8ada459b482535bc0999d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player
+  _cueBall: {fileID: 2013109314}
+  _defaultShotSpeed: 400
 --- !u!1001 &50488134319224511
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1473,7 +1473,7 @@ PrefabInstance:
       addedObject: {fileID: 2128339009}
     - targetCorrespondingSourceObject: {fileID: 8761720251271159043, guid: 53c9280b3290c544ea21b27c0f5b0925, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2128339008}
+      addedObject: {fileID: 2128339010}
   m_SourcePrefab: {fileID: 100100000, guid: 53c9280b3290c544ea21b27c0f5b0925, type: 3}
 --- !u!1001 &936965159381626912
 PrefabInstance:
