@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
     private Rigidbody _poolStickRb;
     private Rigidbody _cueBallRb;
+    [SerializeField] Scrollbar _chargeVisual;
 
 
     //Get reference to cue ball so we can hit it ---- must drag cue ball in through the inspector
@@ -21,7 +23,7 @@ public class Player : MonoBehaviour
     private float _holdTimer;
     private float _maxHold = 3f; // 3 for the seconds of time a player can hold down shoot at max
 
-    //private Vector2 _rotateInput;
+    private Vector2 _rotateInput;
 
 
 
@@ -32,6 +34,8 @@ public class Player : MonoBehaviour
 
         //used for shoot math but the radius only needs to be gathered once so I have it here in Awake.
         _ballRadius = _cueBall.GetComponent<SphereCollider>().radius;
+
+        _chargeVisual.gameObject.SetActive(false); //initialize visual as closed
     }
 
 
@@ -46,13 +50,18 @@ public class Player : MonoBehaviour
             _holdTimer = 0;
             _holdStarted = true;
 
+            // set up the visual indicator
+            _chargeVisual.gameObject.SetActive(true);
+            _chargeVisual.size = _holdTimer;
+
+
             Debug.Log("Holding");
         }
 
         if (context.canceled) // canceled is the phase when the player releases input
         {
             _holdStarted = false;
-            // Implement Close visual
+            _chargeVisual.gameObject.SetActive(false);
 
             if (_holdTimer > _maxHold) //max out power on shot by not allowing more than 3 second hold
             {
@@ -77,12 +86,12 @@ public class Player : MonoBehaviour
 
     }
 
-    /*
+    
     public void Rotate(InputAction.CallbackContext context)
     {
         _rotateInput = context.ReadValue<Vector2>();
     }
-    */
+    
 
     private void Update()
     {
@@ -90,9 +99,8 @@ public class Player : MonoBehaviour
 
         if (_holdStarted)
         {
-            //progressBar.SetActive(true) open visual
-
             _holdTimer += Time.deltaTime;
+            _chargeVisual.size = (_holdTimer / _maxHold); // divide by _maxHold because scrollBarSize is capped to 1.
         }
     }
 }
