@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,7 +13,7 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _cueBall;
 
     //for Shooting
-    [SerializeField] private float _defaultShotSpeed = 400f;
+    [SerializeField] private float _defaultShotSpeed = 5f;
     private float _ballRadius;
 
     //Detect hold
@@ -50,7 +52,7 @@ public class Player : MonoBehaviour
         if (context.canceled) // canceled is the phase when the player releases input
         {
             _holdStarted = false;
-            //Close visual
+            // Implement Close visual
 
             if (_holdTimer > _maxHold) //max out power on shot by not allowing more than 3 second hold
             {
@@ -58,7 +60,7 @@ public class Player : MonoBehaviour
             }
 
             float shotForce = _defaultShotSpeed * _holdTimer;
-            Debug.Log(_holdTimer);
+            Debug.Log("Hold power multiplier: " + _holdTimer);
 
             //direction of shot
             Vector3 shotDir = new Vector3(0, 0f, 1); // Changing these values impacts shot direction, raising the y makes ball chip
@@ -67,9 +69,8 @@ public class Player : MonoBehaviour
             //calculate where to hit the ball
             Vector3 hitPos = _cueBall.transform.position - (shotDir * _ballRadius); // Perfect center of the ball no added spin
             Vector3 hitPosSpin = new Vector3(hitPos.x, hitPos.y - 1, hitPos.z); // Change these values to affect spin
-
+            
             _cueBallRb.AddForceAtPosition(shotDir * shotForce, hitPosSpin, ForceMode.Impulse); // Impulse gives all force at once - realistic for pool
-
 
             Debug.Log("Shoot");
         }
