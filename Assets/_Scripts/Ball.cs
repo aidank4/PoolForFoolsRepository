@@ -5,7 +5,7 @@ public class Ball : MonoBehaviour
 {
     private Rigidbody _ballRb;
 
-    protected float minSpeed = 0.2f;
+    private float _minSpeed = 0.2f;
 
     //private bool _moving = false;
 
@@ -34,12 +34,15 @@ public class Ball : MonoBehaviour
             yield return new WaitForSeconds(2);
 
             //after 2 seconds check if they are close to stopping
-            if (_ballRb.linearVelocity.x < minSpeed && _ballRb.linearVelocity.z < minSpeed)
+            if (_ballRb.linearVelocity.sqrMagnitude < _minSpeed)
             {
                 // Stop the balls from moving and spinning manually so we aren't waiting on the physics system.
                 _ballRb.linearVelocity = Vector3.zero;
                 _ballRb.angularVelocity = Vector3.zero;
-                
+
+                //below comment is old conditional
+                //_ballRb.linearVelocity.x<_minSpeed && _ballRb.linearVelocity.z < _minSpeed
+
                 // if the ball was still moving quickly the if statement will check again in 0.5 seconds
             }
         }
