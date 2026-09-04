@@ -6,15 +6,16 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    private Rigidbody _poolStickRb;
+    private Rigidbody _poolCueRb;
     private Rigidbody _cueBallRb;
-    [SerializeField] Scrollbar _chargeVisual;
 
 
     //Get reference to cue ball so we can hit it ---- must drag cue ball in through the inspector
     [SerializeField] private GameObject _cueBall;
+    private GameObject _poolCue;
 
     //for Shooting
+    public bool shootAvailable = true;
     [SerializeField] private float _defaultShotSpeed = 5f;
     private float _ballRadius;
 
@@ -23,14 +24,19 @@ public class Player : MonoBehaviour
     private float _holdTimer;
     private float _maxHold = 3f; // 3 for the seconds of time a player can hold down shoot at max
 
+    //rotation of pool cue
     private Vector2 _rotateInput;
+    [SerializeField] private float _rotationSpeed = 50f;
 
+    
+    [SerializeField] Scrollbar _chargeVisual;
 
 
     private void Awake()
     {
-        _poolStickRb = GetComponent<Rigidbody>();
+        _poolCueRb = GetComponent<Rigidbody>();
         _cueBallRb = _cueBall.GetComponent<Rigidbody>();
+        _poolCue = this.gameObject;
 
         //used for shoot math but the radius only needs to be gathered once so I have it here in Awake.
         _ballRadius = _cueBall.GetComponent<SphereCollider>().radius;
@@ -60,8 +66,12 @@ public class Player : MonoBehaviour
 
         if (context.canceled) // canceled is the phase when the player releases input
         {
+            //can't shoot right after
+            //shootAvailable = false;
+
             _holdStarted = false;
             _chargeVisual.gameObject.SetActive(false);
+            //_poolCue.gameObject.SetActive(false);
 
             if (_holdTimer > _maxHold) //max out power on shot by not allowing more than 3 second hold
             {
@@ -72,8 +82,7 @@ public class Player : MonoBehaviour
             Debug.Log("Hold power multiplier: " + _holdTimer);
 
             //direction of shot
-            Vector3 shotDir = new Vector3(0, 0f, 1); // Changing these values impacts shot direction, raising the y makes ball chip
-
+            Vector3 shotDir = _poolCue.transform.up; // transform.up because y axis(green) is forward on pool cue prefab
 
             //calculate where to hit the ball
             Vector3 hitPos = _cueBall.transform.position - (shotDir * _ballRadius); // Perfect center of the ball no added spin
@@ -82,6 +91,7 @@ public class Player : MonoBehaviour
             _cueBallRb.AddForceAtPosition(shotDir * shotForce, hitPosSpin, ForceMode.Impulse); // Impulse gives all force at once - realistic for pool
 
             Debug.Log("Shoot");
+            Debug.Log(_rotateInput);
         }
 
     }
@@ -90,12 +100,13 @@ public class Player : MonoBehaviour
     public void Rotate(InputAction.CallbackContext context)
     {
         _rotateInput = context.ReadValue<Vector2>();
+        Debug.Log("Rotating");
     }
     
 
     private void Update()
     {
-        //_poolStickRb.MoveRotation());
+        _poolCue.transform.RotateAround(_cueBall.transform.position, _rotateInput, _rotationSpeed * Time.deltaTime);
 
         if (_holdStarted)
         {

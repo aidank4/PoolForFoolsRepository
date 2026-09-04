@@ -1,11 +1,10 @@
 using System.Collections;
 using UnityEngine;
 
-public class Ball : MonoBehaviour
+public class Ball : BallManager
 {
     private Rigidbody _ballRb;
 
-    private float _minSpeed = 0.2f;
     //private bool _moving = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -27,22 +26,22 @@ public class Ball : MonoBehaviour
     /// <returns></returns>
     IEnumerator MovementCheck()
     {
-        Debug.Log("Cycling");
+
         if (_ballRb.linearVelocity != Vector3.zero) // checks if ball has been hit and is moving
         {
             yield return new WaitForSeconds(2);
 
             //after 2 seconds check if they are close to stopping
-            if (_ballRb.linearVelocity.x < _minSpeed && _ballRb.linearVelocity.z < _minSpeed)
+            if (_ballRb.linearVelocity.x < minSpeed && _ballRb.linearVelocity.z < minSpeed)
             {
                 // Stop the balls from moving and spinning manually so we aren't waiting on the physics system.
                 _ballRb.linearVelocity = Vector3.zero;
                 _ballRb.angularVelocity = Vector3.zero;
-                Debug.Log("Stopped");
                 
                 // if the ball was still moving quickly the if statement will check again in 0.5 seconds
             }
         }
+
         yield return new WaitForSeconds(0.5f);
         StartCoroutine(MovementCheck());
     }
