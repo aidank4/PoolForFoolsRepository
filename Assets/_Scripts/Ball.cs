@@ -1,9 +1,11 @@
 using System.Collections;
 using UnityEngine;
 
-public class Ball : BallManager
+public class Ball : MonoBehaviour
 {
     private Rigidbody _ballRb;
+
+    protected float minSpeed = 0.2f;
 
     //private bool _moving = false;
 

@@ -43,7 +43,7 @@ public class BallManager : MonoBehaviour
             _timer += Time.fixedDeltaTime;
             if (_timer >= _minWaitTime)
             {
-                //Debug.Log("All Balls are still");
+                Debug.Log("All Balls are still");
                 //_shootAvailable = true;
             }
         }
