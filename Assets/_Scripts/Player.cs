@@ -22,6 +22,9 @@ public class Player : MonoBehaviour
     private float _ballRadius;
     [SerializeField] private float _shootWaitTime = 5f;
 
+    // cancel shot
+    private bool _stopShot = false;
+
     //Detect hold
     private bool _holdStarted = false;
     private float _holdTimer;
@@ -58,6 +61,7 @@ public class Player : MonoBehaviour
         if (context.started && _shootAvailable) // detect when click started so that we can timestamp it for the hold duration
         {
             _shooting = true;
+            _stopShot = false;
             
             //Prepare the hold timer
             _holdTimer = 0;
@@ -71,7 +75,7 @@ public class Player : MonoBehaviour
             Debug.Log("Holding");
         }
 
-        if (context.canceled && _shooting) // canceled is the phase when the player releases input
+        if (context.canceled && _shooting && !_stopShot) // canceled is the phase when the player releases input
         {
             
             _shooting = false;
@@ -88,8 +92,18 @@ public class Player : MonoBehaviour
 
     }
 
-    
+    //Using Unity events
+    public void CancelShot(InputAction.CallbackContext context)
+    {
+        _stopShot = true;
+        Debug.Log("Canceled");
 
+        //reset charge
+        _holdTimer = 0;
+        _chargeVisual.gameObject.SetActive(false);
+    }
+
+    //Using Unity events
     public void Rotate(InputAction.CallbackContext context)
     {
         _rotateInput = context.ReadValue<Vector2>();
@@ -138,7 +152,7 @@ public class Player : MonoBehaviour
     {
         _poolCueParent.transform.RotateAround(_cueBall.transform.position, _rotateInput, _rotationSpeed * Time.deltaTime);
 
-        if (_holdStarted)
+        if (_holdStarted && !_stopShot)
         {
             _holdTimer += Time.deltaTime;
             _chargeVisual.size = (_holdTimer / _maxHold); // divide by _maxHold because scrollBarSize is capped to 1.

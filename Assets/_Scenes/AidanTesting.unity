@@ -1975,6 +1975,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7159418116619822582, guid: 8d1baf14fe43ed94d93b9b4cec2214cb, type: 3}
   m_PrefabInstance: {fileID: 1642714158}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1673226133 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5795993226912930031, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+  m_PrefabInstance: {fileID: 5818132184381325902}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 886ae034b6f8ada459b482535bc0999d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player
 --- !u!1 &1867850794
 GameObject:
   m_ObjectHideFlags: 0
@@ -2541,6 +2552,46 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 787951581}
     m_Modifications:
+    - target: {fileID: 2469475310404743267, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: m_ActionEvents.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2469475310404743267, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: m_ActionEvents.Array.data[2].m_ActionId
+      value: 29ab31a2-1c03-4208-8268-f9906276b3cf
+      objectReference: {fileID: 0}
+    - target: {fileID: 2469475310404743267, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: m_ActionEvents.Array.data[2].m_ActionName
+      value: 'Gameplay/CancelShot[/Keyboard/leftShift]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 2469475310404743267, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: m_ActionEvents.Array.data[2].m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2469475310404743267, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: m_ActionEvents.Array.data[2].m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2469475310404743267, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: m_ActionEvents.Array.data[2].m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1673226133}
+    - target: {fileID: 2469475310404743267, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: m_ActionEvents.Array.data[2].m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2469475310404743267, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: m_ActionEvents.Array.data[2].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: CancelShot
+      objectReference: {fileID: 0}
+    - target: {fileID: 2469475310404743267, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: m_ActionEvents.Array.data[2].m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Player, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2469475310404743267, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: m_ActionEvents.Array.data[2].m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 3714206573790673059, guid: 15612147a48dd1149894f367c25f843e, type: 3}
       propertyPath: m_TagString
       value: PoolCue
