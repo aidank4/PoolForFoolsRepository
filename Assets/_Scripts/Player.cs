@@ -28,6 +28,7 @@ public class Player : MonoBehaviour
 
     // cancel shot
     private bool _stopShot = false;
+    private Vector3 _startingPos; // when shot canceled need to remember where pool cue was to reset its position
 
     //Detect hold
     private bool _holdStarted = false;
@@ -75,6 +76,9 @@ public class Player : MonoBehaviour
             _chargeVisual.gameObject.SetActive(true);
             _chargeVisual.size = _holdTimer;
 
+            //Record pool cue position to move back to it incase of canceled shot
+            _startingPos = _poolCueParent.transform.position;
+
 
             Debug.Log("Holding");
         }
@@ -105,6 +109,9 @@ public class Player : MonoBehaviour
         //reset charge
         _holdTimer = 0;
         _chargeVisual.gameObject.SetActive(false);
+
+        //move stick back if shot canceled
+        _poolCueParent.transform.position = _startingPos;
     }
 
     //Using Unity events
