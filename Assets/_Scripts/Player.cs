@@ -22,13 +22,17 @@ public class Player : MonoBehaviour
     private float _ballRadius;
     [SerializeField] private float _shootWaitTime = 5f;
 
+
+    //Pool cue moving back
+    [SerializeField] private float _pullBackSpeed = 1f;
+
     // cancel shot
     private bool _stopShot = false;
 
     //Detect hold
     private bool _holdStarted = false;
     private float _holdTimer;
-    private float _maxHold = 3f; // 3 for the seconds of time a player can hold down shoot at max
+    [SerializeField] private float _maxHold = 3f; // 3 for the seconds of time a player can hold down shoot at max
 
     //rotation of pool cue
     private Vector2 _rotateInput;
@@ -84,7 +88,7 @@ public class Player : MonoBehaviour
             StartCoroutine(ShootDelay());
 
             _chargeVisual.gameObject.SetActive(false);
-            _poolCueModel.gameObject.SetActive(false);
+            //_poolCueModel.gameObject.SetActive(false);
 
 
             CalculateShot();
@@ -129,6 +133,7 @@ public class Player : MonoBehaviour
     /// </summary>
     private void CalculateShot()
     {
+     
         if (_holdTimer > _maxHold) //max out power on shot by not allowing more than 3 second hold
         {
             _holdTimer = _maxHold;
@@ -144,6 +149,9 @@ public class Player : MonoBehaviour
         Vector3 hitPos = _cueBall.transform.position - (shotDir * _ballRadius); // Perfect center of the ball no added spin
         Vector3 hitPosSpin = new Vector3(hitPos.x, hitPos.y - 1, hitPos.z); // Change these values to affect spin
 
+        //snap pool cue forward to "hit the ball"
+        _poolCueParent.transform.position = hitPos;
+
         _cueBallRb.AddForceAtPosition(shotDir * shotForce, hitPosSpin, ForceMode.Impulse); // Impulse gives all force at once - realistic for pool
     }
     
@@ -152,17 +160,31 @@ public class Player : MonoBehaviour
     {
         _poolCueParent.transform.RotateAround(_cueBall.transform.position, _rotateInput, _rotationSpeed * Time.deltaTime);
 
+
         if (_holdStarted && !_stopShot)
         {
             _holdTimer += Time.deltaTime;
             _chargeVisual.size = (_holdTimer / _maxHold); // divide by _maxHold because scrollBarSize is capped to 1.
+
+            //dont let the pool cue pull back visual go further than max power
+            if (_holdTimer < _maxHold)
+            {
+                _poolCueParent.transform.position += -_poolCueParent.transform.up * _pullBackSpeed * Time.deltaTime;
+            }
         }
     }
 
     IEnumerator ShootDelay()
     {
         _shootAvailable = false;
+
+        //Leave pool cue up for a tenth of a second to show it hitting the ball;
+        yield return new WaitForSeconds(0.1f);
+        _poolCueModel.gameObject.SetActive(false);
+
+        //Delay until player can shoot again
         yield return new WaitForSeconds(_shootWaitTime);
+
         _shootAvailable = true;
 
         RespawnPoolCue();
