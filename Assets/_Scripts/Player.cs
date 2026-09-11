@@ -6,8 +6,12 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    private Rigidbody _cueBallRb;
+    //Get reference of turn manager to switch turns
+    [SerializeField] private GameObject _turnManagerRef;
+    private TurnManager _turnManagerScript;
 
+
+    private Rigidbody _cueBallRb;
 
     //Get reference to cue ball so we can hit it ---- must drag cue ball in through the inspector
     [SerializeField] private GameObject _cueBall;
@@ -47,6 +51,7 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
         _cueBallRb = _cueBall.GetComponent<Rigidbody>();
         _poolCueModel = GameObject.FindWithTag("PoolCue"); //need the model as we only want to turn it off visually
         _poolCueParent = this.gameObject;
@@ -80,7 +85,7 @@ public class Player : MonoBehaviour
             _startingPos = _poolCueParent.transform.position;
 
 
-            Debug.Log("Holding");
+            //Debug.Log("Holding");
         }
 
         if (context.canceled && _shooting && !_stopShot) // canceled is the phase when the player releases input
@@ -88,6 +93,9 @@ public class Player : MonoBehaviour
             
             _shooting = false;
             _holdStarted = false;
+
+            //reset keep turn bool to false so that it only gets set true if the correct ball is scored
+            _turnManagerScript.keepTurn = false;
 
             StartCoroutine(ShootDelay());
 
@@ -104,7 +112,7 @@ public class Player : MonoBehaviour
     public void CancelShot(InputAction.CallbackContext context)
     {
         _stopShot = true;
-        Debug.Log("Canceled");
+        //Debug.Log("Canceled");
 
         //reset charge
         _holdTimer = 0;
@@ -118,7 +126,6 @@ public class Player : MonoBehaviour
     public void Rotate(InputAction.CallbackContext context)
     {
         _rotateInput = context.ReadValue<Vector2>();
-        Debug.Log("Rotating");
     }
 
 
@@ -147,7 +154,7 @@ public class Player : MonoBehaviour
         }
 
         float shotForce = _defaultShotSpeed * _holdTimer;
-        Debug.Log("Hold power multiplier: " + _holdTimer);
+        //Debug.Log("Hold power multiplier: " + _holdTimer);
 
         //direction of shot
         Vector3 shotDir = _poolCueParent.transform.up; // transform.up because y axis(green) is forward on pool cue prefab
@@ -195,6 +202,11 @@ public class Player : MonoBehaviour
         _shootAvailable = true;
 
         RespawnPoolCue();
+
+        //Switch turns has a conditional to check if it should switch or not
+        _turnManagerScript.SwitchTurn();
+        
+
 
     }
 }
