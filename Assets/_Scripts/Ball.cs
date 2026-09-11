@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Ball : MonoBehaviour
@@ -16,6 +17,7 @@ public class Ball : MonoBehaviour
 
         StartCoroutine(MovementCheck());
     }
+
 
     /// <summary>
     /// When balls collide they are very slow for a split second.

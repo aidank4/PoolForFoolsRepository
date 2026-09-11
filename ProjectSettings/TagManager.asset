@@ -5,6 +5,11 @@ TagManager:
   serializedVersion: 3
   tags:
   - PoolCue
+  - SolidBall
+  - StripedBall
+  - EightBall
+  - CueBall
+  - CornerPocketA
   layers:
   - Default
   - TransparentFX
