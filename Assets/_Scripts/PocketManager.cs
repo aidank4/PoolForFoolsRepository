@@ -41,7 +41,6 @@ public class PocketManager : MonoBehaviour
                     _turnManagerScript.TurnDeciderStripes();
 
                     Debug.Log("stripes" + _turnManagerScript.teamStripes);
-                    //Check if team stripes scored stripe and keeps turn
 
                     Debug.Log("stripes");
                     Destroy(other.gameObject);
@@ -79,6 +78,7 @@ public class PocketManager : MonoBehaviour
 
             case "CueBall":
                 Debug.Log("Scratch");
+                _turnManagerScript.scratch = true;
                 //other.gameObject.SetActive(false);
                 break;
         }
