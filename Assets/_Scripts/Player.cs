@@ -24,7 +24,7 @@ public class Player : MonoBehaviour
 
     [SerializeField] private float _defaultShotSpeed = 5f;
     private float _ballRadius;
-    [SerializeField] private float _shootWaitTime = 5f;
+    [SerializeField] private float _shootWaitTime = 4f;
 
 
     //Pool cue moving back
@@ -188,6 +188,11 @@ public class Player : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Going to have to change when turn changes on ball stopping
+    /// </summary>
+    /// <returns></returns>
     IEnumerator ShootDelay()
     {
         _shootAvailable = false;
@@ -199,12 +204,18 @@ public class Player : MonoBehaviour
         //Delay until player can shoot again
         yield return new WaitForSeconds(_shootWaitTime);
 
-        _shootAvailable = true;
-
-        RespawnPoolCue();
 
         //Switch turns has a conditional to check if it should switch or not
         _turnManagerScript.SwitchTurn();
+
+        //Animation ends after 1 second so do following code after this wait
+        //TEMP
+        yield return new WaitForSeconds(1f);
+
+        _shootAvailable = true;
+        RespawnPoolCue();
+
+
         
 
 
