@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TurnAnimController : MonoBehaviour
+public class AnimEndController : MonoBehaviour
 {
 
     //this function is called in an animation event

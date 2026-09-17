@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,8 +9,13 @@ public class TurnManager : MonoBehaviour
     [SerializeField] private GameObject _turnSwitchUI;
     [SerializeField] private TMP_Text _turnText;
 
-    private int _playerOne = 1;
-    private int _playerTwo = 2;
+    //Team assignment UI
+    [SerializeField] private GameObject _teamAssignUI;
+    [SerializeField] private Sprite _teamStripesSprite;
+    [SerializeField] private Sprite _teamSolidsSprite;
+
+    public int playerOne { get; private set; }  = 1;
+    public int playerTwo { get; private set; } = 2;
     public int currentPlayer { get; private set; }
 
     public int teamStripes { get; private set; }
@@ -20,9 +26,12 @@ public class TurnManager : MonoBehaviour
 
     private void Awake()
     {
+        //set ui false
         _turnSwitchUI.SetActive(false);
+        _teamAssignUI.SetActive(false);
+
         //set player one as initial player on startup
-        currentPlayer = _playerOne;
+        currentPlayer = playerOne;
     }
 
 
@@ -35,14 +44,14 @@ public class TurnManager : MonoBehaviour
             _turnSwitchUI.SetActive(true);
             _turnText.text = string.Empty;
 
-            if (currentPlayer == _playerOne)
+            if (currentPlayer == playerOne)
             {
-                currentPlayer = _playerTwo;
+                currentPlayer = playerTwo;
                 _turnText.text = "Player 2";
             }
             else
             {
-                currentPlayer = _playerOne;
+                currentPlayer = playerOne;
                 _turnText.text = "Player 1";
             }
             //Play PLAYER 1 or 2 UI, probs function called NewTurnUI
@@ -92,14 +101,19 @@ public class TurnManager : MonoBehaviour
     {
         teamStripes = currentPlayer;
 
+        //turn on object with animation -- stripes sprite
+        _teamAssignUI.SetActive(true);
+        _teamAssignUI.GetComponentInChildren<Image>().sprite = _teamStripesSprite;
+        Debug.Log("assign stripes");
+
         //Assign solids to other player
-        if (teamStripes == _playerOne)
+        if (teamStripes == playerOne)
         {
-            teamSolids = _playerTwo;
+            teamSolids = playerTwo;
         }
         else
         {
-            teamSolids = _playerOne;
+            teamSolids = playerOne;
         }
     }
 
@@ -107,15 +121,40 @@ public class TurnManager : MonoBehaviour
     {
         teamSolids = currentPlayer;
 
+        //turn on object with animation -- solids sprite
+        _teamAssignUI.SetActive(true);
+        _teamAssignUI.GetComponentInChildren<Image>().sprite = _teamSolidsSprite;
+
+        Debug.Log("assign solids");
+
         //Assign stripes to other player
-        if (teamSolids == _playerOne)
+        if (teamSolids == playerOne)
         {
-            teamStripes = _playerTwo;
+            teamStripes = playerTwo;
         }
         else
         {
-            teamStripes = _playerOne;
+            teamStripes = playerOne;
         }
+    }
+
+    /// <summary>
+    /// highlights which team is currently going, used by scoreboard
+    /// </summary>
+    public void ShowTeam(RawImage solidGlow, RawImage stripesGlow)
+    {
+        if (currentPlayer == teamStripes)
+        {
+            stripesGlow.transform.localScale = Vector3.one; //show it by scaling it on
+            solidGlow.transform.localScale = Vector3.zero; //hide it by scaling it off
+        }
+        else if (currentPlayer == teamSolids)
+        {
+            solidGlow.transform.localScale = Vector3.one; //show it by scaling it on
+            stripesGlow.transform.localScale = Vector3.zero; //hide it by scaling it off
+        }
+
+
     }
 
 
