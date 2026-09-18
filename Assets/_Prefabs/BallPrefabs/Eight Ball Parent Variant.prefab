@@ -16,6 +16,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Eight Ball Model
       objectReference: {fileID: 0}
+    - target: {fileID: 2434283410916534087, guid: f2a5f11a58621b344b2851dbb1c217b9, type: 3}
+      propertyPath: m_IsKinematic
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2549439296298193789, guid: f2a5f11a58621b344b2851dbb1c217b9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

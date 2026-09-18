@@ -1215,6 +1215,67 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2005233499690238627, guid: 5726437d8d85df34290c4f1f0717b9e8, type: 3}
   m_PrefabInstance: {fileID: 510527989}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &523292825
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 523292827}
+  - component: {fileID: 523292826}
+  m_Layer: 0
+  m_Name: BallSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &523292826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 523292825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f61d30e763dda2948a6f342dc186d8cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BallManager
+  _startingPos: {fileID: 589058901}
+  _balls:
+  - {fileID: 11400000, guid: fb2fc96481bc14e4fa486c4091d9711b, type: 2}
+  - {fileID: 11400000, guid: db7004b6ffbbd564a98dcbd4e439ccca, type: 2}
+  - {fileID: 11400000, guid: 15badf086cdb89b40a082616d08114ec, type: 2}
+  - {fileID: 11400000, guid: 18c4f01a9aafbf14f86262bb45f42a7e, type: 2}
+  - {fileID: 11400000, guid: 7177ac56316b01745938c839a2004897, type: 2}
+  - {fileID: 11400000, guid: 8a21e93f32c8ac846995d9ab1a656cf0, type: 2}
+  - {fileID: 11400000, guid: df8747a1501cfcd4ba7db207c9b77c1b, type: 2}
+  - {fileID: 11400000, guid: aa18dae488dbecd4aac8ca6867ab267f, type: 2}
+  - {fileID: 11400000, guid: e28cb321a32508c499a5b4a8c2c90ae0, type: 2}
+  - {fileID: 11400000, guid: 29cbbd3d0cde9ab4da06a00daa59a82b, type: 2}
+  - {fileID: 11400000, guid: f472cf58549666646bb603d8770d2f93, type: 2}
+  - {fileID: 11400000, guid: 0957ae64d72d0e44e9120fedb6d7c8ba, type: 2}
+  - {fileID: 11400000, guid: dcf9845f708df824a881fa48d55a205b, type: 2}
+  - {fileID: 11400000, guid: bb2e89ad30a5fb64f97762dc073a27a0, type: 2}
+  - {fileID: 11400000, guid: 08c475e71d1efc04bbf014280d81eb59, type: 2}
+--- !u!4 &523292827
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 523292825}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &572632250
 GameObject:
   m_ObjectHideFlags: 0
@@ -1354,6 +1415,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 572632250}
   m_CullTransparentMesh: 1
+--- !u!1 &589058901
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 589058902}
+  m_Layer: 0
+  m_Name: Spawn Start Position
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &589058902
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 589058901}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &617965594
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2437,9 +2529,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1354439994}
-  - component: {fileID: 1354439995}
   m_Layer: 0
-  m_Name: Ball Manager
+  m_Name: Ball Parent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2475,19 +2566,6 @@ Transform:
   - {fileID: 510527990}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -2.388, z: 0}
---- !u!114 &1354439995
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1354439993}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f61d30e763dda2948a6f342dc186d8cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BallManager
-  _balls: []
 --- !u!1 &1356739785
 GameObject:
   m_ObjectHideFlags: 0
@@ -4898,3 +4976,5 @@ SceneRoots:
   - {fileID: 388796581}
   - {fileID: 1514145551}
   - {fileID: 1701884039}
+  - {fileID: 589058902}
+  - {fileID: 523292827}
