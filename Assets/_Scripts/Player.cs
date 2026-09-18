@@ -42,6 +42,7 @@ public class Player : MonoBehaviour
         _ballRadius = _cueBall.GetComponent<SphereCollider>().radius;
 
         _chargeVisual.gameObject.SetActive(false); //initialize visual as closed
+
     }
 
 
