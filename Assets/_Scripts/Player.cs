@@ -18,6 +18,8 @@ public class Player : MonoBehaviour
     private GameObject _poolCueModel;
     private GameObject _poolCueParent;
 
+    [SerializeField] private GameObject _predictionLineParent;
+
     //for Shooting
     private bool _shootAvailable = true; //Can't start shooting without this bool
     private bool _shooting = false; // Can't release shot without this bool - Without this there is an error where you can release shot before starting shot
@@ -60,6 +62,10 @@ public class Player : MonoBehaviour
         _ballRadius = _cueBall.GetComponent<SphereCollider>().radius;
 
         _chargeVisual.gameObject.SetActive(false); //initialize visual as closed
+
+        //set up prediction lines position and rotation
+        _predictionLineParent.transform.position = _poolCueParent.transform.position + new Vector3(0, 0, _ballSeparation * 2);
+        _predictionLineParent.transform.eulerAngles = new Vector3(0, 0, 0);
 
     }
 
@@ -137,6 +143,11 @@ public class Player : MonoBehaviour
         _poolCueModel.gameObject.SetActive(true);
         _poolCueParent.transform.position = _cueBall.transform.position - new Vector3(0f, 0f, _ballSeparation);
 
+        //set up prediction lines position and rotation
+        _predictionLineParent.gameObject.SetActive(true);
+        _predictionLineParent.transform.position = _poolCueParent.transform.position + new Vector3(0, 0, _ballSeparation * 2);
+        _predictionLineParent.transform.eulerAngles = new Vector3(0, 0, 0);
+
         //eulerAngles is just taking in the inspector values and making it quaternion
         _poolCueParent.transform.eulerAngles = new Vector3(90, 0, 0);
     }
@@ -175,6 +186,8 @@ public class Player : MonoBehaviour
     {
         _poolCueParent.transform.RotateAround(_cueBall.transform.position, _rotateInput, _rotationSpeed * Time.deltaTime);
 
+        //rotate prediction line aswell
+        _predictionLineParent.transform.RotateAround(_cueBall.transform.position, _rotateInput, _rotationSpeed * Time.deltaTime);
 
         if (_holdStarted && !_stopShot)
         {
@@ -201,6 +214,9 @@ public class Player : MonoBehaviour
         //Leave pool cue up for a tenth of a second to show it hitting the ball;
         yield return new WaitForSeconds(0.1f);
         _poolCueModel.gameObject.SetActive(false);
+
+        //hide prediction line
+        _predictionLineParent.gameObject.SetActive(false);
 
         //Delay until player can shoot again
         yield return new WaitForSeconds(_shootWaitTime);
