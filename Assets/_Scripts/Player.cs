@@ -21,12 +21,12 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _predictionLineParent;
 
     //for Shooting
-    private bool _shootAvailable = true; //Can't start shooting without this bool
+    private bool _shootAvailable = true; //Can't start shooting without this bool // accessed by ball manager
+    public bool checkIfCanShoot { get; private set; } = false;
     private bool _shooting = false; // Can't release shot without this bool - Without this there is an error where you can release shot before starting shot
 
     [SerializeField] private float _defaultShotSpeed = 5f;
     private float _ballRadius;
-    [SerializeField] private float _shootWaitTime = 4f;
 
 
     //Pool cue moving back
@@ -104,7 +104,7 @@ public class Player : MonoBehaviour
             //reset keep turn bool to false so that it only gets set true if the correct ball is scored
             _turnManagerScript.keepTurn = false;
 
-            StartCoroutine(ShootDelay());
+            StartCoroutine(EndShot());
 
             _chargeVisual.gameObject.SetActive(false);
             //_poolCueModel.gameObject.SetActive(false);
@@ -149,7 +149,7 @@ public class Player : MonoBehaviour
         _predictionLineParent.transform.eulerAngles = new Vector3(0, 0, 0);
 
         //eulerAngles is just taking in the inspector values and making it quaternion
-        _poolCueParent.transform.eulerAngles = new Vector3(90, 0, 0);
+        _poolCueParent.transform.eulerAngles = new Vector3(0, 90, 0); // model needs to have y 90
     }
 
 
@@ -166,10 +166,9 @@ public class Player : MonoBehaviour
         }
 
         float shotForce = _defaultShotSpeed * _holdTimer;
-        //Debug.Log("Hold power multiplier: " + _holdTimer);
 
         //direction of shot
-        Vector3 shotDir = _poolCueParent.transform.up; // transform.up because y axis(green) is forward on pool cue prefab
+        Vector3 shotDir = -_poolCueParent.transform.right; // Negative transform.right because z axis is forward on pool cue prefab
 
         //calculate where to hit the ball
         Vector3 hitPos = _cueBall.transform.position - (shotDir * _ballRadius); // Perfect center of the ball no added spin
@@ -197,30 +196,37 @@ public class Player : MonoBehaviour
             //dont let the pool cue pull back visual go further than max power
             if (_holdTimer < _maxHold)
             {
-                _poolCueParent.transform.position += -_poolCueParent.transform.up * _pullBackSpeed * Time.deltaTime;
+                _poolCueParent.transform.position += _poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime; // .right is moving the cue back
             }
         }
+
     }
 
 
-    /// <summary>
-    /// Going to have to change when turn changes on ball stopping
-    /// </summary>
-    /// <returns></returns>
-    IEnumerator ShootDelay()
+    IEnumerator EndShot()
     {
         _shootAvailable = false;
 
+        //hide prediction line
+        _predictionLineParent.gameObject.SetActive(false);
+        
         //Leave pool cue up for a tenth of a second to show it hitting the ball;
         yield return new WaitForSeconds(0.1f);
         _poolCueModel.gameObject.SetActive(false);
 
-        //hide prediction line
-        _predictionLineParent.gameObject.SetActive(false);
-
-        //Delay until player can shoot again
-        yield return new WaitForSeconds(_shootWaitTime);
-
+        //wait 1.5 seconds before checking if balls are still
+        yield return new WaitForSeconds(1.5f);
+        checkIfCanShoot = true;
+    }
+    /// <summary>
+    /// Going to have to change when turn changes on ball stopping
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator ShootBack()
+    {
+        Debug.Log("ShootBackCalled");
+        //stop ball manager checking for balls stopping
+        checkIfCanShoot = false;
 
         //Switch turns has a conditional to check if it should switch or not
         _turnManagerScript.SwitchTurn();
@@ -231,11 +237,6 @@ public class Player : MonoBehaviour
 
         _shootAvailable = true;
         RespawnPoolCue();
-
-
-        
-
-
     }
 }
 

@@ -14,18 +14,20 @@ public class BallManager : MonoBehaviour
         public bool stripes;
         public bool spawned;
         public bool eightBall;
+        public bool cueBall;
         public int arrayNum; // temp for spawning can't figure out better way
     }
 
-    /*
+    
     protected float minSpeed = 0.2f;
     private float _timer;
-    private float _minWaitTime = 0.5f;
-    
-    [SerializeField] private Rigidbody[] _balls;
-    */
+    private float _minWaitTime = 2f;
 
-    //[SerializeField] private GameObject _testBall;
+    //Get player object for script
+    [SerializeField] private GameObject _poolCueRef;
+    private Player _playerScript;
+    
+
     [SerializeField] private GameObject _startingPos;
     private float _ballDiameter = 0.5715f;
     private int _rows = 5;
@@ -34,50 +36,56 @@ public class BallManager : MonoBehaviour
     [SerializeField] private float _spawnVarianceMin = -0.05f;
     [SerializeField] private float _spawnVarianceMax = 0.05f;
 
-    //[SerializeField] private BallSO[] _balls;
     [SerializeField] private BallData[] _balls;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Awake()
     {
-        //_balls = GetComponentsInChildren<Rigidbody>();
+        _playerScript = _poolCueRef.GetComponent<Player>();
         SpawnBalls();
     }
 
     
-    // Update is called once per frame
     private void FixedUpdate()
     {
-        /*bool ballsStopped = true;
-        foreach (Rigidbody ball in _balls)
+        if (_playerScript.checkIfCanShoot)
         {
-            //every check of a ball make ballsStill false unless they are still
+            bool checkBallsStopped = true;
 
-            if (ball.linearVelocity.sqrMagnitude > minSpeed)
+            //Check each ball and if any are moving it will set stopped bool to false
+            foreach (BallData ball in _balls) 
             {
-                ballsStopped = false;
+
+                Rigidbody ballRb = ball.ballObject.GetComponent<Rigidbody>();
+
+                Debug.Log($"Ball {ball.arrayNum}: " + $"lineaR = {ballRb.linearVelocity.magnitude:F4}, " + $"angular = { ballRb.angularVelocity.magnitude:F4}");
+                if (ballRb.linearVelocity.magnitude > minSpeed)
+                {
+                    checkBallsStopped = false;
+                }
+                if (ballRb.angularVelocity.magnitude > minSpeed)
+                {
+                    checkBallsStopped = false;
+                }
             }
-            if (ball.angularVelocity.sqrMagnitude > minSpeed)
+
+
+            //if balls are still wait a bit in case it was just a split second
+            if (checkBallsStopped)
             {
-                ballsStopped = false;
+                _timer += Time.fixedDeltaTime;
+                if (_timer >= _minWaitTime)
+                {
+                    Debug.Log("All Balls are still");
+                    StartCoroutine(_playerScript.ShootBack());
+                }
+            }
+            else
+            {
+                _timer = 0;
             }
         }
-
-        //if balls are still wait a bit in case it was just a split second
-        if (ballsStopped)
-        {
-            _timer += Time.fixedDeltaTime;
-            if (_timer >= _minWaitTime)
-            {
-                Debug.Log("All Balls are still");
-                //_shootAvailable = true;
-            }
-        }
-        else
-        {
-            _timer = 0;
-        }*/
     }
 
 
@@ -97,7 +105,7 @@ public class BallManager : MonoBehaviour
             for (int i = 0; i < ballsInRow; i++)
             {
                 //each row moves back by row seperation amount
-                float zValue = rowSeperation * row;
+                float zValue = -rowSeperation * row; // negative to flip triangle direction
                 float yValue = 0f;
 
                 //calculate the x value by multiplying ball diameter by + or - a certain distance // gets either +- 0, 0.5, 1, 1.5 
@@ -128,7 +136,7 @@ public class BallManager : MonoBehaviour
         bool lastBall = false;
 
         //at some point there will have to be two stripes or two solids so check if it is last ball to repeat
-        if (spawnIndex == _balls.Length - 1)
+        if (spawnIndex == _balls.Length - 1) // -2 because cue ball is also in array but has to be ignored
         {
             lastBall = true;
         }
@@ -136,11 +144,13 @@ public class BallManager : MonoBehaviour
         //eight ball is the 5th ball
         if (spawnIndex == 4)
         {
-            for (int i = 0; i < _balls.Length; i++)
+            Debug.Log("Index = 4");
+            for (int i = 0; i < _balls.Length; i++) // - 1 to ignore cue ball which is in array as well
             {
                 //find eightball
                 if (_balls[i].eightBall)
                 {
+                    Debug.Log("EightBall");
                     return i;
                 }
             }
@@ -155,7 +165,7 @@ public class BallManager : MonoBehaviour
             foreach (BallData ball in _balls)
             {
                 //find solid balls that haven't been spawned
-                if (!ball.spawned && !ball.stripes)
+                if (!ball.spawned && !ball.stripes && !ball.eightBall && !ball.cueBall) //eight and cue ball included because they dont have stripes as true
                 {
                     solidOptions.Add(ball);
                 }
