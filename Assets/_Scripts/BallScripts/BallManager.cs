@@ -30,6 +30,10 @@ public class BallManager : MonoBehaviour
     private float _ballDiameter = 0.5715f;
     private int _rows = 5;
 
+    //Variables for random spawn variance
+    [SerializeField] private float _spawnVarianceMin = -0.05f;
+    [SerializeField] private float _spawnVarianceMax = 0.05f;
+
     //[SerializeField] private BallSO[] _balls;
     [SerializeField] private BallData[] _balls;
 
@@ -100,10 +104,13 @@ public class BallManager : MonoBehaviour
                 float xValue = (i - (ballsInRow - 1) / 2f) * _ballDiameter;
 
                 Vector3 spawnPos = _startingPos.transform.position - new Vector3(xValue, yValue, zValue); // set it to behind the starting position movable object
+                //give some randomness
+                Vector3 randomPos = new Vector3(UnityEngine.Random.Range(_spawnVarianceMin, _spawnVarianceMax), 0f, UnityEngine.Random.Range(_spawnVarianceMin, _spawnVarianceMax));
+
 
                 //spawn
                 //Instantiate(_testBall, spawnPos, Quaternion.identity, transform.parent);
-                Instantiate(_balls[SelectedBall(spawnIndex)].ballObject, spawnPos, Quaternion.identity);
+                Instantiate(_balls[SelectedBall(spawnIndex)].ballObject, spawnPos + randomPos, Quaternion.identity);
                 
                 
                 spawnIndex++;
@@ -129,12 +136,12 @@ public class BallManager : MonoBehaviour
         //eight ball is the 5th ball
         if (spawnIndex == 4)
         {
-            foreach (BallData ball in _balls)
+            for (int i = 0; i < _balls.Length; i++)
             {
                 //find eightball
-                if (ball.eightBall)
+                if (_balls[i].eightBall)
                 {
-                    return ball.arrayNum;
+                    return i;
                 }
             }
         }
@@ -160,13 +167,13 @@ public class BallManager : MonoBehaviour
                 //After building list pick a random one - set it spawned and return the index
                 int luckyIndex = UnityEngine.Random.Range(0, solidOptions.Count - 1);
 
-                // there has to be a better way of doing this --- maybe giving each ball a number
+
                 foreach (BallData ball in _balls)
                 {
+                    //have to compare with array num because can't access the og index once the object is in the new list
                     if (solidOptions[luckyIndex].arrayNum == ball.arrayNum)
                     {
-                        //LUCKY INDEX SENDS WRONG INDEX FIX!!!!!!!!!!!!
-                        _balls[luckyIndex].spawned = true;
+                        _balls[ball.arrayNum].spawned = true;
                         Debug.Log("Solid: " + ball.arrayNum);
                         return ball.arrayNum;
                     }
@@ -198,13 +205,12 @@ public class BallManager : MonoBehaviour
                 //After building list pick a random one - set it spawned and return the index
                 int luckyIndex = UnityEngine.Random.Range(0, stripeOptions.Count - 1);
 
-                // there has to be a better way of doing this --- maybe giving each ball a number
+
                 foreach (BallData ball in _balls)
                 {
                     if (stripeOptions[luckyIndex].arrayNum == ball.arrayNum)
                     {
-                        //LUCKY INDEX SENDS WRONG INDEX FIX!!!!!!!!!!!!
-                        _balls[luckyIndex].spawned = true;
+                        _balls[ball.arrayNum].spawned = true;
                         Debug.Log("Stripe: " + ball.arrayNum);
                         return ball.arrayNum;
                     }
