@@ -5,6 +5,18 @@ using System;
 
 public class BallManager : MonoBehaviour
 {
+
+    //Make struct for the array of balls
+    [System.Serializable]
+    public struct BallData
+    {
+        public GameObject ballObject;
+        public bool stripes;
+        public bool spawned;
+        public bool eightBall;
+        public int arrayNum; // temp for spawning can't figure out better way
+    }
+
     /*
     protected float minSpeed = 0.2f;
     private float _timer;
@@ -18,7 +30,8 @@ public class BallManager : MonoBehaviour
     private float _ballDiameter = 0.5715f;
     private int _rows = 5;
 
-    [SerializeField] private BallSO[] _balls;
+    //[SerializeField] private BallSO[] _balls;
+    [SerializeField] private BallData[] _balls;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -116,7 +129,7 @@ public class BallManager : MonoBehaviour
         //eight ball is the 5th ball
         if (spawnIndex == 4)
         {
-            foreach (BallSO ball in _balls)
+            foreach (BallData ball in _balls)
             {
                 //find eightball
                 if (ball.eightBall)
@@ -130,9 +143,9 @@ public class BallManager : MonoBehaviour
         else if (spawnIndex % 2 == 0 || lastBall)
         {
             //use this list to put available solid balls in
-            List<BallSO> solidOptions = new List<BallSO>();
+            List<BallData> solidOptions = new List<BallData>();
 
-            foreach (BallSO ball in _balls)
+            foreach (BallData ball in _balls)
             {
                 //find solid balls that haven't been spawned
                 if (!ball.spawned && !ball.stripes)
@@ -148,11 +161,12 @@ public class BallManager : MonoBehaviour
                 int luckyIndex = UnityEngine.Random.Range(0, solidOptions.Count - 1);
 
                 // there has to be a better way of doing this --- maybe giving each ball a number
-                foreach (BallSO ball in _balls)
+                foreach (BallData ball in _balls)
                 {
-                    if (solidOptions[luckyIndex].name == ball.name)
+                    if (solidOptions[luckyIndex].arrayNum == ball.arrayNum)
                     {
-                        ball.spawned = true;
+                        //LUCKY INDEX SENDS WRONG INDEX FIX!!!!!!!!!!!!
+                        _balls[luckyIndex].spawned = true;
                         Debug.Log("Solid: " + ball.arrayNum);
                         return ball.arrayNum;
                     }
@@ -167,9 +181,9 @@ public class BallManager : MonoBehaviour
         else if (spawnIndex % 2 == 1 || lastBall)
         {
             //use this list to put available stripe balls in
-            List<BallSO> stripeOptions = new List<BallSO>();
+            List<BallData> stripeOptions = new List<BallData>();
 
-            foreach (BallSO ball in _balls)
+            foreach (BallData ball in _balls)
             {
                 //find striped balls that haven't been spawned
                 if (!ball.spawned && ball.stripes)
@@ -185,11 +199,12 @@ public class BallManager : MonoBehaviour
                 int luckyIndex = UnityEngine.Random.Range(0, stripeOptions.Count - 1);
 
                 // there has to be a better way of doing this --- maybe giving each ball a number
-                foreach (BallSO ball in _balls)
+                foreach (BallData ball in _balls)
                 {
-                    if (stripeOptions[luckyIndex].name == ball.name)
+                    if (stripeOptions[luckyIndex].arrayNum == ball.arrayNum)
                     {
-                        ball.spawned = true;
+                        //LUCKY INDEX SENDS WRONG INDEX FIX!!!!!!!!!!!!
+                        _balls[luckyIndex].spawned = true;
                         Debug.Log("Stripe: " + ball.arrayNum);
                         return ball.arrayNum;
                     }

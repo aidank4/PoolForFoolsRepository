@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BallSO
   ballObject: {fileID: 1579966361694371643, guid: a199ce5d43de23344af3dd1e5b27419d, type: 3}
   stripes: 0
-  spawned: 0
+  spawned: 1
   eightBall: 0
   arrayNum: 2
