@@ -52,7 +52,7 @@ public class BallManager : MonoBehaviour
         if (_playerScript.checkIfCanShoot)
         {
             bool checkBallsStopped = true;
-
+            /*
             //Check each ball and if any are moving it will set stopped bool to false
             foreach (BallData ball in _balls) 
             {
@@ -67,17 +67,18 @@ public class BallManager : MonoBehaviour
                 {
                     checkBallsStopped = false;
                 }
-            }
+            }*/
 
             
-            /*Rigidbody rb = _balls[15].ballObject.GetComponent<Rigidbody>();
+            Rigidbody rb = _balls[15].ballObject.GetComponent<Rigidbody>();
             if (rb.linearVelocity.magnitude >= 0)
             {
                 checkBallsStopped = false;
                 Debug.Log("Checking");
                 Debug.Log(rb.gameObject.name);
+                Debug.Log(rb);
                 Debug.Log("Velocity is: " + rb.linearVelocity.magnitude);
-            }*/
+            }
 
 
             //if balls are still wait a bit in case it was just a split second
