@@ -2,6 +2,8 @@ using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using Unity.VisualScripting;
+using UnityEngine.UIElements;
 
 public class BallManager : MonoBehaviour
 {
@@ -19,9 +21,9 @@ public class BallManager : MonoBehaviour
     }
 
     
-    protected float minSpeed = 0.2f;
+    protected float minSpeed = 0f; // ballscript sets balls moving below 0.2 to 0
     private float _timer;
-    private float _minWaitTime = 2f;
+    private float _minWaitTime = 0.5f;
 
     //Get player object for script
     [SerializeField] private GameObject _poolCueRef;
@@ -38,65 +40,21 @@ public class BallManager : MonoBehaviour
 
     [SerializeField] private BallData[] _balls;
 
+    private List<GameObject> _ballObjects = new List<GameObject>();
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
     private void Awake()
     {
         _playerScript = _poolCueRef.GetComponent<Player>();
         SpawnBalls();
+
     }
 
     
     private void FixedUpdate()
     {
-        if (_playerScript.checkIfCanShoot)
-        {
-            bool checkBallsStopped = true;
-            /*
-            //Check each ball and if any are moving it will set stopped bool to false
-            foreach (BallData ball in _balls) 
-            {
 
-                Rigidbody ballRb = ball.ballObject.GetComponent<Rigidbody>();
-                //Debug.Log($"Ball {ball.arrayNum}: " + $"lineaR = {ballRb.linearVelocity.magnitude:F4}, " + $"angular = { ballRb.angularVelocity.magnitude:F4}");
-                if (ballRb.linearVelocity.magnitude > minSpeed)
-                {
-                    checkBallsStopped = false;
-                }
-                if (ballRb.angularVelocity.magnitude > minSpeed)
-                {
-                    checkBallsStopped = false;
-                }
-            }*/
-
-            
-            Rigidbody rb = _balls[15].ballObject.GetComponent<Rigidbody>();
-            if (rb.linearVelocity.magnitude >= 0)
-            {
-                checkBallsStopped = false;
-                Debug.Log("Checking");
-                Debug.Log(rb.gameObject.name);
-                Debug.Log(rb);
-                Debug.Log("Velocity is: " + rb.linearVelocity.magnitude);
-            }
-
-
-            //if balls are still wait a bit in case it was just a split second
-            if (checkBallsStopped)
-            {
-                _timer += Time.fixedDeltaTime;
-                if (_timer >= _minWaitTime)
-                {
-                    Debug.Log("All Balls are still");
-                    StartCoroutine(_playerScript.ShootBack());
-                    _timer = 0; // reset timer for next time
-                }
-            }
-            else
-            {
-                _timer = 0;
-            }
-        }
+        BallCheck();
     }
 
 
@@ -127,11 +85,12 @@ public class BallManager : MonoBehaviour
                 Vector3 randomPos = new Vector3(UnityEngine.Random.Range(_spawnVarianceMin, _spawnVarianceMax), 0f, UnityEngine.Random.Range(_spawnVarianceMin, _spawnVarianceMax));
 
 
-                //spawn
-                //Instantiate(_testBall, spawnPos, Quaternion.identity, transform.parent);
-                Instantiate(_balls[SelectedBall(spawnIndex)].ballObject, spawnPos + randomPos, Quaternion.identity);
-                
-                
+                //spawn and set it to a variable to later reference its rigidbody
+                GameObject spawnBall = Instantiate(_balls[SelectedBall(spawnIndex)].ballObject, spawnPos + randomPos, Quaternion.identity);
+
+                //add to array to get rigidbody in fixed update
+                _ballObjects.Add(spawnBall);
+
                 spawnIndex++;
             }
 
@@ -155,13 +114,13 @@ public class BallManager : MonoBehaviour
         //eight ball is the 5th ball
         if (spawnIndex == 4)
         {
-            Debug.Log("Index = 4");
+            //Debug.Log("Index = 4");
             for (int i = 0; i < _balls.Length; i++) // - 1 to ignore cue ball which is in array as well
             {
                 //find eightball
                 if (_balls[i].eightBall)
                 {
-                    Debug.Log("EightBall");
+                    //Debug.Log("EightBall");
                     return i;
                 }
             }
@@ -195,7 +154,7 @@ public class BallManager : MonoBehaviour
                     if (solidOptions[luckyIndex].arrayNum == ball.arrayNum)
                     {
                         _balls[ball.arrayNum].spawned = true;
-                        Debug.Log("Solid: " + ball.arrayNum);
+                        //Debug.Log("Solid: " + ball.arrayNum);
                         return ball.arrayNum;
                     }
                 }
@@ -232,7 +191,7 @@ public class BallManager : MonoBehaviour
                     if (stripeOptions[luckyIndex].arrayNum == ball.arrayNum)
                     {
                         _balls[ball.arrayNum].spawned = true;
-                        Debug.Log("Stripe: " + ball.arrayNum);
+                        //Debug.Log("Stripe: " + ball.arrayNum);
                         return ball.arrayNum;
                     }
                 }
@@ -243,5 +202,66 @@ public class BallManager : MonoBehaviour
         //error
         Debug.Log("No ball found");
         return 0;
+    }
+
+
+    private void BallCheck()
+    {
+        //Following code handles detecting if balls are stopped
+        if (_playerScript.checkIfCanShoot) // this bool is set to true shortly after a shot has been made
+        {
+            bool checkBallsStopped = true;
+
+            //Check each ball and if any are moving it will set stopped bool to false
+            foreach (GameObject ball in _ballObjects)
+            {
+                //check if ball has been removed from the game
+                if (ball == null)
+                {
+                    _ballObjects.Remove(ball);
+                    break; //break so that the foreach loop doesn't continue with a missing element
+                }
+                else
+                {
+                    //Look at the rigid body of every ball
+                    Rigidbody ballRb = ball.GetComponent<Rigidbody>();
+                    if (ballRb.linearVelocity.magnitude > minSpeed)
+                    {
+                        checkBallsStopped = false;
+                    }
+                    if (ballRb.angularVelocity.magnitude > minSpeed)
+                    {
+                        checkBallsStopped = false;
+                    }
+                }
+            }
+
+            //also check cue ball which is not part of the array
+            Rigidbody cueBallRb = _balls[_balls.Length - 1].ballObject.GetComponent<Rigidbody>(); // it is the last index in the array
+            if (cueBallRb.linearVelocity.magnitude > minSpeed)
+            {
+                checkBallsStopped = false;
+            }
+            if (cueBallRb.angularVelocity.magnitude > minSpeed)
+            {
+                checkBallsStopped = false;
+            }
+
+            //if balls are still wait a bit in case it was just a split second
+            if (checkBallsStopped)
+            {
+                _timer += Time.fixedDeltaTime;
+                //Debug.Log("Timer" + _timer);
+                if (_timer >= _minWaitTime)
+                {
+                    StartCoroutine(_playerScript.ShootBack());
+                    _timer = 0; // reset timer for next time
+                }
+            }
+            else
+            {
+                _timer = 0;
+            }
+        }
     }
 }
