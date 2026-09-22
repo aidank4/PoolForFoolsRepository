@@ -58,8 +58,7 @@ public class BallManager : MonoBehaviour
             {
 
                 Rigidbody ballRb = ball.ballObject.GetComponent<Rigidbody>();
-
-                Debug.Log($"Ball {ball.arrayNum}: " + $"lineaR = {ballRb.linearVelocity.magnitude:F4}, " + $"angular = { ballRb.angularVelocity.magnitude:F4}");
+                //Debug.Log($"Ball {ball.arrayNum}: " + $"lineaR = {ballRb.linearVelocity.magnitude:F4}, " + $"angular = { ballRb.angularVelocity.magnitude:F4}");
                 if (ballRb.linearVelocity.magnitude > minSpeed)
                 {
                     checkBallsStopped = false;
@@ -70,6 +69,16 @@ public class BallManager : MonoBehaviour
                 }
             }
 
+            
+            /*Rigidbody rb = _balls[15].ballObject.GetComponent<Rigidbody>();
+            if (rb.linearVelocity.magnitude >= 0)
+            {
+                checkBallsStopped = false;
+                Debug.Log("Checking");
+                Debug.Log(rb.gameObject.name);
+                Debug.Log("Velocity is: " + rb.linearVelocity.magnitude);
+            }*/
+
 
             //if balls are still wait a bit in case it was just a split second
             if (checkBallsStopped)
@@ -79,6 +88,7 @@ public class BallManager : MonoBehaviour
                 {
                     Debug.Log("All Balls are still");
                     StartCoroutine(_playerScript.ShootBack());
+                    _timer = 0; // reset timer for next time
                 }
             }
             else
@@ -136,7 +146,7 @@ public class BallManager : MonoBehaviour
         bool lastBall = false;
 
         //at some point there will have to be two stripes or two solids so check if it is last ball to repeat
-        if (spawnIndex == _balls.Length - 1) // -2 because cue ball is also in array but has to be ignored
+        if (spawnIndex == _balls.Length - 1)
         {
             lastBall = true;
         }
