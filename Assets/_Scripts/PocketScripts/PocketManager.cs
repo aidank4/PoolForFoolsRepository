@@ -40,11 +40,14 @@ public class PocketManager : MonoBehaviour
                     //keep or lose turn
                     _turnManagerScript.TurnDeciderStripes();
 
-                    Debug.Log("stripes" + _turnManagerScript.teamStripes);
+                    //Debug.Log("stripes" + _turnManagerScript.teamStripes);
 
                     Debug.Log("stripes");
                     Destroy(other.gameObject);
-                    _scoreboardScript.stripeScore += 1;
+
+                    //increase score
+                    AddStripeScore();
+
                     break;
 
                 }
@@ -61,12 +64,15 @@ public class PocketManager : MonoBehaviour
                     //keep or lose turn
                     _turnManagerScript.TurnDeciderSolids();
 
-                    Debug.Log("solids: " + _turnManagerScript.teamSolids);
+                    //Debug.Log("solids: " + _turnManagerScript.teamSolids);
                     //Check if team solids scored solid to keep turn
 
                     Debug.Log("solids");
                     Destroy(other.gameObject);
-                    _scoreboardScript.solidScore += 1;
+
+                    //increase score
+                    AddSolidScore();
+
                     break;
                 }
    
@@ -79,6 +85,7 @@ public class PocketManager : MonoBehaviour
             case "CueBall":
                 Debug.Log("Scratch");
                 _turnManagerScript.scratch = true;
+                _turnManagerScript.keepTurn = false; // if scratch after scoring this will cover not keeping turn
                 //other.gameObject.SetActive(false);
                 break;
         }
@@ -89,5 +96,33 @@ public class PocketManager : MonoBehaviour
         {
             Debug.Log("Corner Pocket");
         }*/
+    }
+
+
+
+    /// <summary>
+    /// Functions for keeping score - doing it here for access to score text variables
+    /// </summary>
+    public void AddStripeScore()
+    {
+        if (_turnManagerScript.playerOne == _turnManagerScript.teamStripes)
+        {
+            _scoreboardScript.pOneScore++;
+        }
+        else
+        {
+            _scoreboardScript.pTwoScore++;
+        }
+    }
+    public void AddSolidScore()
+    {
+        if (_turnManagerScript.playerOne == _turnManagerScript.teamSolids)
+        {
+            _scoreboardScript.pOneScore++;
+        }
+        else
+        {
+            _scoreboardScript.pTwoScore++;
+        }
     }
 }

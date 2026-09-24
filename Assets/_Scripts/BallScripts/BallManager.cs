@@ -23,7 +23,7 @@ public class BallManager : MonoBehaviour
     
     protected float minSpeed = 0f; // ballscript sets balls moving below 0.2 to 0
     private float _timer;
-    private float _minWaitTime = 0.5f;
+    private float _minWaitTime = 0.25f;
 
     //Get player object for script
     [SerializeField] private GameObject _poolCueRef;

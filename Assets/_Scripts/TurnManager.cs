@@ -14,6 +14,13 @@ public class TurnManager : MonoBehaviour
     [SerializeField] private Sprite _teamStripesSprite;
     [SerializeField] private Sprite _teamSolidsSprite;
 
+    //team icon Ui
+    [SerializeField] private GameObject _pOneIconUI;
+    [SerializeField] private GameObject _pTwoIconUI;
+    [SerializeField] private Sprite _stripesIcon;
+    [SerializeField] private Sprite _solidsIcon;
+
+
     public int playerOne { get; private set; }  = 1;
     public int playerTwo { get; private set; } = 2;
     public int currentPlayer { get; private set; }
@@ -22,6 +29,7 @@ public class TurnManager : MonoBehaviour
     public int teamSolids { get; private set; }
 
     public bool keepTurn = false;
+    private bool _lostTurn = false; // only using keep turn had an issue where if a good ball was scored after bad ball then keep turn would still be made true
     public bool scratch = false;
 
     private void Awake()
@@ -29,6 +37,8 @@ public class TurnManager : MonoBehaviour
         //set ui false
         _turnSwitchUI.SetActive(false);
         _teamAssignUI.SetActive(false);
+        _pOneIconUI.SetActive(false);
+        _pTwoIconUI.SetActive(false);
 
         //set player one as initial player on startup
         currentPlayer = playerOne;
@@ -54,47 +64,67 @@ public class TurnManager : MonoBehaviour
                 currentPlayer = playerOne;
                 _turnText.text = "Player 1";
             }
-            //Play PLAYER 1 or 2 UI, probs function called NewTurnUI
+            _lostTurn = false; // reset lost turn once the switch turn has been called
+            scratch = false;
 
         }
-
-        Debug.Log("current player is " + currentPlayer);
+        //Debug.Log("current player is " + currentPlayer);
     }
 
 
     public void TurnDeciderStripes()
     {
-        //if you scratch you lose your turn
-        if (scratch)
+        //make sure we can potentially keep our turn - you lost turn by scoring a bad ball
+        if (!_lostTurn)
         {
-            keepTurn = false;
-            scratch = false; // this might cause the else to play on a scratch
-        }
-        else
-        {
-            //Keep turn or lose it depending on if you scored your type of ball
-            if (currentPlayer == teamStripes)
-            {
-                keepTurn = true;
-            }
-            else if (currentPlayer != teamStripes)
+            //if you scratch you lose your turn
+            if (scratch)
             {
                 keepTurn = false;
+                _lostTurn = true;
+            }
+            else
+            {
+                //Keep turn or lose it depending on if you scored your type of ball
+                if (currentPlayer == teamStripes)
+                {
+                    keepTurn = true;
+                }
+                else if (currentPlayer != teamStripes)
+                {
+                    keepTurn = false;
+                    _lostTurn = true;
+                }
             }
         }
     }
 
     public void TurnDeciderSolids()
     {
-        //Keep turn or lose it depending on if you scored your type of ball
-        if (currentPlayer == teamSolids)
+        //make sure we can potentially keep our turn - you lost turn by scoring a bad ball
+        if (!_lostTurn)
         {
-            keepTurn = true;
+            //if you scratch you lose your turn
+            if (scratch)
+            {
+                keepTurn = false;
+                _lostTurn= true;
+            }
+            else
+            {
+                //Keep turn or lose it depending on if you scored your type of ball
+                if (currentPlayer == teamSolids)
+                {
+                    keepTurn = true;
+                }
+                else if (currentPlayer != teamSolids)
+                {
+                    keepTurn = false;
+                    _lostTurn = true;
+                }
+            }
         }
-        else if (currentPlayer != teamSolids)
-        {
-            keepTurn = false;
-        }
+
     }
 
     public void AssignStripes()
@@ -104,16 +134,30 @@ public class TurnManager : MonoBehaviour
         //turn on object with animation -- stripes sprite
         _teamAssignUI.SetActive(true);
         _teamAssignUI.GetComponentInChildren<Image>().sprite = _teamStripesSprite;
-        Debug.Log("assign stripes");
 
-        //Assign solids to other player
+
+        //Assign solids to other player and set team icon
         if (teamStripes == playerOne)
         {
+            _pOneIconUI.GetComponent<Image>().sprite = _stripesIcon;
+
             teamSolids = playerTwo;
+            _pTwoIconUI.GetComponent<Image>().sprite = _solidsIcon;
+
+            //show icon
+            _pOneIconUI.SetActive(true);
+            _pTwoIconUI.SetActive(true);
         }
         else
         {
+            _pTwoIconUI.GetComponent<Image>().sprite = _stripesIcon;
+
             teamSolids = playerOne;
+            _pOneIconUI.GetComponent<Image>().sprite = _solidsIcon;
+
+            //show icon
+            _pOneIconUI.SetActive(true);
+            _pTwoIconUI.SetActive(true);
         }
     }
 
@@ -125,36 +169,47 @@ public class TurnManager : MonoBehaviour
         _teamAssignUI.SetActive(true);
         _teamAssignUI.GetComponentInChildren<Image>().sprite = _teamSolidsSprite;
 
-        Debug.Log("assign solids");
 
-        //Assign stripes to other player
+        //Assign stripes to other player and set icon
         if (teamSolids == playerOne)
         {
+            _pOneIconUI.GetComponent<Image>().sprite = _solidsIcon;
+
             teamStripes = playerTwo;
+            _pTwoIconUI.GetComponent<Image>().sprite = _stripesIcon;
+
+            //show icon
+            _pOneIconUI.SetActive(true);
+            _pTwoIconUI.SetActive(true);
         }
         else
         {
+            _pTwoIconUI.GetComponent<Image>().sprite = _solidsIcon;
+
             teamStripes = playerOne;
+            _pOneIconUI.GetComponent<Image>().sprite = _stripesIcon;
+
+            //show icon
+            _pOneIconUI.SetActive(true);
+            _pTwoIconUI.SetActive(true);
         }
     }
 
     /// <summary>
     /// highlights which team is currently going, used by scoreboard
     /// </summary>
-    public void ShowTeam(RawImage solidGlow, RawImage stripesGlow)
+    public void ShowTeam(Image pOneGlow, Image pTwoGlow)
     {
-        if (currentPlayer == teamStripes)
+        if (currentPlayer == playerOne)
         {
-            stripesGlow.transform.localScale = Vector3.one; //show it by scaling it on
-            solidGlow.transform.localScale = Vector3.zero; //hide it by scaling it off
+            pOneGlow.transform.localScale = Vector3.one; //show it by scaling it on
+            pTwoGlow.transform.localScale = Vector3.zero; //hide it by scaling it off
         }
-        else if (currentPlayer == teamSolids)
+        else if (currentPlayer == playerTwo)
         {
-            solidGlow.transform.localScale = Vector3.one; //show it by scaling it on
-            stripesGlow.transform.localScale = Vector3.zero; //hide it by scaling it off
+            pTwoGlow.transform.localScale = Vector3.one; //show it by scaling it on
+            pOneGlow.transform.localScale = Vector3.zero; //hide it by scaling it off
         }
-
-
     }
 
 
