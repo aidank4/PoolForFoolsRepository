@@ -17,7 +17,7 @@ public class PowerUpUI : MonoBehaviour
     [SerializeField] private Button _slotA; // when swap gets clicked highlight slotA
 
 
-    private void Awake()
+    private void Start()
     {
         HidePUConflictUI();
         _powerUpIcon.gameObject.SetActive(false);

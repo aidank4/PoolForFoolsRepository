@@ -55,10 +55,10 @@ public class InventoryManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            AddPowerUp();
-        }
+        //if (Input.GetKeyDown(KeyCode.X))
+        //{
+        //    AddPowerUp();
+        //}
     }
 
     private void SetIcons()

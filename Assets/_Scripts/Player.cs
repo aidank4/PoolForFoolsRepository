@@ -216,8 +216,6 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         _poolCueModel.gameObject.SetActive(false);
 
-        //wait 1.5 seconds before checking if balls are still
-        yield return new WaitForSeconds(1.5f);
         ShotEvent();
     }
     /// <summary>

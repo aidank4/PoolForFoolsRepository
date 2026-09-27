@@ -92,10 +92,13 @@ public class TurnManager : MonoBehaviour
             scratch = false;
 
         }
-        //If player is keeping turn make shoot available and show pool cue 
-        //when turn switches this is handled by TriggerTurnSwitchEvent down below which gets called once the dart anim ends
-        _poolCueScript.shootAvailable = true;
-        _poolCueScript.RespawnPoolCue();
+        else
+        {
+            //If player is keeping turn make shoot available and show pool cue 
+            //when turn switches this is handled by TriggerTurnSwitchEvent down below which gets called once the dart anim ends
+            _poolCueScript.shootAvailable = true;
+            _poolCueScript.RespawnPoolCue();
+        }
     }
 
 
