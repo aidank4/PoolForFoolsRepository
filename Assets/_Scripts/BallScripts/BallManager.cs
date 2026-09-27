@@ -20,10 +20,12 @@ public class BallManager : MonoBehaviour
         public int arrayNum; // temp for spawning can't figure out better way
     }
 
-    
+    private bool _checkBalls;
     protected float minSpeed = 0f; // ballscript sets balls moving below 0.2 to 0
     private float _timer;
     private float _minWaitTime = 0.25f;
+    //Event for when balls are stopped
+    public Action BallsStopped;
 
     //Get player object for script
     [SerializeField] private GameObject _poolCueRef;
@@ -50,7 +52,25 @@ public class BallManager : MonoBehaviour
 
     }
 
-    
+    //I don't know much about on enable but maybe it would be better to use than awake in general
+    private void OnEnable()
+    {
+        //Event to start the check for if balls are still
+        if (_playerScript != null)
+        {
+            _playerScript.Shot += ShotEventTriggered;
+        }
+    }
+
+    private void OnDisable()
+    {
+        //Event to start the check for if balls are still
+        if (_playerScript != null)
+        {
+            _playerScript.Shot -= ShotEventTriggered;
+        }
+    }
+
     private void FixedUpdate()
     {
 
@@ -208,7 +228,7 @@ public class BallManager : MonoBehaviour
     private void BallCheck()
     {
         //Following code handles detecting if balls are stopped
-        if (_playerScript.checkIfCanShoot) // this bool is set to true shortly after a shot has been made
+        if (_checkBalls) // this bool is set to true shortly after a shot has been made
         {
             bool checkBallsStopped = true;
 
@@ -254,7 +274,9 @@ public class BallManager : MonoBehaviour
                 //Debug.Log("Timer" + _timer);
                 if (_timer >= _minWaitTime)
                 {
-                    StartCoroutine(_playerScript.ShootBack());
+                    _checkBalls = false;
+                    BallsStoppedEvent(); // Used by inventory manager
+                    //StartCoroutine(_playerScript.ShootReturns());
                     _timer = 0; // reset timer for next time
                 }
             }
@@ -263,5 +285,15 @@ public class BallManager : MonoBehaviour
                 _timer = 0;
             }
         }
+    }
+
+    private void ShotEventTriggered()
+    {
+        _checkBalls = true;
+    }
+
+    private void BallsStoppedEvent()
+    {
+        BallsStopped?.Invoke();
     }
 }

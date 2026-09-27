@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +11,8 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _turnManagerRef;
     private TurnManager _turnManagerScript;
 
+    //Event for the ball manager to start checking to see for time to switch turn
+    public event Action Shot;
 
     private Rigidbody _cueBallRb;
 
@@ -21,8 +24,7 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _predictionLineParent;
 
     //for Shooting
-    private bool _shootAvailable = true; //Can't start shooting without this bool // accessed by ball manager
-    public bool checkIfCanShoot { get; private set; } = false;
+    public bool shootAvailable = true; //Can't start shooting without this bool // accessed and modified by turn manager
     private bool _shooting = false; // Can't release shot without this bool - Without this there is an error where you can release shot before starting shot
 
     [SerializeField] private float _defaultShotSpeed = 5f;
@@ -75,7 +77,7 @@ public class Player : MonoBehaviour
     // so if the function is updated it might need to be re-entered in the inspector through the input action
     public void Shoot(InputAction.CallbackContext context) // get context so we can manipulate what stage of shoot things happen
     {
-        if (context.started && _shootAvailable) // detect when click started so that we can timestamp it for the hold duration
+        if (context.started && shootAvailable) // detect when click started so that we can timestamp it for the hold duration
         {
             _shooting = true;
             _stopShot = false;
@@ -138,7 +140,7 @@ public class Player : MonoBehaviour
 
 
     //Turn pool cue back on
-    private void RespawnPoolCue()
+    public void RespawnPoolCue()
     {
         _poolCueModel.gameObject.SetActive(true);
         _poolCueParent.transform.position = _cueBall.transform.position - new Vector3(0f, 0f, _ballSeparation);
@@ -205,7 +207,7 @@ public class Player : MonoBehaviour
 
     IEnumerator EndShot()
     {
-        _shootAvailable = false;
+        shootAvailable = false;
 
         //hide prediction line
         _predictionLineParent.gameObject.SetActive(false);
@@ -216,17 +218,14 @@ public class Player : MonoBehaviour
 
         //wait 1.5 seconds before checking if balls are still
         yield return new WaitForSeconds(1.5f);
-        checkIfCanShoot = true;
+        ShotEvent();
     }
     /// <summary>
     /// Going to have to change when turn changes on ball stopping
     /// </summary>
     /// <returns></returns>
-    public IEnumerator ShootBack()
+    public IEnumerator ShootReturns()
     {
-        Debug.Log("ShootBackCalled");
-        //stop ball manager checking for balls stopping
-        checkIfCanShoot = false;
 
         //Switch turns has a conditional to check if it should switch or not
         _turnManagerScript.SwitchTurn();
@@ -235,8 +234,13 @@ public class Player : MonoBehaviour
         //TEMP
         yield return new WaitForSeconds(1f);
 
-        _shootAvailable = true;
+        shootAvailable = true;
         RespawnPoolCue();
+    }
+
+    private void ShotEvent()
+    {
+        Shot?.Invoke();
     }
 }
 

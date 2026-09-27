@@ -5,9 +5,14 @@ using UnityEngine.UI;
 
 public class TurnManager : MonoBehaviour
 {
+    //Player Script
+    [SerializeField] private GameObject _poolCueRef;
+    private Player _poolCueScript;
+    
     //Turn switch transition
-    [SerializeField] private GameObject _turnSwitchUI;
     [SerializeField] private TMP_Text _turnText;
+    [SerializeField] private GameObject _turnSwitchUI;
+    private DartAnimEndController _turnSwitchAnimScript;
 
     //Team assignment UI
     [SerializeField] private GameObject _teamAssignUI;
@@ -34,6 +39,10 @@ public class TurnManager : MonoBehaviour
 
     private void Awake()
     {
+        //reference
+        _poolCueScript = _poolCueRef.GetComponent<Player>();
+        _turnSwitchAnimScript = _turnSwitchUI.GetComponent<DartAnimEndController>();
+
         //set ui false
         _turnSwitchUI.SetActive(false);
         _teamAssignUI.SetActive(false);
@@ -44,6 +53,21 @@ public class TurnManager : MonoBehaviour
         currentPlayer = playerOne;
     }
 
+    private void OnEnable()
+    {
+        if (_turnSwitchAnimScript != null)
+        {
+            _turnSwitchAnimScript.OnAnimationComplete += TriggerTurnSwitchEvent;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_turnSwitchAnimScript != null)
+        {
+            _turnSwitchAnimScript.OnAnimationComplete -= TriggerTurnSwitchEvent;
+        }
+    }
 
     //Switch currentPlayer
     public void SwitchTurn()
@@ -68,7 +92,10 @@ public class TurnManager : MonoBehaviour
             scratch = false;
 
         }
-        //Debug.Log("current player is " + currentPlayer);
+        //If player is keeping turn make shoot available and show pool cue 
+        //when turn switches this is handled by TriggerTurnSwitchEvent down below which gets called once the dart anim ends
+        _poolCueScript.shootAvailable = true;
+        _poolCueScript.RespawnPoolCue();
     }
 
 
@@ -212,5 +239,11 @@ public class TurnManager : MonoBehaviour
         }
     }
 
+    private void TriggerTurnSwitchEvent()
+    {
+        //On dart animation over respawn pool cue and make shoot available
+        _poolCueScript.shootAvailable = true;
+        _poolCueScript.RespawnPoolCue();
+    }
 
 }
