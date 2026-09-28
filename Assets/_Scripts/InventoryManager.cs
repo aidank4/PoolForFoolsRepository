@@ -1,7 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using TMPro;
+using Unity.ProjectAuditor.Editor;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 
@@ -11,6 +15,8 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private GameObject _powerUpUIRef;
     private PowerUpUI _powerUpUIScript;
     [SerializeField] private TMP_Text _swapText;
+    [SerializeField] private TMP_Text _slotDescription;
+    [SerializeField] private Image _alreadyUsedUI;
 
     //Ball manager for balls stopped event which can trigger power up choices as turn is over
     [SerializeField] private GameObject _ballManagerRef;
@@ -29,12 +35,19 @@ public class InventoryManager : MonoBehaviour
     //if an extra power up gets claimed, reference it here for if we swap it or delete it later
     private SO_PowerUp _extraPowerUp = null;
 
+    //bool for stopping player from using multiple power ups in turn
+    private bool _powerUpUsed = false;
+
     private void Awake()
     {
+        //Ref
         _ballManagerScript = _ballManagerRef.GetComponent<BallManager>();
         _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
         _powerUpUIScript = _powerUpUIRef.GetComponent<PowerUpUI>();
-        _swapText.gameObject.SetActive(false); 
+        //UI
+        _swapText.gameObject.SetActive(false);
+        _slotDescription.transform.parent.gameObject.SetActive(false);
+        _alreadyUsedUI.gameObject.SetActive(false);
 
     }
 
@@ -55,10 +68,14 @@ public class InventoryManager : MonoBehaviour
 
     private void Update()
     {
-        //if (Input.GetKeyDown(KeyCode.X))
-        //{
-        //    AddPowerUp();
-        //}
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            AddPowerUp();
+        }
+        if (InputManager.Instance.currentActionMap.name == "UI")
+        {
+            ShowPUDescription();
+        }
     }
 
     private void SetIcons()
@@ -114,11 +131,17 @@ public class InventoryManager : MonoBehaviour
             }
         }
     }
+
+    private void RemovePowerUp(int index)
+    {
+        _collectedPowerUps[index] = null;
+        SetIcons();
+    }
     
     /// <summary>
     /// Dragged into Power up UI button
     /// </summary>
-    public void TossPowerUp()
+    public void TossExtraPowerUp()
     {
         _powerUpUIScript.HidePUConflictUI();
 
@@ -126,6 +149,7 @@ public class InventoryManager : MonoBehaviour
 
         //Switch Turn -- this gets called also in swap because swap calls toss
         _turnManagerScript.SwitchTurn();
+        _powerUpUsed = false; //once turn switches can use power up again
 
     }
     /// <summary>
@@ -141,23 +165,56 @@ public class InventoryManager : MonoBehaviour
             _powerUpUIScript.HighlightSlotButton();
         }
     }
-
-    public void SwapPowerUp(GameObject selectedSlot)
+    private int SlotNumber(GameObject selectedSlot)
     {
         for (int i = 0; i < _slots.Length; i++)
         {
             if (_slots[i].transform.parent.gameObject == selectedSlot) // have to compare with parent gameobject because slots is image[] and button is parent
             {
-                Debug.Log(_slots[i].name + " Matched");
-                _collectedPowerUps[i] = _extraPowerUp;
-                SetIcons();
-                TossPowerUp(); // hide UI and return to gameplay
-
-                //hide swap text
-                _swapText.gameObject.SetActive(false);
-               
-                return;
+                return i;
             }
+        }
+        Debug.Log("SLOT NUMBER ERROR");
+        return 0;
+    }
+
+    public void UseOrSwapPowerUp(GameObject selectedSlot)
+    {
+        //if there is an extra power up waiting then we are swapping, if not we are using powerup
+        if (_extraPowerUp != null)
+        {
+            Debug.Log(_slots[SlotNumber(selectedSlot)].name + " Matched");
+            _collectedPowerUps[SlotNumber(selectedSlot)] = _extraPowerUp;
+            SetIcons();
+            TossExtraPowerUp(); // hide UI and return to gameplay
+
+            //hide swap text
+            _swapText.gameObject.SetActive(false);
+        }
+        else
+        {
+            //Check if there is a power up in the slot
+            if (_collectedPowerUps[SlotNumber(selectedSlot)] != null)
+            {
+                //Check if we have used a power up
+                if (!_powerUpUsed)
+                {
+                    //Use power up
+                    Debug.Log("Use following power up: " + _collectedPowerUps[SlotNumber(selectedSlot)].id);
+                    _powerUpUsed = true;
+
+                    //Remove power up from inventory because we are using it
+                    RemovePowerUp(SlotNumber(selectedSlot));
+                    _powerUpUIScript.HidePUConflictUI();
+
+                }
+                else
+                {
+                    //You already used a power up this turn, show ui warning 
+                    StartCoroutine(PowerUpWarning());
+                }
+            }
+            //if no power up in slot do nothing
         }
     }
 
@@ -173,7 +230,37 @@ public class InventoryManager : MonoBehaviour
         {
             //Switch Turn
             _turnManagerScript.SwitchTurn();
+            _powerUpUsed = false; //once turn switches can use power up again
         }
     }
 
+    private void ShowPUDescription()
+    {
+        for (int i = 0; i < _slots.Length; i++)
+        {
+            //if the current slot is being selected
+            if (_slots[i].transform.parent.gameObject == EventSystem.current.currentSelectedGameObject)
+            {
+                //check if not empty
+                if (_collectedPowerUps[i] != null)
+                {
+                    //update description to power up
+                    _slotDescription.text = _collectedPowerUps[i].description;
+                }
+                else
+                {
+                    _slotDescription.text = "No power Up O_O";
+                }
+                //show description
+                _slotDescription.transform.parent.gameObject.SetActive(true);
+                return;
+            }
+        }
+    }
+    IEnumerator PowerUpWarning()
+    {
+        _alreadyUsedUI.gameObject.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        _alreadyUsedUI.gameObject.SetActive(false);
+    }
 }

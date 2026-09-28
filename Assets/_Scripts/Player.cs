@@ -24,7 +24,7 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _predictionLineParent;
 
     //for Shooting
-    public bool shootAvailable = true; //Can't start shooting without this bool // accessed and modified by turn manager
+    public bool shootAvailable = true; //Can't start shooting without this bool // accessed and modified by turn manager - and player controls
     private bool _shooting = false; // Can't release shot without this bool - Without this there is an error where you can release shot before starting shot
 
     [SerializeField] private float _defaultShotSpeed = 5f;

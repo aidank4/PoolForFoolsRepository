@@ -15,6 +15,7 @@ public class PowerUpUI : MonoBehaviour
     //Get button so that we can add in arrow key selction
     [SerializeField] private Button _swapButton; // do the swap button bc this will be first highlighted button and we dont want that to be toss
     [SerializeField] private Button _slotA; // when swap gets clicked highlight slotA
+    [SerializeField] private TMP_Text _slotDescription;
 
 
     private void Start()
@@ -38,6 +39,7 @@ public class PowerUpUI : MonoBehaviour
     public void HidePUConflictUI()
     {
         _powerUpConflictUI.gameObject.SetActive(false);
+        _slotDescription.transform.parent.gameObject.SetActive(false);
         ResetButtonHighlight();
         InputManager.Instance.SwitchCurrentActionMap("Gameplay"); //switch inputs back to gameplay
     }

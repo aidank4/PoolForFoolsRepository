@@ -35,6 +35,26 @@
                     "interactions": "",
                     "initialStateCheck": false,
                     "priority": 0
+                },
+                {
+                    "name": "OpenUI",
+                    "type": "Button",
+                    "id": "586709d5-6e5e-44fe-b9cd-712c60c7cf62",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "Controls",
+                    "type": "Button",
+                    "id": "4f333a98-7a31-4213-9b8a-4dd66356857d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -114,6 +134,28 @@
                     "action": "CancelShot",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "af195310-af69-48ba-99d0-00873cef5114",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "OpenUI",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "828ae768-c499-468a-90fb-a0074165ea6a",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Controls",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -122,9 +164,19 @@
             "id": "83cf56c4-5eb4-4d01-a740-7de2b0beaa81",
             "actions": [
                 {
-                    "name": "New action",
+                    "name": "CloseUI",
                     "type": "Button",
                     "id": "049b8909-a08f-43a4-82ef-f4f7041ebd76",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "Controls",
+                    "type": "Button",
+                    "id": "1cbde3be-e1dc-40b4-99b7-5a2e700a81f2",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -136,11 +188,22 @@
                 {
                     "name": "",
                     "id": "d86f2de0-3005-4706-bd60-c35c0c51afcb",
-                    "path": "",
+                    "path": "<Keyboard>/r",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "CloseUI",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e4288e65-af45-4306-8634-3771a07364ab",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Controls",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
