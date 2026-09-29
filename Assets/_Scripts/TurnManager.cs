@@ -70,6 +70,7 @@ public class TurnManager : MonoBehaviour
     }
 
     //Switch currentPlayer
+    //Used by TossExtraPowerUp and BallsStoppedEventTriggered
     public void SwitchTurn()
     {
         if (!keepTurn)

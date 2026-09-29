@@ -981,7 +981,7 @@ MonoBehaviour:
   - {fileID: 7952065447255420037}
   - {fileID: 7838942592173221605}
   - {fileID: 3082973499434422483}
-  _availablePowerUps:
+  _availablePUs:
   - {fileID: 11400000, guid: 538dad14a8d621c4c925966cc48876d5, type: 2}
   - {fileID: 11400000, guid: 5818e1831a8bac04b9c0d0716a850cc4, type: 2}
   - {fileID: 11400000, guid: 27dd01929bc3fba4bb886d0afb1b8fa4, type: 2}

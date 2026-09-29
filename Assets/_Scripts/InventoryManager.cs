@@ -29,8 +29,11 @@ public class InventoryManager : MonoBehaviour
     //Array for slot icons
     [SerializeField] private Image[] _slots = new Image[3];
     //Array of powerUps
-    [SerializeField] private SO_PowerUp[] _availablePowerUps;
-    private SO_PowerUp[] _collectedPowerUps = new SO_PowerUp[3];
+    [SerializeField] private SO_PowerUp[] _availablePUs;
+    private SO_PowerUp[] _currentPUs = new SO_PowerUp[3];
+    //Array for each player
+    private SO_PowerUp[] _pOnePUs = new SO_PowerUp[3];
+    private SO_PowerUp[] _pTwoPUs = new SO_PowerUp[3];
 
     //if an extra power up gets claimed, reference it here for if we swap it or delete it later
     private SO_PowerUp _extraPowerUp = null;
@@ -72,17 +75,41 @@ public class InventoryManager : MonoBehaviour
         {
             AddPowerUp();
         }
+        //When in UI mode show the descriptions for inventory items when hovered
         if (InputManager.Instance.currentActionMap.name == "UI")
         {
             ShowPUDescription();
         }
     }
 
+    /// <summary>
+    /// Set current players inventory to have all the current power ups
+    /// then set the current power ups to be the other players power ups
+    /// then set icons
+    /// use this in turn switch
+    /// </summary>
+    public void UpdatePowerUps()
+    {
+        //Update current players PUs
+        if (_turnManagerScript.currentPlayer == _turnManagerScript.playerOne)
+        {
+            _pOnePUs = _currentPUs;
+            //set current PUs to be the following players
+            _currentPUs = _pTwoPUs;
+        }
+        else if (_turnManagerScript.currentPlayer == _turnManagerScript.playerTwo)
+        {
+            _pTwoPUs = _currentPUs;
+            _currentPUs = _pOnePUs;
+        }
+        SetIcons();
+    }
+
     private void SetIcons()
     {
-        for (int i = 0;  i < _collectedPowerUps.Length; i++)
+        for (int i = 0;  i < _currentPUs.Length; i++)
         {
-            if (_collectedPowerUps[i] == null)
+            if (_currentPUs[i] == null)
             {
                 //if no power up for the slot hide the slot
                 _slots[i].gameObject.SetActive(false);
@@ -90,7 +117,7 @@ public class InventoryManager : MonoBehaviour
             else
             {
                 //set icon to powerup
-                _slots[i].sprite = _collectedPowerUps[i].icon;
+                _slots[i].sprite = _currentPUs[i].icon;
                 //if the slot is currently hidden
                 if (!_slots[i].gameObject.activeSelf)
                 {
@@ -102,7 +129,7 @@ public class InventoryManager : MonoBehaviour
 
     private SO_PowerUp SelectPowerUp()
     {
-        SO_PowerUp rdmPowerUp = _availablePowerUps[UnityEngine.Random.Range(0, _availablePowerUps.Length)];
+        SO_PowerUp rdmPowerUp = _availablePUs[UnityEngine.Random.Range(0, _availablePUs.Length)];
         return rdmPowerUp;
     }
 
@@ -111,19 +138,19 @@ public class InventoryManager : MonoBehaviour
         //select power up to start
         SO_PowerUp selectedPowerUp = SelectPowerUp();
 
-        for (int i = 0; i < _collectedPowerUps.Length; i++)
+        for (int i = 0; i < _currentPUs.Length; i++)
         {
             //if there is open space add random power up there
-            if (_collectedPowerUps[i] == null)
+            if (_currentPUs[i] == null)
             {
                 //show power up ui
                 StartCoroutine(_powerUpUIScript.DisplayPowerUpIcon(selectedPowerUp));
-                _collectedPowerUps[i] = selectedPowerUp;
+                _currentPUs[i] = selectedPowerUp;
                 SetIcons();
                 return;
             }
             //if this is the last index and there is no space --- do something
-            else if (_collectedPowerUps[i] != null && i == _collectedPowerUps.Length - 1)
+            else if (_currentPUs[i] != null && i == _currentPUs.Length - 1)
             {
                 //keep reference to this powerup that doesnt fit
                 _extraPowerUp = selectedPowerUp;
@@ -134,7 +161,7 @@ public class InventoryManager : MonoBehaviour
 
     private void RemovePowerUp(int index)
     {
-        _collectedPowerUps[index] = null;
+        _currentPUs[index] = null;
         SetIcons();
     }
     
@@ -149,6 +176,7 @@ public class InventoryManager : MonoBehaviour
 
         //Switch Turn -- this gets called also in swap because swap calls toss
         _turnManagerScript.SwitchTurn();
+        UpdatePowerUps();
         _powerUpUsed = false; //once turn switches can use power up again
 
     }
@@ -184,7 +212,7 @@ public class InventoryManager : MonoBehaviour
         if (_extraPowerUp != null)
         {
             Debug.Log(_slots[SlotNumber(selectedSlot)].name + " Matched");
-            _collectedPowerUps[SlotNumber(selectedSlot)] = _extraPowerUp;
+            _currentPUs[SlotNumber(selectedSlot)] = _extraPowerUp;
             SetIcons();
             TossExtraPowerUp(); // hide UI and return to gameplay
 
@@ -194,13 +222,13 @@ public class InventoryManager : MonoBehaviour
         else
         {
             //Check if there is a power up in the slot
-            if (_collectedPowerUps[SlotNumber(selectedSlot)] != null)
+            if (_currentPUs[SlotNumber(selectedSlot)] != null)
             {
                 //Check if we have used a power up
                 if (!_powerUpUsed)
                 {
                     //Use power up
-                    Debug.Log("Use following power up: " + _collectedPowerUps[SlotNumber(selectedSlot)].id);
+                    Debug.Log("Use following power up: " + _currentPUs[SlotNumber(selectedSlot)].id);
                     _powerUpUsed = true;
 
                     //Remove power up from inventory because we are using it
@@ -230,6 +258,7 @@ public class InventoryManager : MonoBehaviour
         {
             //Switch Turn
             _turnManagerScript.SwitchTurn();
+            UpdatePowerUps();
             _powerUpUsed = false; //once turn switches can use power up again
         }
     }
@@ -242,10 +271,10 @@ public class InventoryManager : MonoBehaviour
             if (_slots[i].transform.parent.gameObject == EventSystem.current.currentSelectedGameObject)
             {
                 //check if not empty
-                if (_collectedPowerUps[i] != null)
+                if (_currentPUs[i] != null)
                 {
                     //update description to power up
-                    _slotDescription.text = _collectedPowerUps[i].description;
+                    _slotDescription.text = _currentPUs[i].description;
                 }
                 else
                 {
