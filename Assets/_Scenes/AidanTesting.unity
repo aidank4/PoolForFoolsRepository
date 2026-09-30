@@ -256,6 +256,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 82018514}
   m_CullTransparentMesh: 1
+--- !u!1 &113351027 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2666309798255024493, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+  m_PrefabInstance: {fileID: 737485283988285985}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &363580629 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6607304084275847725, guid: 15612147a48dd1149894f367c25f843e, type: 3}
@@ -565,6 +570,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1066533508}
+  m_CullTransparentMesh: 1
+--- !u!1 &1187424691
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1187424692}
+  - component: {fileID: 1187424694}
+  - component: {fileID: 1187424693}
+  m_Layer: 0
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1187424692
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1187424691}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5417974878753162897}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -366}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1187424693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1187424691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: b81e6de10a65e6e4dbecfd1bfa860f49, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1187424694
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1187424691}
   m_CullTransparentMesh: 1
 --- !u!4 &1206532152 stripped
 Transform:
@@ -1174,6 +1254,7 @@ MonoBehaviour:
   _pTwoIconUI: {fileID: 2039574603063389717}
   _stripesIcon: {fileID: 21300000, guid: 4e58951c69d5e424ca89cd988e545a4f, type: 3}
   _solidsIcon: {fileID: 21300000, guid: 1a44c3da4a4a8a54b968498882124788, type: 3}
+  _inventoryRef: {fileID: 9058666047555689166}
   keepTurn: 0
   scratch: 0
 --- !u!222 &607093650934105158
@@ -1327,6 +1408,10 @@ PrefabInstance:
       propertyPath: _chargeVisual
       value: 
       objectReference: {fileID: 2623837836727218239}
+    - target: {fileID: 5795993226912930031, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: _poolCueModel
+      value: 
+      objectReference: {fileID: 113351027}
     - target: {fileID: 5795993226912930031, guid: 15612147a48dd1149894f367c25f843e, type: 3}
       propertyPath: _ballSeparation
       value: 0.5
@@ -3816,7 +3901,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5814152, g: 0.2783019, b: 1, a: 1}
+  m_Color: {r: 0.5803922, g: 0.2784314, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3824,7 +3909,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 0}
-  m_Type: 1
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -5305,6 +5390,7 @@ RectTransform:
   - {fileID: 6138227251442464603}
   - {fileID: 69941307498799104}
   - {fileID: 6234154171859463511}
+  - {fileID: 1187424692}
   m_Father: {fileID: 2557854030607666327}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -5344,8 +5430,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BallManager
   _poolCueRef: {fileID: 363580629}
   _startingPos: {fileID: 3539945338383402212}
-  _spawnVarianceMin: -0.05
-  _spawnVarianceMax: 0.05
+  _cueBall: {fileID: 534792157}
   _balls:
   - ballObject: {fileID: 3477518249810214210, guid: c14a742929ad26f4f9380ff81d04af08, type: 3}
     stripes: 0
@@ -5437,12 +5522,8 @@ MonoBehaviour:
     eightBall: 0
     cueBall: 0
     arrayNum: 14
-  - ballObject: {fileID: 534792157}
-    stripes: 0
-    spawned: 0
-    eightBall: 0
-    cueBall: 1
-    arrayNum: 15
+  _spawnVarianceMin: -0.05
+  _spawnVarianceMax: 0.05
 --- !u!224 &5460896123645038772
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6433,7 +6514,7 @@ GameObject:
   - component: {fileID: 4158599343523000793}
   - component: {fileID: 5438295494389082145}
   m_Layer: 0
-  m_Name: BallSpawner
+  m_Name: Ball Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

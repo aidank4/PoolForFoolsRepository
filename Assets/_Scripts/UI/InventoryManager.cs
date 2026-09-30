@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using TMPro;
 using Unity.ProjectAuditor.Editor;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -11,63 +13,67 @@ using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
-    //References
+    [Header("References")]
     [SerializeField] private GameObject _powerUpUIRef;
     private PowerUpUI _powerUpUIScript;
     [SerializeField] private TMP_Text _swapText;
     [SerializeField] private TMP_Text _slotDescription;
     [SerializeField] private Image _alreadyUsedUI;
-
-    //Ball manager for balls stopped event which can trigger power up choices as turn is over
-    [SerializeField] private GameObject _ballManagerRef;
+    [SerializeField] private GameObject _ballManagerRef; //Ball manager for balls stopped event which can trigger power up choices as turn is over
     private BallManager _ballManagerScript;
-
-    //TurnManager to switch turn
-    [SerializeField] private GameObject _turnManagerRef;
+    [SerializeField] private GameObject _turnManagerRef; //TurnManager to switch turn -- switch turn in Toss Function and BallsStopped Event
     private TurnManager _turnManagerScript;
 
-    //Array for slot icons
+
+
+    [Header("Containers")] //inventory size is always maxed at 3
     [SerializeField] private Image[] _slots = new Image[3];
-    //Array of powerUps
     [SerializeField] private SO_PowerUp[] _availablePUs;
     private SO_PowerUp[] _currentPUs = new SO_PowerUp[3];
-    //Array for each player
     private SO_PowerUp[] _pOnePUs = new SO_PowerUp[3];
     private SO_PowerUp[] _pTwoPUs = new SO_PowerUp[3];
 
-    //if an extra power up gets claimed, reference it here for if we swap it or delete it later
-    private SO_PowerUp _extraPowerUp = null;
 
-    //bool for stopping player from using multiple power ups in turn
-    private bool _powerUpUsed = false;
+    [Header("Misc Variables")]
+    private SO_PowerUp _extraPowerUp = null; //if an extra power up gets claimed, this ref is used to swap it or delete it later
+    private bool _powerUpUsed = false; //bool for stopping player from using multiple power ups in turn
+
 
     private void Awake()
     {
-        //Ref
+        //Ref init
+        #region
         _ballManagerScript = _ballManagerRef.GetComponent<BallManager>();
         _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
         _powerUpUIScript = _powerUpUIRef.GetComponent<PowerUpUI>();
-        //UI
+        #endregion
+        //UI init
+        #region
         _swapText.gameObject.SetActive(false);
         _slotDescription.transform.parent.gameObject.SetActive(false);
         _alreadyUsedUI.gameObject.SetActive(false);
+        #endregion
 
     }
+
 
     private void OnEnable()
     {
         if (_ballManagerScript != null)
         {
-            _ballManagerScript.BallsStopped += BallsStoppedEventTriggered;
+            _ballManagerScript.BallsStopped += BallsStoppedEventTriggered; //gets called when balls are stopped
         }
     }
+    
+    
     private void OnDisable()
     {
         if (_ballManagerScript != null)
         {
-            _ballManagerScript.BallsStopped -= BallsStoppedEventTriggered;
+            _ballManagerScript.BallsStopped -= BallsStoppedEventTriggered; //gets called when balls are stopped
         }
     }
+
 
     private void Update()
     {
@@ -75,28 +81,28 @@ public class InventoryManager : MonoBehaviour
         {
             AddPowerUp();
         }
-        //When in UI mode show the descriptions for inventory items when hovered
+        
         if (InputManager.Instance.currentActionMap.name == "UI")
         {
-            ShowPUDescription();
+            ShowPUDescription(); //show item descriptions when they are being hovered over
         }
     }
 
+
     /// <summary>
-    /// Set current players inventory to have all the current power ups
-    /// then set the current power ups to be the other players power ups
-    /// then set icons
-    /// use this in turn switch
+    /// Update current players inventory with the current PUs
+    /// then set the current PUs to be the other players PUs
+    /// for the next turn and refresh icons.
     /// </summary>
-    public void UpdatePowerUps()
+    public void UpdateInventory()
     {
-        //Update current players PUs
+        //p1
         if (_turnManagerScript.currentPlayer == _turnManagerScript.playerOne)
         {
             _pOnePUs = _currentPUs;
-            //set current PUs to be the following players
             _currentPUs = _pTwoPUs;
         }
+        //p2
         else if (_turnManagerScript.currentPlayer == _turnManagerScript.playerTwo)
         {
             _pTwoPUs = _currentPUs;
@@ -105,20 +111,21 @@ public class InventoryManager : MonoBehaviour
         SetIcons();
     }
 
+
+    /// <summary>
+    /// Current PUs icons are displayed by inventory
+    /// </summary>
     private void SetIcons()
     {
         for (int i = 0;  i < _currentPUs.Length; i++)
         {
             if (_currentPUs[i] == null)
             {
-                //if no power up for the slot hide the slot
-                _slots[i].gameObject.SetActive(false);
+                _slots[i].gameObject.SetActive(false); //if no power up for the slot hide the slot
             }
             else
             {
-                //set icon to powerup
-                _slots[i].sprite = _currentPUs[i].icon;
-                //if the slot is currently hidden
+                _slots[i].sprite = _currentPUs[i].icon; //set icon to powerup
                 if (!_slots[i].gameObject.activeSelf)
                 {
                     _slots[i].gameObject.SetActive(true);
@@ -127,72 +134,87 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Returns a random PU from the available PU's
+    /// </summary>
+    /// <returns>SO_Powerup</returns>
     private SO_PowerUp SelectPowerUp()
     {
         SO_PowerUp rdmPowerUp = _availablePUs[UnityEngine.Random.Range(0, _availablePUs.Length)];
         return rdmPowerUp;
     }
 
+
+    /// <summary>
+    /// Gets a random power up and adds it to the inventory.
+    /// If the inventory is full then the extra gets stored for later.
+    /// </summary>
     private void AddPowerUp()
     {
-        //select power up to start
         SO_PowerUp selectedPowerUp = SelectPowerUp();
 
         for (int i = 0; i < _currentPUs.Length; i++)
         {
-            //if there is open space add random power up there
-            if (_currentPUs[i] == null)
+            if (_currentPUs[i] == null) //if there is open space add random power up there
             {
-                //show power up ui
                 StartCoroutine(_powerUpUIScript.DisplayPowerUpIcon(selectedPowerUp));
                 _currentPUs[i] = selectedPowerUp;
                 SetIcons();
                 return;
             }
-            //if this is the last index and there is no space --- do something
-            else if (_currentPUs[i] != null && i == _currentPUs.Length - 1)
+            else if (_currentPUs[i] != null && i == _currentPUs.Length - 1) // last index and no inventory space
             {
-                //keep reference to this powerup that doesnt fit
-                _extraPowerUp = selectedPowerUp;
+                _extraPowerUp = selectedPowerUp; //extra will be swapped or tossed away later
 
             }
         }
     }
 
+
+    /// <summary>
+    /// remove PU at argument index
+    /// </summary>
+    /// <param name="index"></param>
     private void RemovePowerUp(int index)
     {
         _currentPUs[index] = null;
         SetIcons();
     }
     
+
     /// <summary>
-    /// Dragged into Power up UI button
+    /// Sets the extra PU to null and then calls a turn switch and updates inventories
     /// </summary>
-    public void TossExtraPowerUp()
+    public void TossExtraPowerUp() //NOTE Dragged into Toss button
     {
         _powerUpUIScript.HidePUConflictUI();
-
         _extraPowerUp = null;
 
-        //Switch Turn -- this gets called also in swap because swap calls toss
         _turnManagerScript.SwitchTurn();
-        UpdatePowerUps();
         _powerUpUsed = false; //once turn switches can use power up again
 
     }
+
+
     /// <summary>
-    /// Dragged into Power up UI button
+    /// Transitions to inventory control so the player can swap in the extra PU.
     /// </summary>
-    public void PowerUpSwapState()
+    public void PowerUpSwapState() //NOTE Dragged into Swap button
     {
         if (_extraPowerUp != null)
         {
-            Debug.Log(_extraPowerUp.ToString());
-            //Text explantion UI
-            _swapText.gameObject.SetActive(true);
+            _swapText.gameObject.SetActive(true); //UI that tells player to swap PUs
             _powerUpUIScript.HighlightSlotButton();
         }
     }
+    
+    
+    /// <summary>
+    /// returns the slot number of the argument Gameobject
+    /// </summary>
+    /// <param name="selectedSlot"></param>
+    /// <returns>int</returns>
     private int SlotNumber(GameObject selectedSlot)
     {
         for (int i = 0; i < _slots.Length; i++)
@@ -206,40 +228,38 @@ public class InventoryManager : MonoBehaviour
         return 0;
     }
 
+
+    /// <summary>
+    /// On button click either swap PU's or use a PU.
+    /// This is dependant on if there is an extra PU.
+    /// </summary>
+    /// <param name="selectedSlot"></param>
     public void UseOrSwapPowerUp(GameObject selectedSlot)
     {
-        //if there is an extra power up waiting then we are swapping, if not we are using powerup
-        if (_extraPowerUp != null)
+        if (_extraPowerUp != null) //there is an extra PU so we need to swap
         {
-            Debug.Log(_slots[SlotNumber(selectedSlot)].name + " Matched");
-            _currentPUs[SlotNumber(selectedSlot)] = _extraPowerUp;
+            _currentPUs[SlotNumber(selectedSlot)] = _extraPowerUp; //overwrite selected slot with the extra
             SetIcons();
             TossExtraPowerUp(); // hide UI and return to gameplay
-
-            //hide swap text
             _swapText.gameObject.SetActive(false);
         }
-        else
+        else //there is not an extra PU so we are using the selected PU
         {
-            //Check if there is a power up in the slot
-            if (_currentPUs[SlotNumber(selectedSlot)] != null)
+            if (_currentPUs[SlotNumber(selectedSlot)] != null) //check if there a power up in the slot
             {
-                //Check if we have used a power up
-                if (!_powerUpUsed)
+                if (!_powerUpUsed) //Check if we have already used a power up this turn
                 {
-                    //Use power up
+                    //Use power up -- NOTE more to do here
                     Debug.Log("Use following power up: " + _currentPUs[SlotNumber(selectedSlot)].id);
                     _powerUpUsed = true;
 
-                    //Remove power up from inventory because we are using it
-                    RemovePowerUp(SlotNumber(selectedSlot));
+                    RemovePowerUp(SlotNumber(selectedSlot)); //Remove used PU and hide UI for gameplay
                     _powerUpUIScript.HidePUConflictUI();
 
                 }
                 else
-                {
-                    //You already used a power up this turn, show ui warning 
-                    StartCoroutine(PowerUpWarning());
+                { 
+                    StartCoroutine(PowerUpWarning()); //You already used a power up this turn, show ui warning
                 }
             }
             //if no power up in slot do nothing
@@ -247,45 +267,53 @@ public class InventoryManager : MonoBehaviour
     }
 
 
-    private void BallsStoppedEventTriggered()
+    /// <summary>
+    /// If there is an extra PU then player must deal with it.
+    /// Else switch turn.
+    /// </summary>
+    private void BallsStoppedEventTriggered() //Called by BallManager
     {
         if (_extraPowerUp != null)
         {
-            //show power up UI before switching turn
-            _powerUpUIScript.ShowPUConflictUI(_extraPowerUp);
+            _powerUpUIScript.ShowPUConflictUI(_extraPowerUp); //have to swap or toss extra PU before turn switch
         }
         else
         {
             //Switch Turn
             _turnManagerScript.SwitchTurn();
-            UpdatePowerUps();
             _powerUpUsed = false; //once turn switches can use power up again
         }
     }
 
+
+    /// <summary>
+    /// Set the slots PU description and show the UI
+    /// </summary>
     private void ShowPUDescription()
     {
         for (int i = 0; i < _slots.Length; i++)
         {
-            //if the current slot is being selected
-            if (_slots[i].transform.parent.gameObject == EventSystem.current.currentSelectedGameObject)
+            if (_slots[i].transform.parent.gameObject == EventSystem.current.currentSelectedGameObject) //if the current slot is being selected
             {
-                //check if not empty
-                if (_currentPUs[i] != null)
+                if (_currentPUs[i] != null) //check that its not empty
                 {
-                    //update description to power up
                     _slotDescription.text = _currentPUs[i].description;
                 }
                 else
                 {
                     _slotDescription.text = "No power Up O_O";
                 }
-                //show description
                 _slotDescription.transform.parent.gameObject.SetActive(true);
                 return;
             }
         }
     }
+
+
+    /// <summary>
+    /// Display UI that warns player a PU can't be used twice in one turn (lasts 1 second)
+    /// </summary>
+    /// <returns>IEnumerator</returns>
     IEnumerator PowerUpWarning()
     {
         _alreadyUsedUI.gameObject.SetActive(true);

@@ -3,9 +3,7 @@ using UnityEngine;
 
 public class AnimEndController : MonoBehaviour
 {
-
-    //this function is called in an animation event
-    public void AnimationComplete()
+    public void AnimationComplete() //this function is called in an animation event
     {
         this.gameObject.SetActive(false);
     }

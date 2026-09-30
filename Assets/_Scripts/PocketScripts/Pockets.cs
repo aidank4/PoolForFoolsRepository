@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Pockets : MonoBehaviour
 {
+    //references
     private PocketManager _pocketManagerRef;
 
     private void Awake()
@@ -11,7 +12,6 @@ public class Pockets : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        //On trigger call parent function that handles what happens
-        _pocketManagerRef.OnChildCollision(GetComponent<Collider>(), other);
+        _pocketManagerRef.OnChildCollision(GetComponent<Collider>(), other); //send out this collider and the other collider
     }
 }

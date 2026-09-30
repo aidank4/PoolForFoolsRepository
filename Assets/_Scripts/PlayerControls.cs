@@ -4,50 +4,68 @@ using UnityEngine.InputSystem;
 
 public class PlayerControls : MonoBehaviour
 {
-    //reference power up UI because we need to highlight the inventory buttons when this is clicked
+    [Header("References")]
     [SerializeField] private GameObject _powerUpUIRef;
-    private PowerUpUI _powerUpUIScript;
-    //Reference pool cue so we can check if shot is available
+    private PowerUpUI _powerUpUIScript; //need for highlighting the inventory buttons
     [SerializeField] private GameObject _poolCueRef;
-    private Player _poolCueScript;
-
-    //Controls UIs
+    private Player _poolCueScript; //need so we can check if shot is available
+    //UI
     [SerializeField] private TMP_Text _controlsExplained;
     [SerializeField] private TMP_Text _controlsHidden;
+
 
 
     private void Awake()
     {
         //ref
+        #region
         _powerUpUIScript = _powerUpUIRef.GetComponent<PowerUpUI>();
         _poolCueScript = _poolCueRef.GetComponent<Player>();
+        #endregion
         //UI
+        #region
         _controlsExplained.gameObject.SetActive(false);
         _controlsHidden.gameObject.SetActive(true);
+        #endregion
     }
 
+
+    /// <summary>
+    /// switches to UI inputs and highlights an inventory slot
+    /// </summary>
+    /// <param name="context"></param>
     public void SwitchToUIState(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
-            //Cant open power ups if already shot - have to before shooting
-            if (_poolCueScript.shootAvailable == true)
+            if (_poolCueScript.shootAvailable == true) //Cant open power ups if already shot - have to before shooting
             {
                 InputManager.Instance.SwitchCurrentActionMap("UI");
                 _powerUpUIScript.HighlightSlotButton();
             }
         }
     }
+
+
+    /// <summary>
+    /// Closes UI and switches input state to gameplay
+    /// </summary>
+    /// <param name="context"></param>
     public void SwitchToGamePlayState(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
-            _powerUpUIScript.HidePUConflictUI();//this function closes ui and switches input state to gameplay
+            _powerUpUIScript.HidePUConflictUI();
         }
     }
+
+
+    /// <summary>
+    /// Toggle between showing controls and hiding them
+    /// </summary>
+    /// <param name="context"></param>
     public void ToggleControls(InputAction.CallbackContext context)
     {
-        //Toggle between showing controls and hiding
         if (context.performed)
         {
             if(_controlsHidden.gameObject.activeSelf)

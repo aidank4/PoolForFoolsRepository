@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_PowerUp
   id: Bomb Shot
   description: why is my cue ball explosive!
-  icon: {fileID: 21300000, guid: 590329b12c187f14fa9e19a71a398b96, type: 3}
+  icon: {fileID: 21300000, guid: 2da91ce1970366445b4f1b7a43348dd7, type: 3}
   prefab: {fileID: 0}

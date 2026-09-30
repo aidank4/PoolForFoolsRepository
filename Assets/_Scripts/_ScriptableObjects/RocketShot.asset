@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_PowerUp
   id: Rocket Shot
   description: T minus cue ball
-  icon: {fileID: 21300000, guid: d12e6d8f3730d8a4cbd4d670254aa087, type: 3}
+  icon: {fileID: 21300000, guid: e6e2f98f9449a5e46a84200dbbe52a89, type: 3}
   prefab: {fileID: 0}
