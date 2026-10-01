@@ -56,7 +56,29 @@ public class PocketManager : MonoBehaviour
             case "EightBall":
                 {
                     Debug.Log("EightBall");
-                    Destroy(other.gameObject);
+                    if(_scoreboardScript.pOneScore == 7 && _turnManagerScript.currentPlayer == _turnManagerScript.playerOne)
+                    {
+                        Debug.Log("Player 1 Wins!");
+                        //display P1 win screen
+                    }
+                    else if(_scoreboardScript.pTwoScore == 7 && _turnManagerScript.currentPlayer == _turnManagerScript.playerTwo)
+                    {
+                        Debug.Log("Player 2 Wins!");
+                        //display P2 win screen
+                    }
+                    else
+                    {
+                        Debug.Log("Player " + _turnManagerScript.currentPlayer.ToString() + " loses");
+                        if(_turnManagerScript.currentPlayer == _turnManagerScript.playerOne)
+                        {
+                            //display P2 win screen
+                        }
+                        else if(_turnManagerScript.currentPlayer == _turnManagerScript.playerTwo)
+                        {
+                            //display P1 win screen
+                        }
+                    }
+                        Destroy(other.gameObject);
                     break;
                 }
             case "CueBall":
