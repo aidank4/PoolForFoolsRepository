@@ -230,40 +230,58 @@ public class InventoryManager : MonoBehaviour
 
 
     /// <summary>
-    /// On button click either swap PU's or use a PU.
-    /// This is dependant on if there is an extra PU.
+    /// Swap the extra PU into the selected slot and overwrite the old PU
     /// </summary>
     /// <param name="selectedSlot"></param>
-    public void UseOrSwapPowerUp(GameObject selectedSlot)
+    private void SwapPowerUp(GameObject selectedSlot)
+    {
+        _currentPUs[SlotNumber(selectedSlot)] = _extraPowerUp; //overwrite selected slot with the extra
+        SetIcons();
+        TossExtraPowerUp(); // hide UI and return to gameplay
+        _swapText.gameObject.SetActive(false);
+    }
+
+
+    /// <summary>
+    /// If there is a power up and one hasn't been used this turn activate the selected powerUp
+    /// </summary>
+    /// <param name="selectedSlot"></param>
+    public void UsePowerUp(GameObject selectedSlot)
     {
         int i = SlotNumber(selectedSlot);
-        if (_extraPowerUp != null) //there is an extra PU so we need to swap
+        if (_currentPUs[i] != null)
         {
-            _currentPUs[i] = _extraPowerUp; //overwrite selected slot with the extra
-            SetIcons();
-            TossExtraPowerUp(); // hide UI and return to gameplay
-            _swapText.gameObject.SetActive(false);
-        }
-        else //there is not an extra PU so we are using the selected PU
-        {
-            if (_currentPUs[i] != null) //check if there a power up in the slot
+            if (!_powerUpUsed)
             {
-                if (!_powerUpUsed) //Check if we have already used a power up this turn
-                {
-                    _currentPUs[i].Activate();
-                    Debug.Log("Use following power up: " + _currentPUs[i].id);
-                    _powerUpUsed = true;
+                _currentPUs[i].Activate();
+                Debug.Log("Use following power up: " + _currentPUs[i].id);
+                _powerUpUsed = true;
 
-                    RemovePowerUp(i); //Remove used PU and hide UI for gameplay
-                    _powerUpUIScript.HidePUConflictUI();
+                RemovePowerUp(i); //Remove used PU and hide UI for gameplay
+                _powerUpUIScript.HidePUConflictUI();
 
-                }
-                else
-                { 
-                    StartCoroutine(PowerUpWarning()); //You already used a power up this turn, show ui warning
-                }
             }
-            //if no power up in slot do nothing
+            else
+            {
+                StartCoroutine(PowerUpWarning()); //You already used a power up this turn, show ui warning
+            }
+        }
+    }
+
+/// <summary>
+/// On button click either swap PU's or use a PU.
+/// This is dependant on if there is an extra PU.
+/// </summary>
+/// <param name="selectedSlot"></param>
+public void UseOrSwapPowerUp(GameObject selectedSlot) //NOTE used by inventory buttons
+    {
+        if (_extraPowerUp != null)
+        {
+            SwapPowerUp(selectedSlot);
+        }
+        else
+        {
+            UsePowerUp(selectedSlot);
         }
     }
 

@@ -1,17 +1,22 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class PlayerControls : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private GameObject _powerUpUIRef;
     private PowerUpUI _powerUpUIScript; //need for highlighting the inventory buttons
+    [SerializeField] private GameObject _inventoryRef;
+    private InventoryManager _inventoryScript; // for UsePowerUp
     [SerializeField] private GameObject _poolCueRef;
     private Player _poolCueScript; //need so we can check if shot is available
-    //UI
     [SerializeField] private TMP_Text _controlsExplained;
     [SerializeField] private TMP_Text _controlsHidden;
+    [SerializeField] private GameObject _slotA;
+    [SerializeField] private GameObject _slotB;
+    [SerializeField] private GameObject _slotC;
 
 
 
@@ -20,6 +25,7 @@ public class PlayerControls : MonoBehaviour
         //ref
         #region
         _powerUpUIScript = _powerUpUIRef.GetComponent<PowerUpUI>();
+        _inventoryScript = _inventoryRef.GetComponent<InventoryManager>();
         _poolCueScript = _poolCueRef.GetComponent<Player>();
         #endregion
         //UI
@@ -29,6 +35,43 @@ public class PlayerControls : MonoBehaviour
         #endregion
     }
 
+    //Use Power Ups
+    #region
+    /// <summary>
+    /// Use the power up in the first slot.
+    /// </summary>
+    public void UsePowerUpA(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            _inventoryScript.UsePowerUp(_slotA);
+        }
+    }
+
+
+    /// <summary>
+    /// Use the power up in the second slot.
+    /// </summary>
+    public void UsePowerUpB(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            _inventoryScript.UsePowerUp(_slotB);
+        }
+    }
+
+
+    /// <summary>
+    /// Use the power up in the third slot.
+    /// </summary>
+    public void UsePowerUpC(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            _inventoryScript.UsePowerUp(_slotC);
+        }
+    }
+    #endregion
 
     /// <summary>
     /// switches to UI inputs and highlights an inventory slot
