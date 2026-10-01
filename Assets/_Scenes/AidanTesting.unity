@@ -5431,99 +5431,54 @@ MonoBehaviour:
   _poolCueRef: {fileID: 363580629}
   _startingPos: {fileID: 3539945338383402212}
   _cueBall: {fileID: 534792157}
+  _spawnVarianceMin: -0.05
+  _spawnVarianceMax: 0.05
   _balls:
   - ballObject: {fileID: 3477518249810214210, guid: c14a742929ad26f4f9380ff81d04af08, type: 3}
     stripes: 0
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 0
   - ballObject: {fileID: 6438808226293274644, guid: 109a9adcbdadfda49a3328556f3fa608, type: 3}
     stripes: 0
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 1
   - ballObject: {fileID: 228427187120902228, guid: 12652557e56beca4c93f3ca9bf68ca6d, type: 3}
     stripes: 0
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 2
   - ballObject: {fileID: 4206044121665734177, guid: ecfb9692c9a6d954f94677293e2c4511, type: 3}
     stripes: 0
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 3
   - ballObject: {fileID: 5146281732291629350, guid: d9ff1614301031e42bf9b71d930eca79, type: 3}
     stripes: 0
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 4
   - ballObject: {fileID: 2275374011197174867, guid: 1337ddcd8b063514ba141c0f151de3a6, type: 3}
     stripes: 0
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 5
   - ballObject: {fileID: 8802787883350149783, guid: 6a38a57c4a471e4408a97f848b14e098, type: 3}
     stripes: 0
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 6
   - ballObject: {fileID: 3946473003456582710, guid: 2e61e24ea5305a442bbc26ef9729455c, type: 3}
     stripes: 0
-    spawned: 0
     eightBall: 1
-    cueBall: 0
-    arrayNum: 7
   - ballObject: {fileID: 5142516112364620316, guid: 06e25d984325a7845abc4b518d36acb6, type: 3}
     stripes: 1
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 8
   - ballObject: {fileID: 6583375685842829484, guid: 51171313b78609640a6ff0b302d4edef, type: 3}
     stripes: 1
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 9
   - ballObject: {fileID: 4778924621003060646, guid: 0a644d333f899564aabd7186f2a21a0b, type: 3}
     stripes: 1
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 10
   - ballObject: {fileID: 8174144040139469195, guid: 65f96d1dd5eec054ca48c4ee2f9519fd, type: 3}
     stripes: 1
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 11
   - ballObject: {fileID: 6397654199069496184, guid: bf0e36b2b6ef85148b95451dbb726039, type: 3}
     stripes: 1
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 12
   - ballObject: {fileID: 5394260129198218236, guid: f078d2e2a3852fa41aefc0cad8e39054, type: 3}
     stripes: 1
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 13
   - ballObject: {fileID: 6225337127685755866, guid: fd7f78e7c9f72b44f9e470a4a4f06ce3, type: 3}
     stripes: 1
-    spawned: 0
     eightBall: 0
-    cueBall: 0
-    arrayNum: 14
-  _spawnVarianceMin: -0.05
-  _spawnVarianceMax: 0.05
 --- !u!224 &5460896123645038772
 RectTransform:
   m_ObjectHideFlags: 0
