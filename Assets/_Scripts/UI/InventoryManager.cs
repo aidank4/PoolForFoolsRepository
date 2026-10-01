@@ -236,24 +236,25 @@ public class InventoryManager : MonoBehaviour
     /// <param name="selectedSlot"></param>
     public void UseOrSwapPowerUp(GameObject selectedSlot)
     {
+        int i = SlotNumber(selectedSlot);
         if (_extraPowerUp != null) //there is an extra PU so we need to swap
         {
-            _currentPUs[SlotNumber(selectedSlot)] = _extraPowerUp; //overwrite selected slot with the extra
+            _currentPUs[i] = _extraPowerUp; //overwrite selected slot with the extra
             SetIcons();
             TossExtraPowerUp(); // hide UI and return to gameplay
             _swapText.gameObject.SetActive(false);
         }
         else //there is not an extra PU so we are using the selected PU
         {
-            if (_currentPUs[SlotNumber(selectedSlot)] != null) //check if there a power up in the slot
+            if (_currentPUs[i] != null) //check if there a power up in the slot
             {
                 if (!_powerUpUsed) //Check if we have already used a power up this turn
                 {
-                    //Use power up -- NOTE more to do here
-                    Debug.Log("Use following power up: " + _currentPUs[SlotNumber(selectedSlot)].id);
+                    _currentPUs[i].Activate();
+                    Debug.Log("Use following power up: " + _currentPUs[i].id);
                     _powerUpUsed = true;
 
-                    RemovePowerUp(SlotNumber(selectedSlot)); //Remove used PU and hide UI for gameplay
+                    RemovePowerUp(i); //Remove used PU and hide UI for gameplay
                     _powerUpUIScript.HidePUConflictUI();
 
                 }

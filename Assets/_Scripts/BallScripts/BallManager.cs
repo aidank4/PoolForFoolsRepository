@@ -67,7 +67,7 @@ public class BallManager : MonoBehaviour
     {
         if (_playerScript != null)
         {
-            _playerScript.Shot += ShotEventTriggered; //Gets called after player shoots
+            _playerScript.ShotCompleted += ShotEventTriggered; //Gets called after player shoots
         }
     }
 
@@ -76,7 +76,7 @@ public class BallManager : MonoBehaviour
     {
         if (_playerScript != null)
         {
-            _playerScript.Shot -= ShotEventTriggered; //Gets called after player shoots
+            _playerScript.ShotCompleted -= ShotEventTriggered; //Gets called after player shoots
         }
     }
 
