@@ -294,7 +294,6 @@ public class Player : MonoBehaviour
 
         yield return new WaitForSeconds(0.1f); //Leave pool cue up for a tenth of a second to show it hitting the ball;
         _poolCueModel.gameObject.SetActive(false);
-        Debug.Log("Hide pool cue");
 
         ShotCompletedEvent(); //This starts the ball manager checking to see if balls are stopped
     }

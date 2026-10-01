@@ -16,7 +16,6 @@ public class BallManager : MonoBehaviour
     }
 
 
-
     [Header("References")]
     [SerializeField] private GameObject _poolCueRef;
     private Player _playerScript;
@@ -24,29 +23,31 @@ public class BallManager : MonoBehaviour
     [SerializeField] private GameObject _cueBall;
 
 
-
     [Header("Spawn Randomness")]
     [SerializeField] private float _spawnVarianceMin = -0.05f;
     [SerializeField] private float _spawnVarianceMax = 0.05f;
-
 
 
     [Header("Ball Data")]
     [SerializeField] private BallData[] _balls;
     List<BallData> solidOptions = new List<BallData>();
     List<BallData> stripesOptions = new List<BallData>();
-    private List<GameObject> _ballObjects = new List<GameObject>(); //These gameobjects are the ones actually spawned into the scene (important for rb)
+    private List<GameObject> _spawnedBalls = new List<GameObject>(); //These gameobjects are the ones actually spawned into the scene (important for rb)
     private BallData tempBall; //Used as a null ball for swapping array elements
-
 
 
     [Header("Misc Variables")]
     private bool _checkBalls; //Used to control if ball movement is being checked
     private float _timer;
+    private float _maxTimer;
     private float _minWaitTime = 0.25f;
-    
-    
-    
+    private float _maxWaitTime = 3f; // seconds
+
+
+    [Header("Power Up Variables")]
+    private bool _eightBallPUActive = false;
+
+
     //Events
     public Action BallsStopped;
 
@@ -58,7 +59,7 @@ public class BallManager : MonoBehaviour
         _playerScript = _poolCueRef.GetComponent<Player>();
 
         SpawnBalls();
-        _ballObjects.Add(_cueBall); //After all balls have been spawned add in the cue ball to the list
+        _spawnedBalls.Add(_cueBall); //After all balls have been spawned add in the cue ball to the list
 
     }
 
@@ -67,16 +68,17 @@ public class BallManager : MonoBehaviour
     {
         if (_playerScript != null)
         {
-            _playerScript.ShotCompleted += ShotEventTriggered; //Gets called after player shoots
+            _playerScript.ShotCompleted += HandleShotEvent;
+            SO_PowerUp.UsePU += HandlePowerUps;
         }
     }
-
 
     private void OnDisable()
     {
         if (_playerScript != null)
         {
-            _playerScript.ShotCompleted -= ShotEventTriggered; //Gets called after player shoots
+            _playerScript.ShotCompleted -= HandleShotEvent;
+            SO_PowerUp.UsePU += HandlePowerUps;
         }
     }
 
@@ -94,12 +96,13 @@ public class BallManager : MonoBehaviour
     {
         if (_checkBalls) // this bool is set to true shortly after a shot has been made
         {
+            _maxTimer += Time.fixedDeltaTime;
             bool checkBallsStopped = true;
-            foreach (GameObject ball in _ballObjects) //Check each ball and if any are moving it will set stopped bool to false
+            foreach (GameObject ball in _spawnedBalls) //Check each ball and if any are moving it will set stopped bool to false
             {
                 if (ball == null) //check if ball has been removed from the game
                 {
-                    _ballObjects.Remove(ball);
+                    _spawnedBalls.Remove(ball);
                     break; //break so that the foreach loop doesn't continue with a missing element
                 }
                 else
@@ -121,12 +124,31 @@ public class BallManager : MonoBehaviour
                     _checkBalls = false;
                     BallsStoppedEvent(); // Used by inventory manager
                     _timer = 0; // reset timer for next time
+                    _maxTimer = 0;
+                    if (_eightBallPUActive)
+                    {
+                        EightBallPU(false);
+                    }
+                    return;
                 }
             }
             else
             {
                 _timer = 0;
             }
+            if (_maxTimer >= _maxWaitTime && _cueBall.GetComponent<Rigidbody>().IsSleeping()) //covers long wait if cueballs ready
+            {
+                _checkBalls = false;
+                BallsStoppedEvent();
+                _timer = 0;
+                _maxTimer = 0;
+                if (_eightBallPUActive)
+                {
+                    EightBallPU(false);
+                }
+                return;
+            }
+
         }
     }
 
@@ -161,7 +183,7 @@ public class BallManager : MonoBehaviour
 
                 //spawn and set it to a variable to later reference its rigidbody
                 GameObject spawnBall = Instantiate(_balls[spawnIndex].ballObject, spawnPos + randomPos, Quaternion.identity);
-                _ballObjects.Add(spawnBall); //add to list to get rigidbody later in fixed update
+                _spawnedBalls.Add(spawnBall); //add to list to get rigidbody later in fixed update
 
                 spawnIndex++;
             }
@@ -284,19 +306,54 @@ public class BallManager : MonoBehaviour
 
 
     /// <summary>
+    /// Once balls are stopped invoke event
+    /// </summary>
+    private void BallsStoppedEvent()
+    {
+        BallsStopped?.Invoke();
+    }
+
+
+    /// <summary>
     /// Once the player has shot set _checkBalls to true to start the ball check
     /// </summary>
-    private void ShotEventTriggered()
+    private void HandleShotEvent()
     {
         _checkBalls = true;
     }
 
 
     /// <summary>
-    /// Once balls are stopped invoke event
+    /// Finds the 8 ball and sets is kinematic.
+    /// Argument will set kinematic to true or false
     /// </summary>
-    private void BallsStoppedEvent()
+    /// <param name="activate"></param>
+    private void EightBallPU(bool activate)
     {
-        BallsStopped?.Invoke();
+        foreach (GameObject ball in _spawnedBalls)
+        {
+            if (ball.gameObject.tag == "EightBall")
+            {
+                if (activate)
+                {
+                    ball.GetComponent<Rigidbody>().isKinematic = true;
+                    _eightBallPUActive = true;
+                }
+                else
+                {
+                    ball.GetComponent<Rigidbody>().isKinematic = false;
+                    _eightBallPUActive = false;
+                }
+            }
+        }
+    }
+
+
+    private void HandlePowerUps(SO_PowerUp powerUp)
+    {
+        if (powerUp.id == "Eight Ball Protection")
+        {
+            EightBallPU(true);
+        }
     }
 }

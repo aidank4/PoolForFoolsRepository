@@ -1870,6 +1870,7 @@ MonoBehaviour:
   - {fileID: 3082973499434422483}
   _availablePUs:
   - {fileID: 11400000, guid: 27dd01929bc3fba4bb886d0afb1b8fa4, type: 2}
+  - {fileID: 11400000, guid: aec74e1660786bb4593905f5828810a5, type: 2}
 --- !u!95 &440618673667891996
 Animator:
   serializedVersion: 7

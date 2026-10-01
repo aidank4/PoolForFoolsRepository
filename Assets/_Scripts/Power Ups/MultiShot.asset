@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: MultiShot
   m_EditorClassIdentifier: Assembly-CSharp::SO_PowerUp
   id: Multi Shot
-  description: Shoot in 3 directions at once!
+  description: 'For one turn: shoot in 3 directions at once!'
   icon: {fileID: 21300000, guid: af9ccc841fab37642b1f9c903f5d8bae, type: 3}
   prefab: {fileID: 0}
