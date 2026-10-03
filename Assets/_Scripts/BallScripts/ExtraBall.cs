@@ -12,10 +12,10 @@ public class ExtraBall : MonoBehaviour
     [Header("Misc Variables")]
     private Rigidbody _ballRb;
     private float _minSpeed = 0.2f;
+    private bool _canDestroy = false;
 
 
-
-    private void Awake()
+    private void Start()
     {
         //ref
         _ballRb = GetComponent<Rigidbody>();
@@ -36,10 +36,13 @@ public class ExtraBall : MonoBehaviour
     /// <returns></returns>
     IEnumerator MovementCheck()
     {
-
+        if (!_poolCueScript.shootAvailable) //Can't destroy until player has shot
+        {
+            _canDestroy = true;
+        }
         if (_ballRb.linearVelocity != Vector3.zero) // checks if ball is moving
         {
-            if (_ballRb.linearVelocity.sqrMagnitude < _minSpeed && !_poolCueScript.shootAvailable) //don't destroy until after shot
+            if (_ballRb.linearVelocity.sqrMagnitude < _minSpeed && _canDestroy)
             {
                 Destroy(this.gameObject);
             }

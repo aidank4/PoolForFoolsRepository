@@ -17,6 +17,7 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private GameObject _powerUpUIRef;
     private PowerUpUI _powerUpUIScript;
     [SerializeField] private TMP_Text _swapText;
+    [SerializeField] private GameObject _controlsText;
     [SerializeField] private TMP_Text _slotDescription;
     [SerializeField] private Image _alreadyUsedUI;
     [SerializeField] private GameObject _ballManagerRef; //Ball manager for balls stopped event which can trigger power up choices as turn is over
@@ -28,7 +29,7 @@ public class InventoryManager : MonoBehaviour
 
     [Header("Containers")] //inventory size is always maxed at 3
     [SerializeField] private Image[] _slots = new Image[3];
-    [SerializeField] private SO_PowerUp[] _availablePUs;
+    [SerializeField] private List<SO_PowerUp> _availablePUs = new List<SO_PowerUp>();
     private SO_PowerUp[] _currentPUs = new SO_PowerUp[3];
     private SO_PowerUp[] _pOnePUs = new SO_PowerUp[3];
     private SO_PowerUp[] _pTwoPUs = new SO_PowerUp[3];
@@ -37,6 +38,7 @@ public class InventoryManager : MonoBehaviour
     [Header("Misc Variables")]
     private SO_PowerUp _extraPowerUp = null; //if an extra power up gets claimed, this ref is used to swap it or delete it later
     private bool _powerUpUsed = false; //bool for stopping player from using multiple power ups in turn
+    private int _pBCounter = 0; //Cant use pocket block more than 5 times
 
 
     private void Awake()
@@ -141,7 +143,16 @@ public class InventoryManager : MonoBehaviour
     /// <returns>SO_Powerup</returns>
     private SO_PowerUp SelectPowerUp()
     {
-        SO_PowerUp rdmPowerUp = _availablePUs[UnityEngine.Random.Range(0, _availablePUs.Length)];
+        SO_PowerUp rdmPowerUp = _availablePUs[UnityEngine.Random.Range(0, _availablePUs.Count)];
+        if (rdmPowerUp.id == "Pocket Block") // Can only get 5 pocketblocks per game
+        {
+            _pBCounter++;
+            if (_pBCounter > 5)
+            {
+                _availablePUs.Remove(rdmPowerUp);
+                rdmPowerUp = _availablePUs[UnityEngine.Random.Range(0, _availablePUs.Count)];
+            }
+        }
         return rdmPowerUp;
     }
 
@@ -205,6 +216,7 @@ public class InventoryManager : MonoBehaviour
         if (_extraPowerUp != null)
         {
             _swapText.gameObject.SetActive(true); //UI that tells player to swap PUs
+            _controlsText.SetActive(false);
             _powerUpUIScript.HighlightSlotButton();
         }
     }
@@ -239,6 +251,7 @@ public class InventoryManager : MonoBehaviour
         SetIcons();
         TossExtraPowerUp(); // hide UI and return to gameplay
         _swapText.gameObject.SetActive(false);
+        _controlsText.SetActive(true);
     }
 
 
@@ -253,12 +266,11 @@ public class InventoryManager : MonoBehaviour
         {
             if (!_powerUpUsed)
             {
-                _currentPUs[i].Activate();
                 Debug.Log("Use following power up: " + _currentPUs[i].id);
-                _powerUpUsed = true;
-
-                RemovePowerUp(i); //Remove used PU and hide UI for gameplay
                 _powerUpUIScript.HidePUConflictUI();
+                _currentPUs[i].Activate();
+                _powerUpUsed = true;
+                RemovePowerUp(i); //Remove used PU and hide UI for gameplay
 
             }
             else
@@ -335,8 +347,10 @@ public void UseOrSwapPowerUp(GameObject selectedSlot) //NOTE used by inventory b
     /// <returns>IEnumerator</returns>
     IEnumerator PowerUpWarning()
     {
+        _controlsText.SetActive(false);
         _alreadyUsedUI.gameObject.SetActive(true);
         yield return new WaitForSeconds(1f);
         _alreadyUsedUI.gameObject.SetActive(false);
+        _controlsText.SetActive(true);
     }
 }

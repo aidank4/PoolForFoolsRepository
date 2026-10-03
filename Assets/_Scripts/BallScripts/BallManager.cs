@@ -1,8 +1,9 @@
 using NUnit.Framework;
-using UnityEngine;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.InputSystem.HID;
 using UnityEngine.UIElements;
 
 public class BallManager : MonoBehaviour
@@ -334,6 +335,17 @@ public class BallManager : MonoBehaviour
         {
             if (ball.gameObject.tag == "EightBall")
             {
+                //Swap model
+                Transform rock = ball.transform.Find("Rock");
+                if (!rock.gameObject.activeSelf)
+                {
+                    rock.gameObject.SetActive(true);
+                }
+                else
+                {
+                    rock.gameObject.SetActive(false);
+                }
+                //Set physics
                 if (activate)
                 {
                     ball.GetComponent<Rigidbody>().isKinematic = true;
@@ -349,6 +361,10 @@ public class BallManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Call Eight ball PU
+    /// </summary>
+    /// <param name="powerUp"></param>
     private void HandlePowerUps(SO_PowerUp powerUp)
     {
         if (powerUp.id == "Eight Ball Protection")
