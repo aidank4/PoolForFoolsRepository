@@ -6,6 +6,7 @@ public class SO_PowerUp : ScriptableObject
 {
     public string id;
     public string description;
+    public bool sabotage;
     public Sprite icon;
     public GameObject prefab;
     public static event Action<SO_PowerUp> UsePU;

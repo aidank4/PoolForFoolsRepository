@@ -24,6 +24,12 @@ public class InventoryManager : MonoBehaviour
     private BallManager _ballManagerScript;
     [SerializeField] private GameObject _turnManagerRef; //TurnManager to switch turn -- switch turn in Toss Function and BallsStopped Event
     private TurnManager _turnManagerScript;
+    [SerializeField] private GameObject _firePU;
+    [SerializeField] private GameObject _fireSabotage;
+    [SerializeField] private Image _imagePU;
+    [SerializeField] private TMP_Text _titleTextPU;
+    [SerializeField] private TMP_Text _nameTextPU;
+    [SerializeField] private TMP_Text _descriptionTextPU;
 
 
 
@@ -54,6 +60,9 @@ public class InventoryManager : MonoBehaviour
         _swapText.gameObject.SetActive(false);
         _slotDescription.transform.parent.gameObject.SetActive(false);
         _alreadyUsedUI.gameObject.SetActive(false);
+        _firePU.SetActive(false);
+        _fireSabotage.SetActive(false);
+        _imagePU.gameObject.SetActive(false);
         #endregion
 
     }
@@ -270,7 +279,8 @@ public class InventoryManager : MonoBehaviour
                 _powerUpUIScript.HidePUConflictUI();
                 _currentPUs[i].Activate();
                 _powerUpUsed = true;
-                RemovePowerUp(i); //Remove used PU and hide UI for gameplay
+                StartCoroutine(VisualPU(_currentPUs[i]));
+                RemovePowerUp(i);
 
             }
             else
@@ -280,12 +290,12 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-/// <summary>
+    /// <summary>
 /// On button click either swap PU's or use a PU.
 /// This is dependant on if there is an extra PU.
 /// </summary>
 /// <param name="selectedSlot"></param>
-public void UseOrSwapPowerUp(GameObject selectedSlot) //NOTE used by inventory buttons
+    public void UseOrSwapPowerUp(GameObject selectedSlot) //NOTE used by inventory buttons
     {
         if (_extraPowerUp != null)
         {
@@ -352,5 +362,37 @@ public void UseOrSwapPowerUp(GameObject selectedSlot) //NOTE used by inventory b
         yield return new WaitForSeconds(1f);
         _alreadyUsedUI.gameObject.SetActive(false);
         _controlsText.SetActive(true);
+    }
+
+
+    /// <summary>
+    /// Turns on power up fireworks and description UI
+    /// </summary>
+    /// <param name="powerup"></param>
+    /// <returns></returns>
+    IEnumerator VisualPU(SO_PowerUp powerup)
+    {
+        if (!powerup.sabotage)
+        {
+            _titleTextPU.text = "Power Up!"; //UI that explains the power up
+            _nameTextPU.text = powerup.id;
+            _descriptionTextPU.text = powerup.description;
+            _imagePU.gameObject.SetActive(true);
+            _firePU.SetActive(true); // fireworks
+            yield return new WaitForSeconds(5f);
+            _firePU.SetActive(false);
+            _imagePU.gameObject.SetActive(false);
+        }
+        else
+        {
+            _titleTextPU.text = "Sabotage!";
+            _nameTextPU.text = powerup.id;
+            _descriptionTextPU.text = powerup.description;
+            _imagePU.gameObject.SetActive(true);
+            _fireSabotage.SetActive(true);
+            yield return new WaitForSeconds(5f);
+            _fireSabotage.SetActive(false);
+            _imagePU.gameObject.SetActive(false);
+        }
     }
 }

@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_PowerUp
   id: Pocket Block
   description: Choose a pocket to block for the rest of the game!
+  sabotage: 1
   icon: {fileID: 21300000, guid: 134e5edfb91d4314b89db49b68f49ee2, type: 3}
   prefab: {fileID: 0}
