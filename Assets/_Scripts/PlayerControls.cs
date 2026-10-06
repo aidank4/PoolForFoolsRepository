@@ -44,7 +44,7 @@ public class PlayerControls : MonoBehaviour
     {
         if (context.performed)
         {
-            _inventoryScript.UsePowerUp(_slotA);
+            _inventoryScript.StartPowerUp(_slotA);
         }
     }
 
@@ -56,7 +56,7 @@ public class PlayerControls : MonoBehaviour
     {
         if (context.performed)
         {
-            _inventoryScript.UsePowerUp(_slotB);
+            _inventoryScript.StartPowerUp(_slotB);
         }
     }
 
@@ -68,10 +68,25 @@ public class PlayerControls : MonoBehaviour
     {
         if (context.performed)
         {
-            _inventoryScript.UsePowerUp(_slotC);
+            _inventoryScript.StartPowerUp(_slotC);
+        }
+    }
+
+
+    /// <summary>
+    /// Call UsePowerUp which closes visuals and activates power up
+    /// </summary>
+    /// <param name="context"></param>
+    public void ActivatePowerUp(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            _inventoryScript.UsePowerUp();
         }
     }
     #endregion
+
+    
 
     /// <summary>
     /// switches to UI inputs and highlights an inventory slot

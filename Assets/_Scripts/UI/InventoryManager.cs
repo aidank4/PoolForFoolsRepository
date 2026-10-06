@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -45,6 +46,8 @@ public class InventoryManager : MonoBehaviour
     private SO_PowerUp _extraPowerUp = null; //if an extra power up gets claimed, this ref is used to swap it or delete it later
     private bool _powerUpUsed = false; //bool for stopping player from using multiple power ups in turn
     private int _pBCounter = 0; //Cant use pocket block more than 5 times
+    private bool _sabotage = false; //used to close sabotage or power up fireworks
+    private SO_PowerUp _selectedPU;
 
 
     private void Awake()
@@ -265,23 +268,55 @@ public class InventoryManager : MonoBehaviour
 
 
     /// <summary>
-    /// If there is a power up and one hasn't been used this turn activate the selected powerUp
+    /// Activate powerup, switch input to gameplay and turn off fireworks.
+    /// </summary>
+    public void UsePowerUp()
+    {
+        InputManager.Instance.SwitchCurrentActionMap("Gameplay");
+        _imagePU.gameObject.SetActive(false);
+        _selectedPU.Activate();
+        _powerUpUsed = true;
+        if (!_selectedPU.sabotage)
+        {
+            _firePU.SetActive(false);
+
+        }
+        else
+        {
+            _fireSabotage.SetActive(false);
+        }
+    }
+
+
+    /// <summary>
+    /// Check if can use power up. Then start ui and fireworks, and then remove the powerup.
     /// </summary>
     /// <param name="selectedSlot"></param>
-    public void UsePowerUp(GameObject selectedSlot)
+    public void StartPowerUp(GameObject selectedSlot)
     {
         int i = SlotNumber(selectedSlot);
+        _selectedPU = _currentPUs[i];
         if (_currentPUs[i] != null)
         {
             if (!_powerUpUsed)
             {
-                Debug.Log("Use following power up: " + _currentPUs[i].id);
                 _powerUpUIScript.HidePUConflictUI();
-                _currentPUs[i].Activate();
-                _powerUpUsed = true;
-                StartCoroutine(VisualPU(_currentPUs[i]));
-                RemovePowerUp(i);
+                InputManager.Instance.SwitchCurrentActionMap("Continue");
 
+                _nameTextPU.text = _selectedPU.id; //UI
+                _descriptionTextPU.text = _selectedPU.description;
+                _imagePU.gameObject.SetActive(true);
+                if (!_selectedPU.sabotage)
+                {
+                    _titleTextPU.text = "Power Up!";
+                    _firePU.SetActive(true);
+                }
+                else
+                {
+                    _titleTextPU.text = "Sabotage!";
+                    _fireSabotage.SetActive(true);
+                }
+                RemovePowerUp(i);
             }
             else
             {
@@ -289,6 +324,7 @@ public class InventoryManager : MonoBehaviour
             }
         }
     }
+
 
     /// <summary>
 /// On button click either swap PU's or use a PU.
@@ -303,7 +339,7 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
-            UsePowerUp(selectedSlot);
+            StartPowerUp(selectedSlot);
         }
     }
 
@@ -362,37 +398,5 @@ public class InventoryManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
         _alreadyUsedUI.gameObject.SetActive(false);
         _controlsText.SetActive(true);
-    }
-
-
-    /// <summary>
-    /// Turns on power up fireworks and description UI
-    /// </summary>
-    /// <param name="powerup"></param>
-    /// <returns></returns>
-    IEnumerator VisualPU(SO_PowerUp powerup)
-    {
-        if (!powerup.sabotage)
-        {
-            _titleTextPU.text = "Power Up!"; //UI that explains the power up
-            _nameTextPU.text = powerup.id;
-            _descriptionTextPU.text = powerup.description;
-            _imagePU.gameObject.SetActive(true);
-            _firePU.SetActive(true); // fireworks
-            yield return new WaitForSeconds(5f);
-            _firePU.SetActive(false);
-            _imagePU.gameObject.SetActive(false);
-        }
-        else
-        {
-            _titleTextPU.text = "Sabotage!";
-            _nameTextPU.text = powerup.id;
-            _descriptionTextPU.text = powerup.description;
-            _imagePU.gameObject.SetActive(true);
-            _fireSabotage.SetActive(true);
-            yield return new WaitForSeconds(5f);
-            _fireSabotage.SetActive(false);
-            _imagePU.gameObject.SetActive(false);
-        }
     }
 }

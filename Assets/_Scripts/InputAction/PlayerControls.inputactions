@@ -375,6 +375,35 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Continue",
+            "id": "d8af6ef1-61f1-4875-b93e-ed39185e60e8",
+            "actions": [
+                {
+                    "name": "Close",
+                    "type": "Button",
+                    "id": "95ff3249-c1fe-47c6-970f-91c367967768",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "fd8ef1ba-e977-411f-8814-9d89fbf2e5dd",
+                    "path": "<Keyboard>/anyKey",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Close",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []
