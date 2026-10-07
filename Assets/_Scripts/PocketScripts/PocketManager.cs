@@ -13,8 +13,14 @@ public class PocketManager : MonoBehaviour
     private Scoreboard _scoreboardScript;
     [SerializeField] private GameObject _turnManagerRef;
     private TurnManager _turnManagerScript;
+    [SerializeField] private GameObject _inventoryRef;
+    private InventoryManager _inventoryScript;
     [SerializeField] private GameObject _highlightObject;
     [SerializeField] private Image _controlsUI;
+    [SerializeField] private GameObject _fireworkRef;
+    private FireWorks _fireworkScript;
+    [SerializeField] private Image _winScreenPOne;
+    [SerializeField] private Image _winScreenPTwo;
 
 
     [Header("Collections")]
@@ -32,10 +38,14 @@ public class PocketManager : MonoBehaviour
         #region
         _scoreboardScript = _scoreboardRef.GetComponent<Scoreboard>();
         _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
+        _inventoryScript = _inventoryRef.GetComponent<InventoryManager>();
+        _fireworkScript = _fireworkRef.GetComponent<FireWorks>();
         #endregion
         //Hide
         _highlightObject.SetActive(false);
         _controlsUI.gameObject.SetActive(false);
+        _winScreenPOne.gameObject.SetActive(false);
+        _winScreenPTwo.gameObject.SetActive(false);
         foreach(GameObject cell in _jailCells)
         {
             cell.SetActive(false);
@@ -69,6 +79,15 @@ public class PocketManager : MonoBehaviour
                     {
                         _turnManagerScript.AssignStripes();
                     }
+                    if (_turnManagerScript.currentPlayer == _turnManagerScript.teamStripes) //Add powerUp and playfireworks
+                    {
+                        _inventoryScript.AddPowerUp();
+                        StartCoroutine(PlayFireworks(child.gameObject.transform.position, false));
+                    }
+                    else
+                    {
+                        StartCoroutine(PlayFireworks(child.gameObject.transform.position, true));
+                    }
 
                     _turnManagerScript.TurnDeciderStripes();
                     Destroy(other.gameObject);
@@ -82,6 +101,16 @@ public class PocketManager : MonoBehaviour
                         _turnManagerScript.AssignSolids();
                     }
 
+                    if (_turnManagerScript.currentPlayer == _turnManagerScript.teamSolids)//Add powerUp and playfireworks
+                    {
+                        _inventoryScript.AddPowerUp();
+                        StartCoroutine(PlayFireworks(child.gameObject.transform.position, false));
+                    }
+                    else
+                    {
+                        StartCoroutine(PlayFireworks(child.gameObject.transform.position, true));
+                    }
+
                     _turnManagerScript.TurnDeciderSolids();
                     Destroy(other.gameObject);
                     AddSolidScore();
@@ -92,24 +121,24 @@ public class PocketManager : MonoBehaviour
                     Debug.Log("EightBall");
                     if(_scoreboardScript.pOneScore == 7 && _turnManagerScript.currentPlayer == _turnManagerScript.playerOne)
                     {
-                        Debug.Log("Player 1 Wins!");
-                        //display P1 win screen
+                        //Debug.Log("Player 1 Wins!");
+                        _winScreenPOne.gameObject.SetActive(true);
                     }
                     else if(_scoreboardScript.pTwoScore == 7 && _turnManagerScript.currentPlayer == _turnManagerScript.playerTwo)
                     {
-                        Debug.Log("Player 2 Wins!");
-                        //display P2 win screen
+                        //Debug.Log("Player 2 Wins!");
+                        _winScreenPTwo.gameObject.SetActive(true);
                     }
                     else
                     {
                         Debug.Log("Player " + _turnManagerScript.currentPlayer.ToString() + " loses");
                         if(_turnManagerScript.currentPlayer == _turnManagerScript.playerOne)
                         {
-                            //display P2 win screen
+                            _winScreenPTwo.gameObject.SetActive(true);
                         }
                         else if(_turnManagerScript.currentPlayer == _turnManagerScript.playerTwo)
                         {
-                            //display P1 win screen
+                            _winScreenPOne.gameObject.SetActive(true);
                         }
                     }
                         Destroy(other.gameObject);
@@ -128,7 +157,7 @@ public class PocketManager : MonoBehaviour
     /// <summary>
     /// Increment stripes score +1
     /// </summary>
-    public void AddStripeScore()
+    private void AddStripeScore()
     {
         if (_turnManagerScript.playerOne == _turnManagerScript.teamStripes)
         {
@@ -144,7 +173,7 @@ public class PocketManager : MonoBehaviour
     /// <summary>
     /// Increments solid score +1
     /// </summary>
-    public void AddSolidScore()
+    private void AddSolidScore()
     {
         if (_turnManagerScript.playerOne == _turnManagerScript.teamSolids)
         {
@@ -158,6 +187,18 @@ public class PocketManager : MonoBehaviour
 
 
     /// <summary>
+    /// Play a firework at a certain position for 5 seconds
+    /// </summary>
+    /// <param name="pos"></param>
+    IEnumerator PlayFireworks(Vector3 pos, bool sabotage)
+    {
+        _fireworkScript.ActivateFirework(sabotage, pos);
+        yield return new WaitForSeconds(5f);
+        _fireworkScript.HideFireWork(sabotage);
+    }
+
+
+    /// <summary>
     /// Cycle through the pockets going left
     /// </summary>
     /// <param name="context"></param>
@@ -167,14 +208,14 @@ public class PocketManager : MonoBehaviour
         {
             if (_choosingPocket)
             {
-                if (_pocketIdx == 0)
+                if (_pocketIdx == _pockets.Count - 1)
                 {
-                    _pocketIdx = _pockets.Count - 1;
+                    _pocketIdx = 0;
                     HighlightPocket();
                 }
                 else
                 {
-                    _pocketIdx--;
+                    _pocketIdx++;
                     HighlightPocket();
                 }
             }
@@ -192,15 +233,14 @@ public class PocketManager : MonoBehaviour
         {
             if (_choosingPocket)
             {
-                if(_pocketIdx == _pockets.Count - 1)
+                if (_pocketIdx == 0)
                 {
-                    _pocketIdx = 0;
+                    _pocketIdx = _pockets.Count - 1;
                     HighlightPocket();
-
                 }
                 else
                 {
-                    _pocketIdx++;
+                    _pocketIdx--;
                     HighlightPocket();
                 }
             }

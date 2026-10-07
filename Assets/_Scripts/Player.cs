@@ -45,6 +45,7 @@ public class Player : MonoBehaviour
     private float _holdTimer;
     private Vector3 _startingPos; // when shot canceled need to remember where pool cue was to reset its position
     private Vector2 _rotateInput;
+    private float _tempRotateInput;
 
 
     //ENUMS
@@ -90,8 +91,8 @@ public class Player : MonoBehaviour
     {
         //Debug.Log(_poolCueParent.transform.right);
         //If given input rotate pool cue and visual indicator
-        _poolCueParent.transform.RotateAround(_cueBall.transform.position, _rotateInput, _rotationSpeed * Time.deltaTime);
-        _predictionLineParent.transform.RotateAround(_cueBall.transform.position, _rotateInput, _rotationSpeed * Time.deltaTime);
+        _poolCueParent.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
+        _predictionLineParent.transform.RotateAround(_cueBall.transform.position, new Vector3 (0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime); //USING TEMP ROTATE
 
         if (_holdStarted && !_stopShot)
         {
@@ -216,7 +217,9 @@ public class Player : MonoBehaviour
     /// <param name="context"></param>
     public void Rotate(InputAction.CallbackContext context) //NOTE called through unity events in the input action
     {
-        _rotateInput = context.ReadValue<Vector2>();
+        // WASD _rotateInput = context.ReadValue<Vector2>();
+        //TEMP NO WASD
+        _tempRotateInput = -context.ReadValue<float>();
     }
 
 
@@ -233,7 +236,7 @@ public class Player : MonoBehaviour
         _predictionLineParent.transform.position = _poolCueParent.transform.position + new Vector3(0, 0, _ballSeparation * 2); // 2 pushes it further away from pool cue
         _predictionLineParent.transform.eulerAngles = new Vector3(0, 0, 0);
 
-        _poolCueParent.transform.eulerAngles = new Vector3(0, 90, 0); // model needs to have y 90
+        _poolCueParent.transform.eulerAngles = new Vector3(0, 90, 3); // model needs to have y 90 // 3 gives small tilt to not clip table
     }
 
 

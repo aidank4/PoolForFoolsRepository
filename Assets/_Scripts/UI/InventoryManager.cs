@@ -25,8 +25,9 @@ public class InventoryManager : MonoBehaviour
     private BallManager _ballManagerScript;
     [SerializeField] private GameObject _turnManagerRef; //TurnManager to switch turn -- switch turn in Toss Function and BallsStopped Event
     private TurnManager _turnManagerScript;
-    [SerializeField] private GameObject _firePU;
-    [SerializeField] private GameObject _fireSabotage;
+    [SerializeField] private GameObject _fireworksRef;
+    private FireWorks _fireworksScript;
+    [SerializeField] private GameObject _cueBall;
     [SerializeField] private Image _imagePU;
     [SerializeField] private TMP_Text _titleTextPU;
     [SerializeField] private TMP_Text _nameTextPU;
@@ -46,7 +47,6 @@ public class InventoryManager : MonoBehaviour
     private SO_PowerUp _extraPowerUp = null; //if an extra power up gets claimed, this ref is used to swap it or delete it later
     private bool _powerUpUsed = false; //bool for stopping player from using multiple power ups in turn
     private int _pBCounter = 0; //Cant use pocket block more than 5 times
-    private bool _sabotage = false; //used to close sabotage or power up fireworks
     private SO_PowerUp _selectedPU;
 
 
@@ -57,14 +57,13 @@ public class InventoryManager : MonoBehaviour
         _ballManagerScript = _ballManagerRef.GetComponent<BallManager>();
         _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
         _powerUpUIScript = _powerUpUIRef.GetComponent<PowerUpUI>();
+        _fireworksScript = _fireworksRef.GetComponent<FireWorks>();
         #endregion
         //UI init
         #region
         _swapText.gameObject.SetActive(false);
         _slotDescription.transform.parent.gameObject.SetActive(false);
         _alreadyUsedUI.gameObject.SetActive(false);
-        _firePU.SetActive(false);
-        _fireSabotage.SetActive(false);
         _imagePU.gameObject.SetActive(false);
         #endregion
 
@@ -173,7 +172,7 @@ public class InventoryManager : MonoBehaviour
     /// Gets a random power up and adds it to the inventory.
     /// If the inventory is full then the extra gets stored for later.
     /// </summary>
-    private void AddPowerUp()
+    public void AddPowerUp()
     {
         SO_PowerUp selectedPowerUp = SelectPowerUp();
 
@@ -276,15 +275,7 @@ public class InventoryManager : MonoBehaviour
         _imagePU.gameObject.SetActive(false);
         _selectedPU.Activate();
         _powerUpUsed = true;
-        if (!_selectedPU.sabotage)
-        {
-            _firePU.SetActive(false);
-
-        }
-        else
-        {
-            _fireSabotage.SetActive(false);
-        }
+        _fireworksScript.HideFireWork(_selectedPU.sabotage);
     }
 
 
@@ -309,13 +300,12 @@ public class InventoryManager : MonoBehaviour
                 if (!_selectedPU.sabotage)
                 {
                     _titleTextPU.text = "Power Up!";
-                    _firePU.SetActive(true);
                 }
                 else
                 {
                     _titleTextPU.text = "Sabotage!";
-                    _fireSabotage.SetActive(true);
                 }
+                //_fireworksScript.ActivateFirework(_selectedPU.sabotage, _cueBall.transform.position);
                 RemovePowerUp(i);
             }
             else
