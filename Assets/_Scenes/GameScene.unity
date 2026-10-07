@@ -151,6 +151,26 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1757876620278393662, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
+      propertyPath: _explosiveForce
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1757876620278393662, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
+      propertyPath: _explodeUpOffset
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1757876620278393662, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
+      propertyPath: _explosiveRadius
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1966556306568221108, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
+      propertyPath: _availablePUs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1966556306568221108, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
+      propertyPath: '_availablePUs.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 538dad14a8d621c4c925966cc48876d5, type: 2}
     - target: {fileID: 2080833465964349800, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -236,7 +256,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 4884472886508360673, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}

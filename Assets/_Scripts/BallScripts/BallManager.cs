@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -46,7 +47,11 @@ public class BallManager : MonoBehaviour
 
 
     [Header("Power Up Variables")]
+    [SerializeField] float _explosiveForce = 100f;
+    [SerializeField] float _explosiveRadius = 5f;
+    [SerializeField] float _explodeUpOffset = 1f;
     private bool _eightBallPUActive = false;
+    private bool _bombBlastActive = false;
 
 
     //Events
@@ -114,6 +119,13 @@ public class BallManager : MonoBehaviour
                         checkBallsStopped = false;
                     }
                 }
+            }
+
+            if (_cueBall.GetComponent<Rigidbody>().IsSleeping() && _bombBlastActive) //Bomb blast power up
+            {
+                //checkBallsStopped = false; MIGHT NEED
+                StartCoroutine(BlastBalls());
+                return;
             }
 
             //if balls are still wait a bit in case it was just a split second
@@ -362,7 +374,31 @@ public class BallManager : MonoBehaviour
 
 
     /// <summary>
-    /// Call Eight ball PU
+    /// Adds explosive force to objects near cue ball
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator BlastBalls()
+    {
+        _checkBalls = false;
+        //increase blink speed
+        yield return new WaitForSeconds(1);
+        //Stop blink coroutine
+        //play particle effect
+        Collider[] nearbyObjects = Physics.OverlapSphere(_cueBall.transform.position, _explosiveRadius);
+        foreach (Collider obj in nearbyObjects)
+        {
+            if (obj.TryGetComponent(out Rigidbody rb))
+            {
+                rb.AddExplosionForce(_explosiveForce, _cueBall.transform.position, _explosiveRadius, _explodeUpOffset, ForceMode.Impulse);
+            }
+        }
+        _bombBlastActive = false;
+        _checkBalls = true;
+    }
+
+
+    /// <summary>
+    /// Call ball related powerups
     /// </summary>
     /// <param name="powerUp"></param>
     private void HandlePowerUps(SO_PowerUp powerUp)
@@ -370,6 +406,11 @@ public class BallManager : MonoBehaviour
         if (powerUp.id == "Eight Ball Protection")
         {
             EightBallPU(true);
+        }
+        if(powerUp.id == "Bomb Shot")
+        {
+            _bombBlastActive = true;
+            //Start blinking coroutine
         }
     }
 }
