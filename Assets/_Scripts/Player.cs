@@ -28,7 +28,7 @@ public class Player : MonoBehaviour
 
 
     [Header("PowerUp Variables")]
-    [SerializeField] private float _multiBallShotSeperation = 0.25f;
+    [SerializeField] private float _multiBallShotSeperation = 0.1f;
     private GameObject _extraCueBallA;
     private GameObject _extraCueBallB;
 
