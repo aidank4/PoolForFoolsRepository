@@ -42,7 +42,7 @@ public class PlayerControls : MonoBehaviour
     /// </summary>
     public void UsePowerUpA(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.performed && _poolCueScript.shootAvailable)
         {
             _inventoryScript.StartPowerUp(_slotA);
         }
@@ -54,7 +54,7 @@ public class PlayerControls : MonoBehaviour
     /// </summary>
     public void UsePowerUpB(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.performed && _poolCueScript.shootAvailable)
         {
             _inventoryScript.StartPowerUp(_slotB);
         }
@@ -66,7 +66,7 @@ public class PlayerControls : MonoBehaviour
     /// </summary>
     public void UsePowerUpC(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.performed && _poolCueScript.shootAvailable)
         {
             _inventoryScript.StartPowerUp(_slotC);
         }

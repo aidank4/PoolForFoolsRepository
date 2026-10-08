@@ -152,6 +152,22 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1757876620278393662, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
+      propertyPath: _blinkMat
+      value: 
+      objectReference: {fileID: 2100000, guid: eccde8a5c0772d64b8ed3466c0ce604a, type: 2}
+    - target: {fileID: 1757876620278393662, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
+      propertyPath: _blinkRed
+      value: 
+      objectReference: {fileID: 2100000, guid: eccde8a5c0772d64b8ed3466c0ce604a, type: 2}
+    - target: {fileID: 1757876620278393662, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
+      propertyPath: _blinkYellow
+      value: 
+      objectReference: {fileID: 2100000, guid: 175c80d724006bc4dbaa4a164023a5d2, type: 2}
+    - target: {fileID: 1757876620278393662, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
+      propertyPath: _blinkBaseColor
+      value: 
+      objectReference: {fileID: 2100000, guid: 44d0d5bf950e44c45bf14951df500ffe, type: 2}
+    - target: {fileID: 1757876620278393662, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
       propertyPath: _explosiveForce
       value: 2.5
       objectReference: {fileID: 0}

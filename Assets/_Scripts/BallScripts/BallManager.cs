@@ -20,7 +20,7 @@ public class BallManager : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private GameObject _poolCueRef;
-    private Player _playerScript;
+    private Player _poolCueScript;
     [SerializeField] private GameObject _startingPos;
     [SerializeField] private GameObject _cueBall;
 
@@ -47,9 +47,15 @@ public class BallManager : MonoBehaviour
 
 
     [Header("Power Up Variables")]
-    [SerializeField] float _explosiveForce = 100f;
-    [SerializeField] float _explosiveRadius = 5f;
-    [SerializeField] float _explodeUpOffset = 1f;
+    [SerializeField] private float _explosiveForce = 100f;
+    [SerializeField] private float _explosiveRadius = 5f;
+    [SerializeField] private float _explodeUpOffset = 1f;
+    [SerializeField] private Material _blinkRed;
+    [SerializeField] private Material _blinkYellow;
+    [SerializeField] private Material _blinkBaseColor;
+    [SerializeField] private float _initialBlinkSpeed = 0.5f;
+    private float _blinkMultiplier = 1f;
+    private int _blinkCount = 0;
     private bool _eightBallPUActive = false;
     private bool _bombBlastActive = false;
 
@@ -62,7 +68,7 @@ public class BallManager : MonoBehaviour
     private void Awake()
     {
         //ref
-        _playerScript = _poolCueRef.GetComponent<Player>();
+        _poolCueScript = _poolCueRef.GetComponent<Player>();
 
         SpawnBalls();
         _spawnedBalls.Add(_cueBall); //After all balls have been spawned add in the cue ball to the list
@@ -72,18 +78,18 @@ public class BallManager : MonoBehaviour
 
     private void OnEnable()
     {
-        if (_playerScript != null)
+        if (_poolCueScript != null)
         {
-            _playerScript.ShotCompleted += HandleShotEvent;
+            _poolCueScript.ShotCompleted += HandleShotEvent;
             SO_PowerUp.UsePU += HandlePowerUps;
         }
     }
 
     private void OnDisable()
     {
-        if (_playerScript != null)
+        if (_poolCueScript != null)
         {
-            _playerScript.ShotCompleted -= HandleShotEvent;
+            _poolCueScript.ShotCompleted -= HandleShotEvent;
             SO_PowerUp.UsePU += HandlePowerUps;
         }
     }
@@ -121,7 +127,7 @@ public class BallManager : MonoBehaviour
                 }
             }
 
-            if (_cueBall.GetComponent<Rigidbody>().IsSleeping() && _bombBlastActive) //Bomb blast power up
+            if (_cueBall.GetComponent<Rigidbody>().IsSleeping() && _bombBlastActive && !_poolCueScript.shootAvailable) //Bomb blast power up
             {
                 //checkBallsStopped = false; MIGHT NEED
                 StartCoroutine(BlastBalls());
@@ -380,20 +386,43 @@ public class BallManager : MonoBehaviour
     IEnumerator BlastBalls()
     {
         _checkBalls = false;
-        //increase blink speed
-        yield return new WaitForSeconds(1);
-        //Stop blink coroutine
+        _blinkMultiplier *= 0.25f;
+        yield return new WaitForSeconds(1f);
+        _blinkMultiplier *= 0.25f;
+        yield return new WaitForSeconds(.5f);
+        StopAllCoroutines();
+        _cueBall.GetComponentInChildren<Renderer>().material = _blinkBaseColor;
         //play particle effect
         Collider[] nearbyObjects = Physics.OverlapSphere(_cueBall.transform.position, _explosiveRadius);
         foreach (Collider obj in nearbyObjects)
         {
-            if (obj.TryGetComponent(out Rigidbody rb))
-            {
-                rb.AddExplosionForce(_explosiveForce, _cueBall.transform.position, _explosiveRadius, _explodeUpOffset, ForceMode.Impulse);
+            if (obj != _cueBall.GetComponent<Collider>())
+            { 
+                if (obj.TryGetComponent(out Rigidbody rb))
+                {
+                    rb.AddExplosionForce(_explosiveForce, _cueBall.transform.position, _explosiveRadius, _explodeUpOffset, ForceMode.Impulse);
+                }
             }
         }
         _bombBlastActive = false;
         _checkBalls = true;
+    }
+
+    IEnumerator BlastBlink(Renderer ballMesh)
+    {
+        
+        if (_blinkCount % 2 == 0)
+        {
+            ballMesh.material = _blinkYellow;
+            _blinkCount++;
+        }
+        else
+        {
+            ballMesh.material = _blinkRed;
+            _blinkCount++;
+        }
+        yield return new WaitForSeconds(_initialBlinkSpeed * _blinkMultiplier);
+        StartCoroutine(BlastBlink(ballMesh));
     }
 
 
@@ -410,7 +439,10 @@ public class BallManager : MonoBehaviour
         if(powerUp.id == "Bomb Shot")
         {
             _bombBlastActive = true;
-            //Start blinking coroutine
+
+            Renderer ballMesh = _cueBall.GetComponentInChildren<Renderer>();
+            Material baseMat = ballMesh.material;
+            StartCoroutine(BlastBlink(ballMesh));
         }
     }
 }
