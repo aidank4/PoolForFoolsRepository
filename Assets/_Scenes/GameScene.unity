@@ -153,11 +153,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1757876620278393662, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
       propertyPath: _explosiveForce
-      value: 3
+      value: 2.5
       objectReference: {fileID: 0}
     - target: {fileID: 1757876620278393662, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
       propertyPath: _explodeUpOffset
-      value: 1
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 1757876620278393662, guid: 7e50a4a8f0072574486b591d18e5db5d, type: 3}
       propertyPath: _explosiveRadius
