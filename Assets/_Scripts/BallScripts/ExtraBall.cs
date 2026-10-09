@@ -26,6 +26,7 @@ public class ExtraBall : MonoBehaviour
     public void Access(Player poolCueScript)
     {
         _poolCueScript = poolCueScript;
+
     }
 
     /// <summary>

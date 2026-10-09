@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
@@ -91,6 +92,11 @@ public class Player : MonoBehaviour
         //If given input rotate pool cue and visual indicator
         _poolCueParent.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
         _predictionLineParent.transform.RotateAround(_cueBall.transform.position, new Vector3 (0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime); //USING TEMP ROTATE
+        if (Shoot == MultiShoot) //Rotate extra balls when multi shoot active
+        {
+            _extraCueBallA.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
+            _extraCueBallB.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
+        }
 
         if (_holdStarted && !_stopShot)
         {
@@ -157,22 +163,10 @@ public class Player : MonoBehaviour
         if (stage == ClickStage.Pressed && shootAvailable)
         {
             StartShot();
-            //Set up a left and right position for the extra balls
-            Vector3 shiftLeft = new Vector3(-_poolCueParent.transform.forward.x, 0, -_poolCueParent.transform.forward.z);
-            Vector3 shiftRight = new Vector3(_poolCueParent.transform.forward.x, 0, _poolCueParent.transform.forward.z);
-            Vector3 ballAPos = (_cueBall.transform.position + shiftLeft);
-            Vector3 ballBPos = (_cueBall.transform.position + shiftRight);
-
-            _extraCueBallA = Instantiate(_cueBallExtra, ballAPos, Quaternion.identity);
-            _extraCueBallB = Instantiate(_cueBallExtra, ballBPos, Quaternion.identity);
-            if(_extraCueBallA.TryGetComponent(out ExtraBall extraBallScriptA)) //Pass a ref of this script cleanly into extra ball for shootAvailable bool
-            {
-                extraBallScriptA.Access(this);
-            }
-            if (_extraCueBallB.TryGetComponent(out ExtraBall extraBallScriptB))
-            {
-                extraBallScriptB.Access(this);
-            }
+            _extraCueBallA.GetComponent<Collider>().isTrigger = false;
+            _extraCueBallA.GetComponent<Rigidbody>().isKinematic = false;
+            _extraCueBallB.GetComponent<Collider>().isTrigger = false;
+            _extraCueBallB.GetComponent<Rigidbody>().isKinematic = false;
         }
         else if (stage == ClickStage.Released && _shooting && !_stopShot)
         {
@@ -182,13 +176,54 @@ public class Player : MonoBehaviour
 
             Vector3 leftOffset = new Vector3(-_multiBallShotSeperation, 0, 0); //aims ball diagonally
             Vector3 rightOffset = new Vector3(_multiBallShotSeperation, 0, 0);
-            CalculateShot(_extraCueBallA, leftOffset); //shoot all balls
-            CalculateShot(_extraCueBallB, rightOffset);
+
+            //right
+            if (_extraCueBallA.transform.position.x - _extraCueBallB.transform.position.x < _extraCueBallA.transform.position.z - _extraCueBallB.transform.position.z)
+            {
+                CalculateShot(_extraCueBallA, leftOffset);
+                CalculateShot(_extraCueBallB, rightOffset);
+            }
+            else if((_extraCueBallA.transform.position.x - _extraCueBallB.transform.position.x) - (_extraCueBallA.transform.position.z - _extraCueBallB.transform.position.z) < .2f)
+            {
+                CalculateShot(_extraCueBallA, leftOffset);
+                CalculateShot(_extraCueBallB, rightOffset);
+            }
+            else
+            {
+                CalculateShot(_extraCueBallA, rightOffset);
+                CalculateShot(_extraCueBallB, leftOffset);
+            }
+
             CalculateShot(_cueBall, Vector3.zero);
 
             StartCoroutine(EndShot());
             _chargeVisual.gameObject.SetActive(false);
             Shoot = DefaultShoot;
+        }
+    }
+
+
+    private void SpawnMultiBalls()
+    {
+        //Set up a left and right position for the extra balls
+        Vector3 shiftLeft = new Vector3(-_poolCueParent.transform.forward.x, 0, -_poolCueParent.transform.forward.z);
+        Vector3 shiftRight = new Vector3(_poolCueParent.transform.forward.x, 0, _poolCueParent.transform.forward.z);
+        Vector3 ballAPos = (_cueBall.transform.position + shiftLeft);
+        Vector3 ballBPos = (_cueBall.transform.position + shiftRight);
+
+        _extraCueBallA = Instantiate(_cueBallExtra, ballAPos, Quaternion.identity);
+        _extraCueBallA.GetComponent<Rigidbody>().isKinematic = true;
+        _extraCueBallA.GetComponent<Collider>().isTrigger = true;
+        _extraCueBallB = Instantiate(_cueBallExtra, ballBPos, Quaternion.identity);
+        _extraCueBallB.GetComponent<Rigidbody>().isKinematic = true;
+        _extraCueBallB.GetComponent<Collider>().isTrigger = true;
+        if (_extraCueBallA.TryGetComponent(out ExtraBall extraBallScriptA)) //Pass a ref of this script cleanly into extra ball for shootAvailable bool
+        {
+            extraBallScriptA.Access(this);
+        }
+        if (_extraCueBallB.TryGetComponent(out ExtraBall extraBallScriptB))
+        {
+            extraBallScriptB.Access(this);
         }
     }
 
@@ -317,6 +352,7 @@ public class Player : MonoBehaviour
     {
         if (powerUP.id == "Multi Shot")
         {
+            SpawnMultiBalls();
             Shoot = MultiShoot;
         }
     }
