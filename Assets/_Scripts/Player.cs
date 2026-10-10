@@ -27,9 +27,11 @@ public class Player : MonoBehaviour
 
 
     [Header("PowerUp Variables")]
-    [SerializeField] private float _multiBallShotSeperation = 0.1f;
+    [SerializeField] private float _multiBallShotAngle = 10;
     private GameObject _extraCueBallA;
     private GameObject _extraCueBallB;
+    private GameObject _extraLineA;
+    private GameObject _extraLineB;
 
 
     [Header("Bools")]
@@ -69,7 +71,7 @@ public class Player : MonoBehaviour
 
         //Extra
         _ballRadius = _cueBall.GetComponent<SphereCollider>().radius; //used for shoot math but the radius only needs to be gathered once so I have it here in Awake.
-        _predictionLineParent.transform.position = _poolCueParent.transform.position + new Vector3(0, 0, _ballSeparation * 2); //set up prediction lines position and rotation
+        _predictionLineParent.transform.position = _cueBall.transform.position + new Vector3(0, 0, _ballSeparation); //set up prediction lines position and rotation
         _predictionLineParent.transform.eulerAngles = new Vector3(0, 0, 0);
         Shoot = DefaultShoot;
     }
@@ -92,11 +94,13 @@ public class Player : MonoBehaviour
         //If given input rotate pool cue and visual indicator
         _poolCueParent.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
         _predictionLineParent.transform.RotateAround(_cueBall.transform.position, new Vector3 (0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime); //USING TEMP ROTATE
-        if (Shoot == MultiShoot) //Rotate extra balls when multi shoot active
+        if (Shoot == MultiShoot)
         {
             _extraCueBallA.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
+            _extraLineA.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
             _extraCueBallB.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
-        }
+            _extraLineB.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
+        }//Rotate extra balls and lines when multi shoot active
 
         if (_holdStarted && !_stopShot)
         {
@@ -146,7 +150,7 @@ public class Player : MonoBehaviour
             _holdStarted = false;
             _turnManagerScript.keepTurn = false; //reset keep turn bool to false so that it only gets set true if the correct ball is scored
 
-            CalculateShot(_cueBall, Vector3.zero);
+            CalculateShot(_cueBall, _predictionLineParent);
             StartCoroutine(EndShot());
             _chargeVisual.gameObject.SetActive(false);
         }
@@ -155,7 +159,7 @@ public class Player : MonoBehaviour
 
 
     /// <summary>
-    /// Spawns 2 extra cue balls and shoots all cue balls in different directions.
+    /// Set on extra balls physics and shoot all balls
     /// </summary>
     /// <param name="stage"></param>
     private void MultiShoot(ClickStage stage)
@@ -163,7 +167,7 @@ public class Player : MonoBehaviour
         if (stage == ClickStage.Pressed && shootAvailable)
         {
             StartShot();
-            _extraCueBallA.GetComponent<Collider>().isTrigger = false;
+            _extraCueBallA.GetComponent<Collider>().isTrigger = false; //Activate physics
             _extraCueBallA.GetComponent<Rigidbody>().isKinematic = false;
             _extraCueBallB.GetComponent<Collider>().isTrigger = false;
             _extraCueBallB.GetComponent<Rigidbody>().isKinematic = false;
@@ -174,27 +178,9 @@ public class Player : MonoBehaviour
             _holdStarted = false;
             _turnManagerScript.keepTurn = false;
 
-            Vector3 leftOffset = new Vector3(-_multiBallShotSeperation, 0, 0); //aims ball diagonally
-            Vector3 rightOffset = new Vector3(_multiBallShotSeperation, 0, 0);
-
-            //right
-            if (_extraCueBallA.transform.position.x - _extraCueBallB.transform.position.x < _extraCueBallA.transform.position.z - _extraCueBallB.transform.position.z)
-            {
-                CalculateShot(_extraCueBallA, leftOffset);
-                CalculateShot(_extraCueBallB, rightOffset);
-            }
-            else if((_extraCueBallA.transform.position.x - _extraCueBallB.transform.position.x) - (_extraCueBallA.transform.position.z - _extraCueBallB.transform.position.z) < .2f)
-            {
-                CalculateShot(_extraCueBallA, leftOffset);
-                CalculateShot(_extraCueBallB, rightOffset);
-            }
-            else
-            {
-                CalculateShot(_extraCueBallA, rightOffset);
-                CalculateShot(_extraCueBallB, leftOffset);
-            }
-
-            CalculateShot(_cueBall, Vector3.zero);
+            CalculateShot(_extraCueBallA, _extraLineA);
+            CalculateShot(_extraCueBallB, _extraLineB);
+            CalculateShot(_cueBall, _predictionLineParent);
 
             StartCoroutine(EndShot());
             _chargeVisual.gameObject.SetActive(false);
@@ -203,6 +189,9 @@ public class Player : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Spawn balls and lines in correct spots with correct angles
+    /// </summary>
     private void SpawnMultiBalls()
     {
         //Set up a left and right position for the extra balls
@@ -211,12 +200,29 @@ public class Player : MonoBehaviour
         Vector3 ballAPos = (_cueBall.transform.position + shiftLeft);
         Vector3 ballBPos = (_cueBall.transform.position + shiftRight);
 
+        //spawn balls and set physics off
         _extraCueBallA = Instantiate(_cueBallExtra, ballAPos, Quaternion.identity);
         _extraCueBallA.GetComponent<Rigidbody>().isKinematic = true;
         _extraCueBallA.GetComponent<Collider>().isTrigger = true;
+
         _extraCueBallB = Instantiate(_cueBallExtra, ballBPos, Quaternion.identity);
         _extraCueBallB.GetComponent<Rigidbody>().isKinematic = true;
         _extraCueBallB.GetComponent<Collider>().isTrigger = true;
+
+
+        _predictionLineParent.SetActive(false);
+        _predictionLineParent.SetActive(true);
+
+        _extraLineA = Instantiate(_predictionLineParent, _extraCueBallA.transform.position, Quaternion.LookRotation(-_poolCueParent.transform.right));
+        _extraLineA.transform.localEulerAngles = new Vector3(0, _extraLineA.transform.localEulerAngles.y, _extraLineA.transform.localEulerAngles.z); // set x to 0 so not angled down
+        _extraLineA.transform.localEulerAngles += new Vector3(0, -_multiBallShotAngle, 0); //adjust aim angle
+        _extraLineA.transform.position = _extraCueBallA.transform.position +  (_extraLineA.transform.forward * _ballSeparation); //put the line slightly in front of ball
+
+        _extraLineB = Instantiate(_predictionLineParent, _extraCueBallB.transform.position, Quaternion.LookRotation(-_poolCueParent.transform.right));
+        _extraLineB.transform.localEulerAngles = new Vector3(0, _extraLineB.transform.localEulerAngles.y, _extraLineB.transform.localEulerAngles.z);
+        _extraLineB.transform.localEulerAngles += new Vector3(0, _multiBallShotAngle, 0);
+        _extraLineB.transform.position = _extraCueBallB.transform.position + (_extraLineB.transform.forward * _ballSeparation);
+
         if (_extraCueBallA.TryGetComponent(out ExtraBall extraBallScriptA)) //Pass a ref of this script cleanly into extra ball for shootAvailable bool
         {
             extraBallScriptA.Access(this);
@@ -274,11 +280,11 @@ public class Player : MonoBehaviour
 
 
     /// <summary>
-    /// Calculate shot power, spin and direction, then launch the ball
+    /// Take in a ball and object for its transform.forward direction then shoot the ball
     /// </summary>
     /// <param name="ball"></param>
-    /// <param name="offset"></param>
-    private void CalculateShot(GameObject ball, Vector3 offset)
+    /// <param name="direction"></param>
+    private void CalculateShot(GameObject ball, GameObject direction)
     {
      
         if (_holdTimer > _maxCharge) //max out power on shot
@@ -287,7 +293,7 @@ public class Player : MonoBehaviour
         }
 
         float shotForce = _defaultShotSpeed * _holdTimer;
-        Vector3 shotDir = -_poolCueParent.transform.right + offset; // Negative transform.right because we want to shoot away from where its facing
+        Vector3 shotDir = direction.transform.forward;
         //calculate where to hit the ball
         Vector3 hitPos = ball.transform.position - (shotDir * _ballRadius); // Perfect center of the ball no added spin
         Vector3 hitPosSpin = new Vector3(hitPos.x, hitPos.y - 1, hitPos.z); // Change these values to affect spin
@@ -327,6 +333,11 @@ public class Player : MonoBehaviour
     {
         shootAvailable = false;
         _predictionLineParent.gameObject.SetActive(false); //hide prediction line
+        if (_extraLineA != null && _extraLineB != null) //Multi shoot
+        {
+            Destroy(_extraLineA.gameObject);
+            Destroy(_extraLineB.gameObject);
+        }
 
         yield return new WaitForSeconds(0.1f); //Leave pool cue up for a tenth of a second to show it hitting the ball;
         _poolCueModel.gameObject.SetActive(false);

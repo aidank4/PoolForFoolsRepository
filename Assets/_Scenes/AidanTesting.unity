@@ -15499,6 +15499,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3213455897774711111}
     - target: {fileID: 5795993226912930031, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: _multiBallShotAngle
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5795993226912930031, guid: 15612147a48dd1149894f367c25f843e, type: 3}
       propertyPath: _predictionLineParent
       value: 
       objectReference: {fileID: 8105787378156730718}
