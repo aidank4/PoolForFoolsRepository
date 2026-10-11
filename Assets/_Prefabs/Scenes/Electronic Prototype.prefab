@@ -5887,6 +5887,13 @@ MonoBehaviour:
   - ballObject: {fileID: 6225337127685755866, guid: fd7f78e7c9f72b44f9e470a4a4f06ce3, type: 3}
     stripes: 1
     eightBall: 0
+  _explosiveForce: 100
+  _explosiveRadius: 5
+  _explodeUpOffset: 1
+  _blinkRed: {fileID: 0}
+  _blinkYellow: {fileID: 0}
+  _blinkBaseColor: {fileID: 0}
+  _initialBlinkSpeed: 0.5
 --- !u!1 &552301810406940578
 GameObject:
   m_ObjectHideFlags: 0
@@ -6161,7 +6168,6 @@ Transform:
   - {fileID: 5424144250387212822}
   - {fileID: 6635855764794845839}
   - {fileID: 7896424474729824381}
-  - {fileID: 460625950302281509}
   - {fileID: 443522429378636330}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -11678,50 +11684,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!1 &4884472886508360673
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 460625950302281509}
-  - component: {fileID: 8415638096359525281}
-  m_Layer: 0
-  m_Name: Power Up Manager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &460625950302281509
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4884472886508360673}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 8785997114530753613}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8415638096359525281
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4884472886508360673}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c46f3d8a84e96144fbe24ad546c32aae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PowerUps
 --- !u!1 &4966774309480918805
 GameObject:
   m_ObjectHideFlags: 0

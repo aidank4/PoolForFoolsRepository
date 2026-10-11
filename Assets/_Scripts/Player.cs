@@ -28,6 +28,7 @@ public class Player : MonoBehaviour
 
     [Header("PowerUp Variables")]
     [SerializeField] private float _multiBallShotAngle = 10;
+    [SerializeField] private float _rocketShotForce = 10f;
     private GameObject _extraCueBallA;
     private GameObject _extraCueBallB;
     private GameObject _extraLineA;
@@ -155,6 +156,32 @@ public class Player : MonoBehaviour
             _chargeVisual.gameObject.SetActive(false);
         }
 
+    }
+
+
+    /// <summary>
+    /// Shoot without turning on charge, CalculateShot takes care of rocket speed
+    /// </summary>
+    /// <param name="stage"></param>
+    private void RocketShoot(ClickStage stage)
+    {
+        if (stage == ClickStage.Pressed && shootAvailable)
+        {
+            //custom start shot
+            _shooting = true;
+            _stopShot = false;
+            _startingPos = _poolCueParent.transform.position;
+        }
+        //On release
+        if (stage == ClickStage.Released && _shooting && !_stopShot)
+        {
+            _shooting = false;
+            _turnManagerScript.keepTurn = false;
+
+            CalculateShot(_cueBall, _predictionLineParent);
+            StartCoroutine(EndShot());
+            Shoot = DefaultShoot;
+        }
     }
 
 
@@ -293,6 +320,11 @@ public class Player : MonoBehaviour
         }
 
         float shotForce = _defaultShotSpeed * _holdTimer;
+        if (Shoot == RocketShoot)
+        {
+            shotForce = _rocketShotForce;
+        }
+
         Vector3 shotDir = direction.transform.forward;
         //calculate where to hit the ball
         Vector3 hitPos = ball.transform.position - (shotDir * _ballRadius); // Perfect center of the ball no added spin
@@ -365,6 +397,10 @@ public class Player : MonoBehaviour
         {
             SpawnMultiBalls();
             Shoot = MultiShoot;
+        }
+        if (powerUP.id == "Rocket Shot")
+        {
+            Shoot = RocketShoot;
         }
     }
 }

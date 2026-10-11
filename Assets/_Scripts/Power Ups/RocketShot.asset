@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: RocketShot
   m_EditorClassIdentifier: Assembly-CSharp::SO_PowerUp
   id: Rocket Shot
-  description: T minus cue ball
+  description: Shoot a Rocket!
+  sabotage: 0
   icon: {fileID: 21300000, guid: e6e2f98f9449a5e46a84200dbbe52a89, type: 3}
   prefab: {fileID: 0}

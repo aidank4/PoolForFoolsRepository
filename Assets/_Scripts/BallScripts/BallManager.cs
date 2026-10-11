@@ -56,8 +56,9 @@ public class BallManager : MonoBehaviour
     [SerializeField] private float _initialBlinkSpeed = 0.5f;
     private float _blinkMultiplier = 1f;
     private int _blinkCount = 0;
-    private bool _eightBallPUActive = false;
     private bool _bombBlastActive = false;
+    private bool _eightBallPUActive = false;
+    private bool _rocketShotPUActive = false;
 
 
     //Events
@@ -140,14 +141,7 @@ public class BallManager : MonoBehaviour
                 _timer += Time.fixedDeltaTime;
                 if (_timer >= _minWaitTime)
                 {
-                    _checkBalls = false;
-                    BallsStoppedEvent(); // Used by inventory manager
-                    _timer = 0; // reset timer for next time
-                    _maxTimer = 0;
-                    if (_eightBallPUActive)
-                    {
-                        EightBallPU(false);
-                    }
+                    BallCheckOver();
                     return;
                 }
             }
@@ -157,17 +151,27 @@ public class BallManager : MonoBehaviour
             }
             if (_maxTimer >= _maxWaitTime && _cueBall.GetComponent<Rigidbody>().IsSleeping()) //covers long wait if cueballs ready
             {
-                _checkBalls = false;
-                BallsStoppedEvent();
-                _timer = 0;
-                _maxTimer = 0;
-                if (_eightBallPUActive)
-                {
-                    EightBallPU(false);
-                }
+                BallCheckOver();
                 return;
             }
 
+        }
+    }
+
+
+    private void BallCheckOver()
+    {
+        _checkBalls = false;
+        BallsStoppedEvent();
+        _timer = 0;
+        _maxTimer = 0;
+        if (_eightBallPUActive)
+        {
+            EightBallPU(false);
+        }
+        if (_rocketShotPUActive)
+        {
+            RocketBall();
         }
     }
 
@@ -380,6 +384,26 @@ public class BallManager : MonoBehaviour
 
 
     /// <summary>
+    /// Swap cue ball model with rocket or reverse
+    /// </summary>
+    private void RocketBall()
+    {
+        Transform rocketModel = _cueBall.transform.Find("Rocket Model");
+        Transform baseModel = _cueBall.transform.Find("Cue Ball Model");
+        if (!rocketModel.gameObject.activeSelf)
+        {
+            rocketModel.gameObject.SetActive(true);
+            baseModel.gameObject.SetActive(false);
+        }
+        else
+        {
+            baseModel.gameObject.SetActive(true);
+            rocketModel.gameObject.SetActive(false);
+        }
+    }
+
+
+    /// <summary>
     /// Adds explosive force to objects near cue ball
     /// </summary>
     /// <returns></returns>
@@ -407,6 +431,7 @@ public class BallManager : MonoBehaviour
         _bombBlastActive = false;
         _checkBalls = true;
     }
+
 
     IEnumerator BlastBlink(Renderer ballMesh)
     {
@@ -443,6 +468,11 @@ public class BallManager : MonoBehaviour
             Renderer ballMesh = _cueBall.GetComponentInChildren<Renderer>();
             Material baseMat = ballMesh.material;
             StartCoroutine(BlastBlink(ballMesh));
+        }
+        if (powerUp.id == "Rocket Shot")
+        {
+            RocketBall();
+            _rocketShotPUActive = true;
         }
     }
 }
