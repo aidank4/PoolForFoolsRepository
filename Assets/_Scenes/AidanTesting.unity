@@ -527,7 +527,7 @@ MonoBehaviour:
   _pOneIconUI: {fileID: 8493496911287454551}
   _pTwoIconUI: {fileID: 2333835258621004607}
   _stripesIcon: {fileID: 21300000, guid: 62ee4c20ef1540d488bae6c82589826a, type: 3}
-  _solidsIcon: {fileID: 21300000, guid: 1a44c3da4a4a8a54b968498882124788, type: 3}
+  _solidsIcon: {fileID: 21300000, guid: 963292ee5d4c75c4a96f066763bde6f1, type: 3}
   _inventoryRef: {fileID: 6902260043454952869}
   keepTurn: 0
   scratch: 0
@@ -7682,7 +7682,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 4e58951c69d5e424ca89cd988e545a4f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 963292ee5d4c75c4a96f066763bde6f1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_PowerUp
   id: Magnetic Shot
   description: my cue ball is so attractive
-  icon: {fileID: 21300000, guid: a1e65edcfc119be46bb0ba30307a09df, type: 3}
+  sabotage: 0
+  icon: {fileID: 21300000, guid: 6999936c24d245f458e93af8efd01159, type: 3}
   prefab: {fileID: 0}

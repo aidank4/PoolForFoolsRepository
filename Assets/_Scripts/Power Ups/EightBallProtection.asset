@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_PowerUp
   id: Eight Ball Protection
   description: 'For one turn: the 8 ball will stay still as a rock!'
-  icon: {fileID: 21300000, guid: f1a25d2e23a15aa489ea0db40fb9c513, type: 3}
+  sabotage: 0
+  icon: {fileID: 21300000, guid: 928d6ac94ccc04649a486c852260c1c5, type: 3}
   prefab: {fileID: 0}
