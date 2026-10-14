@@ -23,6 +23,8 @@ public class BallManager : MonoBehaviour
     private Player _poolCueScript;
     [SerializeField] private GameObject _startingPos;
     [SerializeField] private GameObject _cueBall;
+    [SerializeField] private GameObject _vfxManagerRef;
+    private VFXManager _vfxManager;
 
 
     [Header("Spawn Randomness")]
@@ -70,6 +72,7 @@ public class BallManager : MonoBehaviour
     {
         //ref
         _poolCueScript = _poolCueRef.GetComponent<Player>();
+        _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
 
         SpawnBalls();
         _spawnedBalls.Add(_cueBall); //After all balls have been spawned add in the cue ball to the list
@@ -159,6 +162,9 @@ public class BallManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    ///Handles what to do when balls are all still 
+    /// </summary>
     private void BallCheckOver()
     {
         _checkBalls = false;
@@ -172,6 +178,7 @@ public class BallManager : MonoBehaviour
         if (_rocketShotPUActive)
         {
             RocketBall();
+            _rocketShotPUActive = false;
         }
     }
 
@@ -415,8 +422,9 @@ public class BallManager : MonoBehaviour
         _blinkMultiplier *= 0.25f;
         yield return new WaitForSeconds(.5f);
         StopAllCoroutines();
+        _blinkMultiplier = 1f; //reset
         _cueBall.GetComponentInChildren<Renderer>().material = _blinkBaseColor;
-        //play particle effect
+        _vfxManager.ExplosionEffect(_cueBall.transform.position);
         Collider[] nearbyObjects = Physics.OverlapSphere(_cueBall.transform.position, _explosiveRadius);
         foreach (Collider obj in nearbyObjects)
         {
@@ -471,8 +479,8 @@ public class BallManager : MonoBehaviour
         }
         if (powerUp.id == "Rocket Shot")
         {
-            RocketBall();
             _rocketShotPUActive = true;
+            RocketBall();
         }
     }
 }
