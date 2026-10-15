@@ -5,6 +5,7 @@ public class VFXManager : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private VisualEffect _explosion;
+    [SerializeField] private VisualEffect _rocket;
 
 
     //misc
@@ -16,6 +17,7 @@ public class VFXManager : MonoBehaviour
         //Hide
         #region
         _explosion.gameObject.SetActive(false);
+        _rocket.gameObject.SetActive(false);
         #endregion
     }
 
@@ -32,11 +34,36 @@ public class VFXManager : MonoBehaviour
         }
     }
 
-    //Functions for playing them
+
+    /// <summary>
+    /// Turn on explosion VFX and set its position to parameter
+    /// </summary>
+    /// <param name="playPos"></param>
     public void ExplosionEffect(Vector3 playPos)
     {
         _explosion.transform.position = playPos;
         _explosion.gameObject.SetActive(true);
         _playing = true;
+    }
+
+
+    /// <summary>
+    /// Turn on rocket VFX and reparent it to parameter
+    /// </summary>
+    /// <param name="parent"></param>
+    public void RocketOn(GameObject parent)
+    {
+        _rocket.gameObject.transform.SetParent(parent.transform, false);
+        _rocket.gameObject.SetActive(true);
+    }
+
+
+    /// <summary>
+    /// Turn off rocket VFX and reparent it to VFXManager
+    /// </summary>
+    public void RocketOff()
+    {
+        _rocket.gameObject.transform.SetParent(this.gameObject.transform, false);
+        _rocket.gameObject.SetActive(false);
     }
 }

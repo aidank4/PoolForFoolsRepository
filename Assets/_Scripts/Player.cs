@@ -16,6 +16,8 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _cueBallExtra;
     [SerializeField] private GameObject _poolCueModel;
     private GameObject _poolCueParent;
+    [SerializeField] private GameObject _vfxManagerRef;
+    private VFXManager _vfxManager;
 
 
     [Header("Modifiable Shot Mechanics")]
@@ -66,6 +68,7 @@ public class Player : MonoBehaviour
         #region
         _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
         _poolCueParent = this.gameObject;
+        _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
         #endregion
         //UI
         _chargeVisual.gameObject.SetActive(false);
@@ -171,6 +174,7 @@ public class Player : MonoBehaviour
             _shooting = true;
             _stopShot = false;
             _startingPos = _poolCueParent.transform.position;
+            _vfxManager.RocketOn(_cueBall);
         }
         //On release
         if (stage == ClickStage.Released && _shooting && !_stopShot)

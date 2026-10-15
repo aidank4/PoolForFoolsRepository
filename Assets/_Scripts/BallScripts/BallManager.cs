@@ -178,6 +178,7 @@ public class BallManager : MonoBehaviour
         if (_rocketShotPUActive)
         {
             RocketBall();
+            _vfxManager.RocketOff();
             _rocketShotPUActive = false;
         }
     }
