@@ -48,7 +48,8 @@ public class BallManager : MonoBehaviour
     private float _maxWaitTime = 3f; // seconds
 
 
-    [Header("Power Up Variables")]
+    [Header("Power Ups")]
+    [Header("Bomb")]
     [SerializeField] private float _explosiveForce = 100f;
     [SerializeField] private float _explosiveRadius = 5f;
     [SerializeField] private float _explodeUpOffset = 1f;
@@ -59,8 +60,16 @@ public class BallManager : MonoBehaviour
     private float _blinkMultiplier = 1f;
     private int _blinkCount = 0;
     private bool _bombBlastActive = false;
-    private bool _eightBallPUActive = false;
+    [Header("Rocket")]
     private bool _rocketShotPUActive = false;
+    private Transform _rocketModel;
+    private Transform _baseCueBallModel;
+    [Header("Magnet")]
+    [SerializeField] private float _attractionRadius = 3f; 
+    [SerializeField] private float _attractionforce = 0.1f; 
+    private bool _magnetActive = false;
+    //misc
+    private bool _eightBallPUActive = false;
 
 
     //Events
@@ -71,8 +80,17 @@ public class BallManager : MonoBehaviour
     private void Awake()
     {
         //ref
+        #region
         _poolCueScript = _poolCueRef.GetComponent<Player>();
         _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
+        _rocketModel = _cueBall.transform.Find("Rocket Model");
+        _baseCueBallModel = _cueBall.transform.Find("Cue Ball Model");
+        #endregion
+        //hide
+        #region
+        _rocketModel.gameObject.SetActive(false);
+        _baseCueBallModel.gameObject.SetActive(true);
+        #endregion
 
         SpawnBalls();
         _spawnedBalls.Add(_cueBall); //After all balls have been spawned add in the cue ball to the list
@@ -102,6 +120,18 @@ public class BallManager : MonoBehaviour
     private void FixedUpdate()
     {
         BallCheck();
+        if (_rocketShotPUActive && !_checkBalls)
+        {
+            RocketRotation();
+        }
+    }
+
+    private void Update()
+    {
+        if (_magnetActive && _cueBall.GetComponent<Rigidbody>().linearVelocity.magnitude > .2f) //if under .2 balls should stop magnitizing
+        {
+            MagnetAttract();
+        }
     }
 
 
@@ -178,8 +208,10 @@ public class BallManager : MonoBehaviour
         if (_rocketShotPUActive)
         {
             RocketBall();
-            _vfxManager.RocketOff();
-            _rocketShotPUActive = false;
+        }
+        if (_magnetActive)
+        {
+            _magnetActive = false;
         }
     }
 
@@ -351,6 +383,11 @@ public class BallManager : MonoBehaviour
     private void HandleShotEvent()
     {
         _checkBalls = true;
+        if (_rocketShotPUActive) // Constrain rocket rotation on shot
+        {
+            _cueBall.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            _vfxManager.RocketOff();
+        }
     }
 
 
@@ -392,22 +429,36 @@ public class BallManager : MonoBehaviour
 
 
     /// <summary>
-    /// Swap cue ball model with rocket or reverse
+    /// Swap cue ball model with rocket and turn on vfx.
+    /// If rocket is already active then reset back to standard cue ball
     /// </summary>
     private void RocketBall()
     {
-        Transform rocketModel = _cueBall.transform.Find("Rocket Model");
-        Transform baseModel = _cueBall.transform.Find("Cue Ball Model");
-        if (!rocketModel.gameObject.activeSelf)
+
+        if (!_rocketModel.gameObject.activeSelf) //rocket on
         {
-            rocketModel.gameObject.SetActive(true);
-            baseModel.gameObject.SetActive(false);
+            _rocketShotPUActive = true;
+            RocketRotation();
+            _rocketModel.gameObject.SetActive(true);
+            _baseCueBallModel.gameObject.SetActive(false);
+            _vfxManager.RocketOn(_rocketModel);
         }
-        else
+        else // rocket off
         {
-            baseModel.gameObject.SetActive(true);
-            rocketModel.gameObject.SetActive(false);
+            _baseCueBallModel.gameObject.SetActive(true);
+            _rocketModel.gameObject.SetActive(false);
+            _cueBall.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None; // reset rotation constraints
+            _rocketShotPUActive = false;
         }
+    }
+
+
+    /// <summary>
+    /// Update rocket models rotation to orientation of pool cue
+    /// </summary>
+    private void RocketRotation()
+    {
+        _rocketModel.rotation = Quaternion.LookRotation(_poolCueScript.poolCueParent.transform.up, -_poolCueScript.poolCueParent.transform.right);
     }
 
 
@@ -442,6 +493,11 @@ public class BallManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// blinks the cue ball between yellow and red
+    /// </summary>
+    /// <param name="ballMesh"></param>
+    /// <returns></returns>
     IEnumerator BlastBlink(Renderer ballMesh)
     {
         
@@ -460,6 +516,27 @@ public class BallManager : MonoBehaviour
     }
 
 
+    private void MagnetAttract()
+    {
+        Collider[] closeBalls = Physics.OverlapSphere(_cueBall.transform.position, _attractionRadius);
+        foreach (Collider victim in closeBalls)
+        {
+            if (victim != _cueBall.GetComponent<Collider>())
+            {
+                if (victim.TryGetComponent(out Rigidbody rb))
+                {
+                    Vector3 direction = rb.gameObject.transform.position - _cueBall.transform.position;
+                    float distance = direction.magnitude;
+                    if (distance > 0.75f)
+                    {
+                        rb.AddForce(direction.normalized * (-_attractionforce/distance), ForceMode.Force);
+                    }
+                }
+            }
+        }
+    }
+
+
     /// <summary>
     /// Call ball related powerups
     /// </summary>
@@ -473,15 +550,16 @@ public class BallManager : MonoBehaviour
         if(powerUp.id == "Bomb Shot")
         {
             _bombBlastActive = true;
-
             Renderer ballMesh = _cueBall.GetComponentInChildren<Renderer>();
-            Material baseMat = ballMesh.material;
             StartCoroutine(BlastBlink(ballMesh));
         }
         if (powerUp.id == "Rocket Shot")
         {
-            _rocketShotPUActive = true;
             RocketBall();
+        }
+        if (powerUp.id == "Magnetic Shot")
+        {
+            _magnetActive = true;
         }
     }
 }

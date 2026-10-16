@@ -15,7 +15,7 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _cueBall;
     [SerializeField] private GameObject _cueBallExtra;
     [SerializeField] private GameObject _poolCueModel;
-    private GameObject _poolCueParent;
+    public GameObject poolCueParent { get; private set; }
     [SerializeField] private GameObject _vfxManagerRef;
     private VFXManager _vfxManager;
 
@@ -67,7 +67,7 @@ public class Player : MonoBehaviour
         //ref
         #region
         _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
-        _poolCueParent = this.gameObject;
+        poolCueParent = this.gameObject;
         _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
         #endregion
         //UI
@@ -96,7 +96,7 @@ public class Player : MonoBehaviour
     {
         //Debug.Log(_poolCueParent.transform.right);
         //If given input rotate pool cue and visual indicator
-        _poolCueParent.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
+        poolCueParent.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
         _predictionLineParent.transform.RotateAround(_cueBall.transform.position, new Vector3 (0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime); //USING TEMP ROTATE
         if (Shoot == MultiShoot)
         {
@@ -113,7 +113,7 @@ public class Player : MonoBehaviour
 
             if (_holdTimer < _maxCharge) //dont let the pool cue pull back further than max power
             {
-                _poolCueParent.transform.position += _poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime; // .right is moving the cue back
+                poolCueParent.transform.position += poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime; // .right is moving the cue back
             }
         }
 
@@ -173,8 +173,7 @@ public class Player : MonoBehaviour
             //custom start shot
             _shooting = true;
             _stopShot = false;
-            _startingPos = _poolCueParent.transform.position;
-            _vfxManager.RocketOn(_cueBall);
+            _startingPos = poolCueParent.transform.position;
         }
         //On release
         if (stage == ClickStage.Released && _shooting && !_stopShot)
@@ -226,8 +225,8 @@ public class Player : MonoBehaviour
     private void SpawnMultiBalls()
     {
         //Set up a left and right position for the extra balls
-        Vector3 shiftLeft = new Vector3(-_poolCueParent.transform.forward.x, 0, -_poolCueParent.transform.forward.z);
-        Vector3 shiftRight = new Vector3(_poolCueParent.transform.forward.x, 0, _poolCueParent.transform.forward.z);
+        Vector3 shiftLeft = new Vector3(-poolCueParent.transform.forward.x, 0, -poolCueParent.transform.forward.z);
+        Vector3 shiftRight = new Vector3(poolCueParent.transform.forward.x, 0, poolCueParent.transform.forward.z);
         Vector3 ballAPos = (_cueBall.transform.position + shiftLeft);
         Vector3 ballBPos = (_cueBall.transform.position + shiftRight);
 
@@ -244,12 +243,12 @@ public class Player : MonoBehaviour
         _predictionLineParent.SetActive(false);
         _predictionLineParent.SetActive(true);
 
-        _extraLineA = Instantiate(_predictionLineParent, _extraCueBallA.transform.position, Quaternion.LookRotation(-_poolCueParent.transform.right));
+        _extraLineA = Instantiate(_predictionLineParent, _extraCueBallA.transform.position, Quaternion.LookRotation(-poolCueParent.transform.right));
         _extraLineA.transform.localEulerAngles = new Vector3(0, _extraLineA.transform.localEulerAngles.y, _extraLineA.transform.localEulerAngles.z); // set x to 0 so not angled down
         _extraLineA.transform.localEulerAngles += new Vector3(0, -_multiBallShotAngle, 0); //adjust aim angle
         _extraLineA.transform.position = _extraCueBallA.transform.position +  (_extraLineA.transform.forward * _ballSeparation); //put the line slightly in front of ball
 
-        _extraLineB = Instantiate(_predictionLineParent, _extraCueBallB.transform.position, Quaternion.LookRotation(-_poolCueParent.transform.right));
+        _extraLineB = Instantiate(_predictionLineParent, _extraCueBallB.transform.position, Quaternion.LookRotation(-poolCueParent.transform.right));
         _extraLineB.transform.localEulerAngles = new Vector3(0, _extraLineB.transform.localEulerAngles.y, _extraLineB.transform.localEulerAngles.z);
         _extraLineB.transform.localEulerAngles += new Vector3(0, _multiBallShotAngle, 0);
         _extraLineB.transform.position = _extraCueBallB.transform.position + (_extraLineB.transform.forward * _ballSeparation);
@@ -277,7 +276,7 @@ public class Player : MonoBehaviour
         _holdTimer = 0;
         _chargeVisual.gameObject.SetActive(false);
 
-        _poolCueParent.transform.position = _startingPos; //move stick back
+        poolCueParent.transform.position = _startingPos; //move stick back
     }
 
 
@@ -299,14 +298,14 @@ public class Player : MonoBehaviour
     public void RespawnPoolCue()
     {
         _poolCueModel.gameObject.SetActive(true);
-        _poolCueParent.transform.position = _cueBall.transform.position - new Vector3(0f, 0f, _ballSeparation);
+        poolCueParent.transform.position = _cueBall.transform.position - new Vector3(0f, 0f, _ballSeparation);
 
         //set up prediction lines position and rotation
         _predictionLineParent.gameObject.SetActive(true);
-        _predictionLineParent.transform.position = _poolCueParent.transform.position + new Vector3(0, 0, _ballSeparation * 2); // 2 pushes it further away from pool cue
+        _predictionLineParent.transform.position = poolCueParent.transform.position + new Vector3(0, 0, _ballSeparation * 2); // 2 pushes it further away from pool cue
         _predictionLineParent.transform.eulerAngles = new Vector3(0, 0, 0);
 
-        _poolCueParent.transform.eulerAngles = new Vector3(0, 90, 3); // model needs to have y 90 // 3 gives small tilt to not clip table
+        poolCueParent.transform.eulerAngles = new Vector3(0, 90, 3); // model needs to have y 90 // 3 gives small tilt to not clip table
     }
 
 
@@ -332,12 +331,12 @@ public class Player : MonoBehaviour
         Vector3 shotDir = direction.transform.forward;
         //calculate where to hit the ball
         Vector3 hitPos = ball.transform.position - (shotDir * _ballRadius); // Perfect center of the ball no added spin
-        Vector3 hitPosSpin = new Vector3(hitPos.x, hitPos.y - 1, hitPos.z); // Change these values to affect spin
+        //Vector3 hitPosSpin = new Vector3(hitPos.x, hitPos.y - 1, hitPos.z); // Change these values to affect spin
 
-        _poolCueParent.transform.position = hitPos; //snap pool cue forward to "hit the ball"
+        poolCueParent.transform.position = hitPos; //snap pool cue forward to "hit the ball"
 
         Rigidbody ballRb = ball.GetComponent<Rigidbody>();
-        ballRb.AddForceAtPosition(shotDir.normalized * shotForce, hitPosSpin, ForceMode.Impulse); // Impulse gives all force at once - realistic for pool
+        ballRb.AddForceAtPosition(shotDir.normalized * shotForce, hitPos, ForceMode.Impulse); // Impulse gives all force at once - realistic for pool
     }
 
 
@@ -357,7 +356,7 @@ public class Player : MonoBehaviour
         _chargeVisual.gameObject.SetActive(true);
         _chargeVisual.size = _holdTimer;
 
-        _startingPos = _poolCueParent.transform.position; //Record pool cue position to move back to it incase of canceled shot
+        _startingPos = poolCueParent.transform.position; //Record pool cue position to move back to it incase of canceled shot
     }
 
 
@@ -375,10 +374,10 @@ public class Player : MonoBehaviour
             Destroy(_extraLineB.gameObject);
         }
 
+        ShotCompletedEvent(); //This starts the ball manager checking to see if balls are stopped
         yield return new WaitForSeconds(0.1f); //Leave pool cue up for a tenth of a second to show it hitting the ball;
         _poolCueModel.gameObject.SetActive(false);
 
-        ShotCompletedEvent(); //This starts the ball manager checking to see if balls are stopped
     }
 
 

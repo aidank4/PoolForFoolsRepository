@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -9,6 +10,9 @@ public class VFXManager : MonoBehaviour
 
 
     //misc
+    //private static readonly int lifetimeID = Shader.PropertyToID("Lifetime");
+    //private float _startingLifeTime;
+    //private float _lifeTime;
     private bool _playing = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -19,6 +23,9 @@ public class VFXManager : MonoBehaviour
         _explosion.gameObject.SetActive(false);
         _rocket.gameObject.SetActive(false);
         #endregion
+
+        //_lifeTime = _rocket.GetFloat(lifetimeID);
+        //_startingLifeTime = _lifeTime;
     }
 
     // Update is called once per frame
@@ -51,9 +58,10 @@ public class VFXManager : MonoBehaviour
     /// Turn on rocket VFX and reparent it to parameter
     /// </summary>
     /// <param name="parent"></param>
-    public void RocketOn(GameObject parent)
+    public void RocketOn(Transform parent)
     {
-        _rocket.gameObject.transform.SetParent(parent.transform, false);
+        _rocket.gameObject.transform.SetParent(parent, false);
+        _rocket.gameObject.transform.rotation = Quaternion.LookRotation(parent.up);
         _rocket.gameObject.SetActive(true);
     }
 
@@ -66,4 +74,22 @@ public class VFXManager : MonoBehaviour
         _rocket.gameObject.transform.SetParent(this.gameObject.transform, false);
         _rocket.gameObject.SetActive(false);
     }
+
+
+    //private IEnumerator RocketVFXDim()
+    //{
+    //    float timer = 0f;
+    //    float maxTime = 1f;
+    //    while (timer < maxTime)
+    //    {
+    //        timer += Time.deltaTime;
+    //        _lifeTime -= _lifeTime / 100f;
+    //        _rocket.SetFloat(lifetimeID, _lifeTime);
+    //        yield return null;
+    //    }
+    //    _rocket.gameObject.transform.SetParent(this.gameObject.transform, false);
+    //    _rocket.gameObject.SetActive(false);
+    //    _lifeTime = _startingLifeTime;
+    //    _rocket.SetFloat(lifetimeID, _lifeTime);
+    //}
 }
