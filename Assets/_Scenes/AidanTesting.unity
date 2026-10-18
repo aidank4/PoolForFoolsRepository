@@ -18210,7 +18210,7 @@ MonoBehaviour:
   _blinkBaseColor: {fileID: 2100000, guid: 44d0d5bf950e44c45bf14951df500ffe, type: 2}
   _initialBlinkSpeed: 0.5
   _attractionRadius: 2
-  _attractionforce: 0.3
+  _attractionforce: 0.25
 --- !u!1 &6377551532694915513
 GameObject:
   m_ObjectHideFlags: 0
