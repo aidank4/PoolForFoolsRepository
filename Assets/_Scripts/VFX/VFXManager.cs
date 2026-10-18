@@ -7,13 +7,11 @@ public class VFXManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private VisualEffect _explosion;
     [SerializeField] private VisualEffect _rocket;
+    [SerializeField] private VisualEffect _magnet;
 
 
-    //misc
-    //private static readonly int lifetimeID = Shader.PropertyToID("Lifetime");
-    //private float _startingLifeTime;
-    //private float _lifeTime;
-    private bool _playing = false;
+    private bool _magnetPlaying = false;
+    private bool _explosionPlaying = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -22,22 +20,24 @@ public class VFXManager : MonoBehaviour
         #region
         _explosion.gameObject.SetActive(false);
         _rocket.gameObject.SetActive(false);
+        _magnet.gameObject.SetActive(false);
         #endregion
-
-        //_lifeTime = _rocket.GetFloat(lifetimeID);
-        //_startingLifeTime = _lifeTime;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (_playing)
+        if (_explosionPlaying)
         {
             if (_explosion.aliveParticleCount == 0)
             {
                 _explosion.gameObject.SetActive(false);
-                _playing = false;
+                _explosionPlaying = false;
             }
+        }
+        if (_magnetPlaying)
+        {
+            _magnet.gameObject.transform.rotation = Quaternion.identity;
         }
     }
 
@@ -50,7 +50,7 @@ public class VFXManager : MonoBehaviour
     {
         _explosion.transform.position = playPos;
         _explosion.gameObject.SetActive(true);
-        _playing = true;
+        _explosionPlaying = true;
     }
 
 
@@ -76,20 +76,26 @@ public class VFXManager : MonoBehaviour
     }
 
 
-    //private IEnumerator RocketVFXDim()
-    //{
-    //    float timer = 0f;
-    //    float maxTime = 1f;
-    //    while (timer < maxTime)
-    //    {
-    //        timer += Time.deltaTime;
-    //        _lifeTime -= _lifeTime / 100f;
-    //        _rocket.SetFloat(lifetimeID, _lifeTime);
-    //        yield return null;
-    //    }
-    //    _rocket.gameObject.transform.SetParent(this.gameObject.transform, false);
-    //    _rocket.gameObject.SetActive(false);
-    //    _lifeTime = _startingLifeTime;
-    //    _rocket.SetFloat(lifetimeID, _lifeTime);
-    //}
+    /// <summary>
+    /// Set magnet to child of param and turn it on
+    /// </summary>
+    /// <param name="parent"></param>
+    public void MagnetOn(Transform parent)
+    {
+        _magnetPlaying = true;
+        _magnet.gameObject.transform.SetParent(parent, false);
+        //_magnet.gameObject.transform.rotation.
+        _magnet.gameObject.SetActive(true);
+    }
+
+
+    /// <summary>
+    /// Reparent magnet and turn it off
+    /// </summary>
+    public void MagnetOff()
+    {
+        _magnetPlaying = false;
+        _magnet.gameObject.transform.SetParent(this.gameObject.transform, false);
+        _magnet.gameObject.SetActive(false);
+    }
 }

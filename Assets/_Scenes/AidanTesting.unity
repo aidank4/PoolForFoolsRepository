@@ -301,6 +301,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VFXManager
   _explosion: {fileID: 198416752}
   _rocket: {fileID: 1424539170}
+  _magnet: {fileID: 1495479127}
 --- !u!4 &478439779
 Transform:
   m_ObjectHideFlags: 0
@@ -567,7 +568,7 @@ Transform:
   m_GameObject: {fileID: 1495479124}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.01, z: -4.29}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1340,7 +1341,7 @@ MonoBehaviour:
   - {fileID: 6129788140231050023}
   - {fileID: 4971738177890332921}
   _availablePUs:
-  - {fileID: 11400000, guid: d3551e1258deb2d4fb171800ad74e9e8, type: 2}
+  - {fileID: 11400000, guid: 5818e1831a8bac04b9c0d0716a850cc4, type: 2}
 --- !u!1 &595154658329810399
 GameObject:
   m_ObjectHideFlags: 0
@@ -18209,7 +18210,7 @@ MonoBehaviour:
   _blinkBaseColor: {fileID: 2100000, guid: 44d0d5bf950e44c45bf14951df500ffe, type: 2}
   _initialBlinkSpeed: 0.5
   _attractionRadius: 2
-  _attractionforce: 0.1
+  _attractionforce: 0.3
 --- !u!1 &6377551532694915513
 GameObject:
   m_ObjectHideFlags: 0

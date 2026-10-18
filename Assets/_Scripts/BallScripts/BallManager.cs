@@ -212,6 +212,7 @@ public class BallManager : MonoBehaviour
         if (_magnetActive)
         {
             _magnetActive = false;
+            _vfxManager.MagnetOff();
         }
     }
 
@@ -560,6 +561,7 @@ public class BallManager : MonoBehaviour
         if (powerUp.id == "Magnetic Shot")
         {
             _magnetActive = true;
+            _vfxManager.MagnetOn(_cueBall.transform);
         }
     }
 }
