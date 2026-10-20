@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
@@ -38,6 +39,7 @@ public class Player : MonoBehaviour
     private GameObject _extraLineA;
     private GameObject _extraLineB;
     private bool _sabotaged = false;
+    private List<Sprite> _sabotageIcons = new List<Sprite>();
     private bool _rdmPowerPU = false;
 
 
@@ -498,15 +500,18 @@ public class Player : MonoBehaviour
         if (powerUP.affectNext)
         {
             _sabotaged = true;
+            _sabotageIcons.Add(powerUP.icon);
         }
         if (powerUP.id == "Multi Shot")
         {
             SpawnMultiBalls();
             Shoot = MultiShoot;
+            _sabotageIcons.Add(powerUP.icon);
         }
         if (powerUP.id == "Rocket Shot")
         {
             Shoot = RocketShoot;
+            _sabotageIcons.Add(powerUP.icon);
         }
         if (powerUP.id == "Random Power Shot")
         {
@@ -525,6 +530,8 @@ public class Player : MonoBehaviour
                 _rdmPowerPU = false;
                 Shoot = RdmPowerShoot;
             }
+            StartCoroutine(_turnManagerScript.SabotageUI(_sabotageIcons.ToArray()));
+            _sabotageIcons.Clear();
         }
     }
 }
