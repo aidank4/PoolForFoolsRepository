@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -6,25 +7,20 @@ using UnityEngine.UI;
 public class TurnManager : MonoBehaviour
 {
     [Header("References")]
-    //Player Script
-    [SerializeField] private GameObject _poolCueRef;
+    [SerializeField] private GameObject _poolCueRef; //Player Script
     private Player _poolCueScript;
-    //Turn switch transition
-    [SerializeField] private TMP_Text _turnText;
+    [SerializeField] private GameObject _inventoryRef; //Inventory
+    private InventoryManager _inventoryScript;
+    [SerializeField] private TMP_Text _turnText; //Turn switch transition
     [SerializeField] private GameObject _turnSwitchUI;
     private DartAnimEndController _turnSwitchAnimScript;
-    //Team assignment UI
-    [SerializeField] private GameObject _teamAssignUI;
+    [SerializeField] private GameObject _teamAssignUI; //Team assignment UI
     [SerializeField] private Sprite _teamStripesSprite;
     [SerializeField] private Sprite _teamSolidsSprite;
-    //team icon Ui
     [SerializeField] private GameObject _pOneIconUI;
     [SerializeField] private GameObject _pTwoIconUI;
     [SerializeField] private Sprite _stripesIcon;
     [SerializeField] private Sprite _solidsIcon;
-    //Inventory
-    [SerializeField] private GameObject _inventoryRef;
-    private InventoryManager _inventoryScript;
 
 
 
@@ -41,6 +37,10 @@ public class TurnManager : MonoBehaviour
     public bool keepTurn = false; //Used to see if a player scored a team ball
     private bool _lostTurn = false; // fixes the issuewhere if a good ball was scored after bad ball then keep turn would still be made true
     public bool scratch = false; //Gets set true by the pocket manager
+
+
+    //Events
+    public event Action TurnSwitched;
 
     private void Awake()
     {
@@ -109,6 +109,7 @@ public class TurnManager : MonoBehaviour
             //when turn switches this is handled by TriggerTurnSwitchEvent down below which gets called once the dart anim ends
             _poolCueScript.shootAvailable = true;
             _poolCueScript.RespawnPoolCue();
+            //turn off Sabotage UI
         }
     }
 
@@ -254,11 +255,14 @@ public class TurnManager : MonoBehaviour
 
 
     /// <summary>
-    /// Turns on shootAvailable and respawns pool cue
+    /// Turns on shootAvailable, respawn pool cue, and invoke event.
+    /// If the upcoming player was sabotaged, display sabotage UI 
     /// </summary>
     private void TriggerTurnSwitchEvent()
     {
         _poolCueScript.shootAvailable = true;
         _poolCueScript.RespawnPoolCue();
+        TurnSwitched?.Invoke();
+        //turn on Sabotage UI
     }
 }

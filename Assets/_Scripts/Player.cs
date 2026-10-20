@@ -22,7 +22,7 @@ public class Player : MonoBehaviour
 
     [Header("Modifiable Shot Mechanics")]
     [SerializeField] private float _defaultShotSpeed = 5f;
-    [SerializeField] private float _maxCharge = 3f; // 3 for the seconds of time a player can hold down shoot at max
+    [SerializeField] private float _maxCharge = 1f; // 1 for the seconds of time a player can hold down shoot at max
     [SerializeField] private float _pullBackSpeed = 1f;
     [SerializeField] private float _rotationSpeed = 50f;
     [SerializeField] private float _ballSeparation = 0.5f;
@@ -31,10 +31,14 @@ public class Player : MonoBehaviour
     [Header("PowerUp Variables")]
     [SerializeField] private float _multiBallShotAngle = 10;
     [SerializeField] private float _rocketShotForce = 10f;
+    [SerializeField] private float _minCharge =  0.1f;
+    [SerializeField] private float _rdmChargeSpeed =  5f;
     private GameObject _extraCueBallA;
     private GameObject _extraCueBallB;
     private GameObject _extraLineA;
     private GameObject _extraLineB;
+    private bool _sabotaged = false;
+    private bool _rdmPowerPU = false;
 
 
     [Header("Bools")]
@@ -84,11 +88,19 @@ public class Player : MonoBehaviour
     private void OnEnable()
     {
         SO_PowerUp.UsePU += HandlePUs;
+        if(_turnManagerScript != null)
+        {
+            _turnManagerScript.TurnSwitched += HandleTurnSwitch;
+        }
     }
 
     private void OnDisable()
     {
         SO_PowerUp.UsePU -= HandlePUs;
+        if (_turnManagerScript != null)
+        {
+            _turnManagerScript.TurnSwitched -= HandleTurnSwitch;
+        }
     }
 
 
@@ -185,6 +197,93 @@ public class Player : MonoBehaviour
             StartCoroutine(EndShot());
             Shoot = DefaultShoot;
         }
+    }
+
+
+    /// <summary>
+    /// Animates a random charge and shoots with random power
+    /// </summary>
+    /// <param name="stage"></param>
+    private void RdmPowerShoot(ClickStage stage)
+    {
+        if (stage == ClickStage.Pressed && shootAvailable)
+        {
+            _shooting = true;
+            _stopShot = false;
+            _startingPos = poolCueParent.transform.position;
+            _holdTimer = UnityEngine.Random.Range(_minCharge, _maxCharge);
+            _chargeVisual.gameObject.SetActive(true);
+            //anim
+            StartCoroutine((RdmPowerAnim(_holdTimer))); //Handles shot release stuff
+
+        }
+    }
+
+
+    /// <summary>
+    /// Animate the charge going up, down, then to the random shot power value.
+    /// After, handle shooting the ball and end shot.
+    /// </summary>
+    /// <param name="targetCharge"></param>
+    /// <returns></returns>
+    private IEnumerator RdmPowerAnim(float targetCharge)
+    {
+        bool goingUp = true;
+        bool goingDown = false;
+        bool goTarget = false;
+        float tempholdTimer = 0f;
+
+        while (goingUp)
+        {
+            if (tempholdTimer >= _maxCharge)
+            {
+                goingUp = false;
+                goingDown = true;
+            }
+            else
+            {
+                tempholdTimer += Time.deltaTime * _rdmChargeSpeed;
+                _chargeVisual.size = (tempholdTimer / _maxCharge);
+                yield return null;
+            }
+        }
+        while (goingDown)
+        {
+            if (tempholdTimer <= 0)
+            {
+                goingDown = false;
+                goTarget = true;
+            }
+            else
+            {
+                tempholdTimer -= Time.deltaTime * _rdmChargeSpeed;
+                _chargeVisual.size = (tempholdTimer /  (_maxCharge));
+                yield return null;
+            }
+
+        }
+        while (goTarget)
+        {
+            if (Mathf.Abs(tempholdTimer - targetCharge) < 0.01)
+            {
+                goTarget = false;
+                _chargeVisual.size = (targetCharge / _maxCharge);
+            }
+            else
+            {
+                tempholdTimer += Time.deltaTime * _rdmChargeSpeed;
+                _chargeVisual.size = (tempholdTimer / _maxCharge);
+                poolCueParent.transform.position += poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime;
+                yield return null;
+            }
+        }
+        //shoot the ball
+        _shooting = false;
+        _turnManagerScript.keepTurn = false;
+        _chargeVisual.gameObject.SetActive(false);
+        CalculateShot(_cueBall, _predictionLineParent);
+        StartCoroutine(EndShot());
+        Shoot = DefaultShoot;
     }
 
 
@@ -396,6 +495,10 @@ public class Player : MonoBehaviour
     /// <param name="powerUP"></param>
     private void HandlePUs(SO_PowerUp powerUP)
     {
+        if (powerUP.affectNext)
+        {
+            _sabotaged = true;
+        }
         if (powerUP.id == "Multi Shot")
         {
             SpawnMultiBalls();
@@ -404,6 +507,24 @@ public class Player : MonoBehaviour
         if (powerUP.id == "Rocket Shot")
         {
             Shoot = RocketShoot;
+        }
+        if (powerUP.id == "Random Power Shot")
+        {
+            _rdmPowerPU = true;
+        }
+    }
+
+    private void HandleTurnSwitch()
+    {
+        if (_sabotaged)
+        {
+            _sabotaged = false;
+            //check dif PUs
+            if (_rdmPowerPU)
+            {
+                _rdmPowerPU = false;
+                Shoot = RdmPowerShoot;
+            }
         }
     }
 }
