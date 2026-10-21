@@ -1880,8 +1880,8 @@ MonoBehaviour:
   m_text: 'Camera Switch: Tab     Rotate Pool Cue: A D     Shoot: Space     Cancel
     Shot: Left Shift     Toggle Inventory: I        Hide Controls: C'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 191bb2e1c66c0dd409bb84be4f21ec07, type: 2}
+  m_sharedMaterial: {fileID: -4536882787237876826, guid: 191bb2e1c66c0dd409bb84be4f21ec07, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
