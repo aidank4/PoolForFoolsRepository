@@ -328,5 +328,7 @@ public class TurnManager : MonoBehaviour
         _poolCueScript.shootAvailable = true;
         _poolCueScript.RespawnPoolCue();
         TurnSwitched?.Invoke();
+        //TEMP GIVE PU on turn switch
+        _inventoryScript.AddPowerUp();
     }
 }

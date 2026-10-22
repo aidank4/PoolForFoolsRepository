@@ -497,7 +497,7 @@ public class Player : MonoBehaviour
     /// <param name="powerUP"></param>
     private void HandlePUs(SO_PowerUp powerUP)
     {
-        if (powerUP.affectNext)
+        if (powerUP.affectNext && !_sabotaged)
         {
             _sabotaged = true;
             _sabotageIcons.Add(powerUP.icon);
