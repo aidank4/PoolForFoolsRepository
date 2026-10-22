@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnityEditor.Rendering.CameraUI;
 
 
 public class InventoryManager : MonoBehaviour
@@ -14,13 +15,12 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private TMP_Text _swapText;
     [SerializeField] private GameObject _controlsText;
     [SerializeField] private TMP_Text _slotDescription;
-    [SerializeField] private Image _alreadyUsedUI;
+    [SerializeField] private Image _cantUsePUUI;
+    //[SerializeField] private TMP_Text _cantUsePUText;
     [SerializeField] private GameObject _ballManagerRef; //Ball manager for balls stopped event which can trigger power up choices as turn is over
     private BallManager _ballManagerScript;
     [SerializeField] private GameObject _turnManagerRef; //TurnManager to switch turn -- switch turn in Toss Function and BallsStopped Event
     private TurnManager _turnManagerScript;
-    [SerializeField] private GameObject _fireworksRef;
-    private FireWorks _fireworksScript;
     [SerializeField] private GameObject _cueBall;
     [SerializeField] private Image _imagePU;
     [SerializeField] private TMP_Text _titleTextPU;
@@ -32,14 +32,15 @@ public class InventoryManager : MonoBehaviour
     [Header("Containers")] //inventory size is always maxed at 3
     [SerializeField] private Image[] _slots = new Image[3];
     [SerializeField] private List<SO_PowerUp> _availablePUs = new List<SO_PowerUp>();
-    private SO_PowerUp[] _currentPUs = new SO_PowerUp[3];
+    private List<SO_PowerUp> _usedPUs = new List<SO_PowerUp>();
+    public List<SO_PowerUp> usingPUs { get; private set; } = new List<SO_PowerUp>();
+    private SO_PowerUp[] _currentInventoryPUs = new SO_PowerUp[3];
     private SO_PowerUp[] _pOnePUs = new SO_PowerUp[3];
     private SO_PowerUp[] _pTwoPUs = new SO_PowerUp[3];
 
 
     [Header("Misc Variables")]
     private SO_PowerUp _extraPowerUp = null; //if an extra power up gets claimed, this ref is used to swap it or delete it later
-    private bool _powerUpUsed = false; //bool for stopping player from using multiple power ups in turn
     private int _pBCounter = 0; //Cant use pocket block more than 5 times
     private SO_PowerUp _selectedPU;
 
@@ -51,13 +52,12 @@ public class InventoryManager : MonoBehaviour
         _ballManagerScript = _ballManagerRef.GetComponent<BallManager>();
         _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
         _powerUpUIScript = _powerUpUIRef.GetComponent<PowerUpUI>();
-        _fireworksScript = _fireworksRef.GetComponent<FireWorks>();
         #endregion
         //UI init
         #region
         _swapText.gameObject.SetActive(false);
         _slotDescription.transform.parent.gameObject.SetActive(false);
-        _alreadyUsedUI.gameObject.SetActive(false);
+        _cantUsePUUI.gameObject.SetActive(false);
         _imagePU.gameObject.SetActive(false);
         #endregion
 
@@ -106,14 +106,14 @@ public class InventoryManager : MonoBehaviour
         //p1
         if (_turnManagerScript.currentPlayer == _turnManagerScript.playerOne)
         {
-            _pOnePUs = _currentPUs;
-            _currentPUs = _pTwoPUs;
+            _pOnePUs = _currentInventoryPUs;
+            _currentInventoryPUs = _pTwoPUs;
         }
         //p2
         else if (_turnManagerScript.currentPlayer == _turnManagerScript.playerTwo)
         {
-            _pTwoPUs = _currentPUs;
-            _currentPUs = _pOnePUs;
+            _pTwoPUs = _currentInventoryPUs;
+            _currentInventoryPUs = _pOnePUs;
         }
         SetIcons();
     }
@@ -124,15 +124,15 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     private void SetIcons()
     {
-        for (int i = 0;  i < _currentPUs.Length; i++)
+        for (int i = 0;  i < _currentInventoryPUs.Length; i++)
         {
-            if (_currentPUs[i] == null)
+            if (_currentInventoryPUs[i] == null)
             {
                 _slots[i].gameObject.SetActive(false); //if no power up for the slot hide the slot
             }
             else
             {
-                _slots[i].sprite = _currentPUs[i].icon; //set icon to powerup
+                _slots[i].sprite = _currentInventoryPUs[i].icon; //set icon to powerup
                 if (!_slots[i].gameObject.activeSelf)
                 {
                     _slots[i].gameObject.SetActive(true);
@@ -170,16 +170,16 @@ public class InventoryManager : MonoBehaviour
     {
         SO_PowerUp selectedPowerUp = SelectPowerUp();
 
-        for (int i = 0; i < _currentPUs.Length; i++)
+        for (int i = 0; i < _currentInventoryPUs.Length; i++)
         {
-            if (_currentPUs[i] == null) //if there is open space add random power up there
+            if (_currentInventoryPUs[i] == null) //if there is open space add random power up there
             {
                 StartCoroutine(_powerUpUIScript.DisplayPowerUpIcon(selectedPowerUp));
-                _currentPUs[i] = selectedPowerUp;
+                _currentInventoryPUs[i] = selectedPowerUp;
                 SetIcons();
                 return;
             }
-            else if (_currentPUs[i] != null && i == _currentPUs.Length - 1) // last index and no inventory space
+            else if (_currentInventoryPUs[i] != null && i == _currentInventoryPUs.Length - 1) // last index and no inventory space
             {
                 _extraPowerUp = selectedPowerUp; //extra will be swapped or tossed away later
 
@@ -194,7 +194,7 @@ public class InventoryManager : MonoBehaviour
     /// <param name="index"></param>
     private void RemovePowerUp(int index)
     {
-        _currentPUs[index] = null;
+        _currentInventoryPUs[index] = null;
         SetIcons();
     }
     
@@ -206,10 +206,7 @@ public class InventoryManager : MonoBehaviour
     {
         _powerUpUIScript.HidePUConflictUI();
         _extraPowerUp = null;
-
         _turnManagerScript.SwitchTurn();
-        _powerUpUsed = false; //once turn switches can use power up again
-
     }
 
 
@@ -252,7 +249,7 @@ public class InventoryManager : MonoBehaviour
     /// <param name="selectedSlot"></param>
     private void SwapPowerUp(GameObject selectedSlot)
     {
-        _currentPUs[SlotNumber(selectedSlot)] = _extraPowerUp; //overwrite selected slot with the extra
+        _currentInventoryPUs[SlotNumber(selectedSlot)] = _extraPowerUp; //overwrite selected slot with the extra
         SetIcons();
         TossExtraPowerUp(); // hide UI and return to gameplay
         _swapText.gameObject.SetActive(false);
@@ -261,29 +258,97 @@ public class InventoryManager : MonoBehaviour
 
 
     /// <summary>
-    /// Activate powerup, switch input to gameplay and turn off fireworks.
+    /// Activate powerup, switch input to gameplay.
     /// </summary>
     public void UsePowerUp()
     {
         InputManager.Instance.SwitchCurrentActionMap("Gameplay");
         _imagePU.gameObject.SetActive(false);
         _selectedPU.Activate();
-        _powerUpUsed = true;
-        _fireworksScript.HideFireWork(_selectedPU.sabotage);
+        usingPUs.Add(_selectedPU);
     }
 
 
     /// <summary>
-    /// Check if can use power up. Then start ui and fireworks, and then remove the powerup.
+    /// Find if a selected PU is a duplicate, re affects the shot, or re affects the opponents shot.
+    /// </summary>
+    /// <param name="selectedPU"></param>
+    /// <returns></returns>
+    private (bool dupe, bool reAffectingShot, bool reAffectingOpShot, bool shotSabotaged) UsablePUCheck(SO_PowerUp selectedPU)
+    {
+        bool dupe = false;
+        bool reAffectingShot = false;
+        bool reAffectingOpShot = false;
+        bool shotSabotaged = false;
+
+        bool shotAffected = false;
+        bool opShotAffected = false;
+
+        foreach (SO_PowerUp powerUp in usingPUs)
+        {
+            if (powerUp.id == selectedPU.id) // duplicate
+            {
+                dupe = true;
+            }
+            if (powerUp.affectShot && !powerUp.sabotage) //shot is already affected
+            {
+                shotAffected = true;
+            }
+            if (powerUp.affectShot && powerUp.sabotage) // opponents shot is already affected
+            {
+                opShotAffected = true;
+            }
+        }
+
+        foreach (SO_PowerUp powerUp in _usedPUs)
+        {
+            if (powerUp.sabotage && powerUp.affectShot) //our shot is sabotaged
+            {
+                shotAffected = true;
+                shotSabotaged = true;
+            }
+        }
+
+        if (!_selectedPU.sabotage && _selectedPU.affectShot && shotAffected)
+        {
+            reAffectingShot = true;
+        }
+        if (_selectedPU.sabotage && _selectedPU.affectShot && opShotAffected)
+        {
+            reAffectingOpShot = true;
+        }
+        return (dupe, reAffectingShot, reAffectingOpShot, shotSabotaged);
+    }
+
+
+    /// <summary>
+    /// Check if can use power up. Then start ui and remove the powerup.
     /// </summary>
     /// <param name="selectedSlot"></param>
     public void StartPowerUp(GameObject selectedSlot)
     {
         int i = SlotNumber(selectedSlot);
-        _selectedPU = _currentPUs[i];
-        if (_currentPUs[i] != null)
+        _selectedPU = _currentInventoryPUs[i];
+
+        if (_currentInventoryPUs[i] != null) //power up selected
         {
-            if (!_powerUpUsed)
+            //Cant use power up
+            var accessPU = UsablePUCheck(_selectedPU);
+            if (accessPU.dupe)
+            {
+                StartCoroutine(PowerUpWarning("Cant use multiple times"));
+            }
+            else if (accessPU.reAffectingShot)
+            {
+                if (accessPU.shotSabotaged) StartCoroutine(PowerUpWarning("Shot was sabotaged"));
+                else StartCoroutine(PowerUpWarning("Shot is already enhanced"));
+            }
+            else if (accessPU.reAffectingOpShot)
+            {
+                StartCoroutine(PowerUpWarning("Opponents shot is already sabotaged"));
+            }
+            //Can use power up
+            else
             {
                 _powerUpUIScript.HidePUConflictUI();
                 InputManager.Instance.SwitchCurrentActionMap("Continue");
@@ -291,6 +356,7 @@ public class InventoryManager : MonoBehaviour
                 _nameTextPU.text = _selectedPU.id; //UI
                 _descriptionTextPU.text = _selectedPU.description;
                 _imagePU.gameObject.SetActive(true);
+
                 if (!_selectedPU.sabotage)
                 {
                     _titleTextPU.text = "Power Up!";
@@ -299,12 +365,7 @@ public class InventoryManager : MonoBehaviour
                 {
                     _titleTextPU.text = "Sabotage!";
                 }
-                //_fireworksScript.ActivateFirework(_selectedPU.sabotage, _cueBall.transform.position);
                 RemovePowerUp(i);
-            }
-            else
-            {
-                StartCoroutine(PowerUpWarning()); //You already used a power up this turn, show ui warning
             }
         }
     }
@@ -329,25 +390,6 @@ public class InventoryManager : MonoBehaviour
 
 
     /// <summary>
-    /// If there is an extra PU then player must deal with it.
-    /// Else switch turn.
-    /// </summary>
-    private void BallsStoppedEventTriggered() //Called by BallManager
-    {
-        if (_extraPowerUp != null)
-        {
-            _powerUpUIScript.ShowPUConflictUI(_extraPowerUp); //have to swap or toss extra PU before turn switch
-        }
-        else
-        {
-            //Switch Turn
-            _turnManagerScript.SwitchTurn();
-            _powerUpUsed = false; //once turn switches can use power up again
-        }
-    }
-
-
-    /// <summary>
     /// Set the slots PU description and show the UI
     /// </summary>
     private void ShowPUDescription()
@@ -356,9 +398,9 @@ public class InventoryManager : MonoBehaviour
         {
             if (_slots[i].transform.parent.gameObject == EventSystem.current.currentSelectedGameObject) //if the current slot is being selected
             {
-                if (_currentPUs[i] != null) //check that its not empty
+                if (_currentInventoryPUs[i] != null) //check that its not empty
                 {
-                    _slotDescription.text = _currentPUs[i].description;
+                    _slotDescription.text = _currentInventoryPUs[i].description;
                 }
                 else
                 {
@@ -372,15 +414,50 @@ public class InventoryManager : MonoBehaviour
 
 
     /// <summary>
-    /// Display UI that warns player a PU can't be used twice in one turn (lasts 1 second)
+    /// Display UI that warns player that selected PU can not be used.
     /// </summary>
-    /// <returns>IEnumerator</returns>
-    IEnumerator PowerUpWarning()
+    /// <param name="output"></param>
+    /// <returns></returns>
+    IEnumerator PowerUpWarning(string output)
     {
+        TMP_Text puText = _cantUsePUUI.GetComponentInChildren<TMP_Text>();
+        puText.text = output;
         _controlsText.SetActive(false);
-        _alreadyUsedUI.gameObject.SetActive(true);
+        _cantUsePUUI.gameObject.SetActive(true);
         yield return new WaitForSeconds(1f);
-        _alreadyUsedUI.gameObject.SetActive(false);
+        _cantUsePUUI.gameObject.SetActive(false);
         _controlsText.SetActive(true);
+    }
+
+
+    /// <summary>
+    /// Reset using and used power up collections
+    /// </summary>
+    public void ResetOldPUCollections()
+    {
+        _usedPUs.Clear();
+        foreach (SO_PowerUp powerup in usingPUs)
+        {
+            _usedPUs.Add(powerup);
+        }
+        usingPUs.Clear();
+    }
+
+
+    /// <summary>
+    /// If there is an extra PU then player must deal with it.
+    /// Else switch turn.
+    /// </summary>
+    private void BallsStoppedEventTriggered() //Called by BallManager
+    {
+        if (_extraPowerUp != null)
+        {
+            _powerUpUIScript.ShowPUConflictUI(_extraPowerUp); //have to swap or toss extra PU before turn switch
+        }
+        else
+        {
+            //Switch Turn
+            _turnManagerScript.SwitchTurn(); // also gets called in TossExtraPowerUp
+        }
     }
 }

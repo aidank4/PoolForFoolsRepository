@@ -15,5 +15,7 @@ MonoBehaviour:
   id: Bomb Shot
   description: Explosive cue ball!
   sabotage: 0
+  affectNext: 0
+  affectShot: 1
   icon: {fileID: 21300000, guid: 99b1bc482d3e2e748bbc7269cce3948a, type: 3}
   prefab: {fileID: 0}

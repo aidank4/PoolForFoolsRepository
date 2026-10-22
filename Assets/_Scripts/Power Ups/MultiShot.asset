@@ -14,5 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_PowerUp
   id: Multi Shot
   description: 'For one turn: shoot in 3 directions at once!'
+  sabotage: 0
+  affectNext: 0
+  affectShot: 1
   icon: {fileID: 21300000, guid: af9ccc841fab37642b1f9c903f5d8bae, type: 3}
   prefab: {fileID: 0}

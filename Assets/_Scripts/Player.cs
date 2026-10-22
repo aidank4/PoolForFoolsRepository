@@ -506,12 +506,10 @@ public class Player : MonoBehaviour
         {
             SpawnMultiBalls();
             Shoot = MultiShoot;
-            _sabotageIcons.Add(powerUP.icon);
         }
         if (powerUP.id == "Rocket Shot")
         {
             Shoot = RocketShoot;
-            _sabotageIcons.Add(powerUP.icon);
         }
         if (powerUP.id == "Random Power Shot")
         {

@@ -102,6 +102,7 @@ public class TurnManager : MonoBehaviour
         if (!keepTurn)
         {
             _inventoryScript.UpdateInventory();
+            _inventoryScript.ResetOldPUCollections();
             ResetSabotageUI();
             _turnSwitchUI.SetActive(true); //Play the turn transition
             _turnText.text = string.Empty;
@@ -126,6 +127,7 @@ public class TurnManager : MonoBehaviour
             _poolCueScript.shootAvailable = true;
             _poolCueScript.RespawnPoolCue();
             ResetSabotageUI();
+            _inventoryScript.usingPUs.Clear();
         }
     }
 
@@ -288,7 +290,6 @@ public class TurnManager : MonoBehaviour
             RectTransform rectTransform = obj.GetComponent<RectTransform>();
             rectTransform.anchoredPosition = new Vector2(0, 0);
             _sabotageIcons.Add(obj);
-            Debug.Log("Icon: " + icon);
         }
         yield return new WaitForSeconds(1.5f);
         _sabotageOverlay.gameObject.SetActive(false);
@@ -300,7 +301,6 @@ public class TurnManager : MonoBehaviour
             obj.transform.SetParent(_sabotageCorner.gameObject.transform, false);
             RectTransform rectTransform = obj.GetComponent<RectTransform>();
             rectTransform.anchoredPosition = new Vector2(0, 0);
-            Debug.Log("Obj: " + obj);
         }
     }
 

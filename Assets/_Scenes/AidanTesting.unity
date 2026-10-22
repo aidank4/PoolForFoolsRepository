@@ -1747,7 +1747,6 @@ Transform:
   - {fileID: 8592186159745847971}
   - {fileID: 2776728045096354191}
   - {fileID: 836788007433765905}
-  - {fileID: 3072564533590831662}
   - {fileID: 9083709662655744965}
   - {fileID: 2001044338731103109}
   - {fileID: 5149138507981046428}
@@ -1858,10 +1857,9 @@ MonoBehaviour:
   _swapText: {fileID: 6556884453141002808}
   _controlsText: {fileID: 7045257381709404925}
   _slotDescription: {fileID: 7829914370343823197}
-  _alreadyUsedUI: {fileID: 2678909120401664135}
+  _cantUsePUUI: {fileID: 2678909120401664135}
   _ballManagerRef: {fileID: 776739690783377043}
   _turnManagerRef: {fileID: 3213455897774711111}
-  _fireworksRef: {fileID: 7255664188404437394}
   _cueBall: {fileID: 5955478590351502289}
   _imagePU: {fileID: 2156838456014018379}
   _titleTextPU: {fileID: 9002688607830991512}
@@ -1872,9 +1870,7 @@ MonoBehaviour:
   - {fileID: 6129788140231050023}
   - {fileID: 4971738177890332921}
   _availablePUs:
-  - {fileID: 11400000, guid: 3869ffe2868a5924c81d6ca4f199ed38, type: 2}
-  - {fileID: 11400000, guid: 27dd01929bc3fba4bb886d0afb1b8fa4, type: 2}
-  - {fileID: 11400000, guid: d3551e1258deb2d4fb171800ad74e9e8, type: 2}
+  - {fileID: 11400000, guid: 5818e1831a8bac04b9c0d0716a850cc4, type: 2}
 --- !u!1 &595154658329810399
 GameObject:
   m_ObjectHideFlags: 0
@@ -1996,30 +1992,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3444268844234080615}
   m_CullTransparentMesh: 1
---- !u!223 &695436756724893957
-Canvas:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7573557905203684821}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
-  m_PixelPerfect: 0
-  m_ReceivesEvents: 1
-  m_OverrideSorting: 0
-  m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
-  m_UseReflectionProbes: 0
-  m_AdditionalShaderChannelsFlag: 0
-  m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_TargetDisplay: 0
 --- !u!199 &708340760665153540
 ParticleSystemRenderer:
   serializedVersion: 7
@@ -9799,25 +9771,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!224 &3072564533590831662
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7573557905203684821}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 468556277258170908}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 0}
 --- !u!1 &3083204430782931989
 GameObject:
   m_ObjectHideFlags: 0
@@ -9830,7 +9783,7 @@ GameObject:
   - component: {fileID: 5212539839661418988}
   - component: {fileID: 2876945610231486574}
   m_Layer: 0
-  m_Name: Already Used Text
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10679,29 +10632,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &3934699438381573079
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7573557905203684821}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 1
-  m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 1920, y: 1080}
-  m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0.5
-  m_PhysicalUnit: 3
-  m_FallbackScreenDPI: 96
-  m_DefaultSpriteDPI: 96
-  m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
 --- !u!114 &3941396532927180752
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18015,7 +17945,7 @@ GameObject:
   - component: {fileID: 4588534311235090558}
   - component: {fileID: 2678909120401664135}
   m_Layer: 0
-  m_Name: Already Used Background
+  m_Name: Cant Use PU
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -23893,23 +23823,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4896500184303457769}
   m_CullTransparentMesh: 1
---- !u!114 &6728518235384480837
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7573557905203684821}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!1 &6735706830633380085
 GameObject:
   m_ObjectHideFlags: 0
@@ -24735,25 +24648,6 @@ GameObject:
   - component: {fileID: 2350349768435457907}
   m_Layer: 0
   m_Name: Directional Light
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!1 &7573557905203684821
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3072564533590831662}
-  - component: {fileID: 695436756724893957}
-  - component: {fileID: 3934699438381573079}
-  - component: {fileID: 6728518235384480837}
-  m_Layer: 0
-  m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

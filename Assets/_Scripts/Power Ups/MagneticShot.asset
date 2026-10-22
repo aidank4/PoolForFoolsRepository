@@ -15,5 +15,7 @@ MonoBehaviour:
   id: Magnetic Shot
   description: my cue ball is so attractive
   sabotage: 0
+  affectNext: 0
+  affectShot: 1
   icon: {fileID: 21300000, guid: 6999936c24d245f458e93af8efd01159, type: 3}
   prefab: {fileID: 0}

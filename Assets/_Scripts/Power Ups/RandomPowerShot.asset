@@ -17,5 +17,6 @@ MonoBehaviour:
     turn!
   sabotage: 1
   affectNext: 1
+  affectShot: 1
   icon: {fileID: 21300000, guid: f14d23706ed57374eaafc06f9f0a9dd0, type: 3}
   prefab: {fileID: 0}
