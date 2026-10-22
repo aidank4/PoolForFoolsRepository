@@ -422,7 +422,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6179259592831659881}
         m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
-        m_MethodName: UseOrSwapPowerUp
+        m_MethodName: StartPowerUp
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 304617260694320639}
@@ -15010,7 +15010,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6179259592831659881}
         m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
-        m_MethodName: UseOrSwapPowerUp
+        m_MethodName: StartPowerUp
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 4931613659023150664}
@@ -15143,7 +15143,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6179259592831659881}
         m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
-        m_MethodName: UseOrSwapPowerUp
+        m_MethodName: StartPowerUp
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 5089038011297895826}
@@ -17136,6 +17136,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5818e1831a8bac04b9c0d0716a850cc4, type: 2}
   - {fileID: 11400000, guid: 3869ffe2868a5924c81d6ca4f199ed38, type: 2}
   - {fileID: 11400000, guid: 538dad14a8d621c4c925966cc48876d5, type: 2}
+  - {fileID: 11400000, guid: aec74e1660786bb4593905f5828810a5, type: 2}
+  - {fileID: 11400000, guid: 27dd01929bc3fba4bb886d0afb1b8fa4, type: 2}
+  - {fileID: 11400000, guid: d3551e1258deb2d4fb171800ad74e9e8, type: 2}
+  - {fileID: 11400000, guid: fb0343564af02ea4aab6706bf0758123, type: 2}
 --- !u!1 &6356053659313690123
 GameObject:
   m_ObjectHideFlags: 0
