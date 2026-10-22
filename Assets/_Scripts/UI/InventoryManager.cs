@@ -4,7 +4,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static UnityEditor.Rendering.CameraUI;
 
 
 public class InventoryManager : MonoBehaviour
@@ -84,10 +83,10 @@ public class InventoryManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            AddPowerUp();
-        }
+        //if (Input.GetKeyDown(KeyCode.X))
+        //{
+        //    AddPowerUp();
+        //}
         
         if (InputManager.Instance.currentActionMap.name == "UI")
         {
