@@ -83,11 +83,11 @@ public class InventoryManager : MonoBehaviour
 
     private void Update()
     {
-        //if (Input.GetKeyDown(KeyCode.X))
-        //{
-        //    AddPowerUp();
-        //}
-        
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            AddPowerUp();
+        }
+
         if (InputManager.Instance.currentActionMap.name == "UI")
         {
             ShowPUDescription(); //show item descriptions when they are being hovered over
