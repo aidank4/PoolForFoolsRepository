@@ -17,8 +17,6 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _cueBallExtra;
     [SerializeField] private GameObject _poolCueModel;
     public GameObject poolCueParent { get; private set; }
-    [SerializeField] private GameObject _vfxManagerRef;
-    private VFXManager _vfxManager;
 
 
     [Header("Modifiable Shot Mechanics")]
@@ -74,7 +72,6 @@ public class Player : MonoBehaviour
         #region
         _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
         poolCueParent = this.gameObject;
-        _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
         #endregion
         //UI
         _chargeVisual.gameObject.SetActive(false);

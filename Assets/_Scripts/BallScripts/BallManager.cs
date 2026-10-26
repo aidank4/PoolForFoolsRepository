@@ -25,7 +25,8 @@ public class BallManager : MonoBehaviour
     [SerializeField] private GameObject _cueBall;
     [SerializeField] private GameObject _vfxManagerRef;
     private VFXManager _vfxManager;
-
+    [SerializeField] private GameObject _pocketManagerRef;
+    private PocketManager _pocketManager;
 
     [Header("Spawn Randomness")]
     [SerializeField] private float _spawnVarianceMin = -0.05f;
@@ -85,6 +86,7 @@ public class BallManager : MonoBehaviour
         _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
         _rocketModel = _cueBall.transform.Find("Rocket Model");
         _baseCueBallModel = _cueBall.transform.Find("Cue Ball Model");
+        _pocketManager = _pocketManagerRef.GetComponent<PocketManager>();
         #endregion
         //hide
         #region
@@ -103,8 +105,12 @@ public class BallManager : MonoBehaviour
         if (_poolCueScript != null)
         {
             _poolCueScript.ShotCompleted += HandleShotEvent;
-            SO_PowerUp.UsePU += HandlePowerUps;
         }
+        if (_pocketManager != null)
+        {
+            _pocketManager.Scratched += HandleScratch;
+        }
+        SO_PowerUp.UsePU += HandlePowerUps;
     }
 
     private void OnDisable()
@@ -112,8 +118,12 @@ public class BallManager : MonoBehaviour
         if (_poolCueScript != null)
         {
             _poolCueScript.ShotCompleted -= HandleShotEvent;
-            SO_PowerUp.UsePU += HandlePowerUps;
         }
+        if (_pocketManager != null)
+        {
+            _pocketManager.Scratched -= HandleScratch;
+        }
+        SO_PowerUp.UsePU += HandlePowerUps;
     }
 
 
@@ -562,6 +572,23 @@ public class BallManager : MonoBehaviour
         {
             _magnetActive = true;
             _vfxManager.MagnetOn(_cueBall.transform);
+        }
+    }
+
+
+    /// <summary>
+    /// On scratch reset cue ball affecting power ups
+    /// </summary>
+    private void HandleScratch()
+    {
+        if (_rocketShotPUActive)
+        {
+            RocketBall();
+        }
+        if (_magnetActive)
+        {
+            _magnetActive = false;
+            _vfxManager.MagnetOff();
         }
     }
 }

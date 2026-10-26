@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,6 +32,11 @@ public class PocketManager : MonoBehaviour
     [Header("Misc Variables")]
     private bool _choosingPocket = false;
     private int _pocketIdx;
+
+
+    //Events
+    public event Action Scratched;
+
 
     private void Awake()
     {
@@ -148,6 +154,7 @@ public class PocketManager : MonoBehaviour
                 {
                     _turnManagerScript.scratch = true;
                     _turnManagerScript.keepTurn = false;
+                    Scratched?.Invoke();
                     break;
                 }
         }

@@ -25,6 +25,8 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private TMP_Text _titleTextPU;
     [SerializeField] private TMP_Text _nameTextPU;
     [SerializeField] private TMP_Text _descriptionTextPU;
+    [SerializeField] private GameObject _vfxPU;
+    [SerializeField] private GameObject _vfxSabotage;
 
 
 
@@ -39,7 +41,7 @@ public class InventoryManager : MonoBehaviour
 
 
     [Header("Misc Variables")]
-    private SO_PowerUp _extraPowerUp = null; //if an extra power up gets claimed, this ref is used to swap it or delete it later
+    [SerializeField]private SO_PowerUp _extraPowerUp = null; //if an extra power up gets claimed, this ref is used to swap it or delete it later
     private int _pBCounter = 0; //Cant use pocket block more than 5 times
     private SO_PowerUp _selectedPU;
 
@@ -58,6 +60,8 @@ public class InventoryManager : MonoBehaviour
         _slotDescription.transform.parent.gameObject.SetActive(false);
         _cantUsePUUI.gameObject.SetActive(false);
         _imagePU.gameObject.SetActive(false);
+        _vfxPU.SetActive(false);
+        _vfxSabotage.SetActive(false);
         #endregion
 
     }
@@ -263,6 +267,14 @@ public class InventoryManager : MonoBehaviour
     {
         InputManager.Instance.SwitchCurrentActionMap("Gameplay");
         _imagePU.gameObject.SetActive(false);
+        if (_selectedPU.sabotage)
+        {
+            _vfxSabotage.SetActive(false);
+        }
+        else
+        {
+            _vfxPU.SetActive(false);
+        }
         _selectedPU.Activate();
         usingPUs.Add(_selectedPU);
     }
@@ -359,10 +371,14 @@ public class InventoryManager : MonoBehaviour
                 if (!_selectedPU.sabotage)
                 {
                     _titleTextPU.text = "Power Up!";
+                    _vfxPU.transform.SetParent(_slots[i].transform.parent, false);
+                    _vfxPU.SetActive(true);
                 }
                 else
                 {
                     _titleTextPU.text = "Sabotage!";
+                    _vfxSabotage.transform.SetParent(_slots[i].transform.parent, false);
+                    _vfxSabotage.SetActive(true);
                 }
                 RemovePowerUp(i);
             }
