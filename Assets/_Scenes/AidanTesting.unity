@@ -20918,6 +20918,18 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4947095132700695223}
     - target: {fileID: 5795993226912930031, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: _rotationMult
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5795993226912930031, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: _rotationAccel
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 5795993226912930031, guid: 15612147a48dd1149894f367c25f843e, type: 3}
+      propertyPath: _rotationSpeed
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5795993226912930031, guid: 15612147a48dd1149894f367c25f843e, type: 3}
       propertyPath: _vfxManagerRef
       value: 
       objectReference: {fileID: 6282111400113710669}

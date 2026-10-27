@@ -23,8 +23,11 @@ public class Player : MonoBehaviour
     [SerializeField] private float _defaultShotSpeed = 5f;
     [SerializeField] private float _maxCharge = 1f; // 1 for the seconds of time a player can hold down shoot at max
     [SerializeField] private float _pullBackSpeed = 1f;
-    [SerializeField] private float _rotationSpeed = 50f;
+    [SerializeField] private float _rotationSpeed = 5f;
     [SerializeField] private float _ballSeparation = 0.5f;
+    [SerializeField] private float _rotationAccel = 15f;
+    [SerializeField] private float _startingRotMult;
+    private float _rotationMult = 1f;
 
 
     [Header("PowerUp Variables")]
@@ -37,6 +40,7 @@ public class Player : MonoBehaviour
     private GameObject _extraLineA;
     private GameObject _extraLineB;
     private bool _rdmPowerPU = false;
+    private bool _curvedShot = false;
 
 
     [Header("Bools")]
@@ -52,6 +56,7 @@ public class Player : MonoBehaviour
     private Vector3 _startingPos; // when shot canceled need to remember where pool cue was to reset its position
     private Vector2 _rotateInput;
     private float _tempRotateInput;
+    private bool _holding = false;
 
 
     //ENUMS
@@ -78,6 +83,7 @@ public class Player : MonoBehaviour
         _ballRadius = _cueBall.GetComponent<SphereCollider>().radius; //used for shoot math but the radius only needs to be gathered once so I have it here in Awake.
         _predictionLineParent.transform.position = _cueBall.transform.position + new Vector3(0, 0, _ballSeparation); //set up prediction lines position and rotation
         _predictionLineParent.transform.eulerAngles = new Vector3(0, 0, 0);
+        _startingRotMult = _rotationMult;
         Shoot = DefaultShoot;
     }
 
@@ -103,10 +109,18 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        //Debug.Log(_poolCueParent.transform.right);
-        //If given input rotate pool cue and visual indicator
-        poolCueParent.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
-        _predictionLineParent.transform.RotateAround(_cueBall.transform.position, new Vector3 (0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime); //USING TEMP ROTATE
+        //Rotate pool cue
+        poolCueParent.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), (_rotationSpeed * _rotationMult) * Time.deltaTime);
+        _predictionLineParent.transform.RotateAround(_cueBall.transform.position, new Vector3 (0, _tempRotateInput, 0), (_rotationSpeed * _rotationMult) * Time.deltaTime); //USING TEMP ROTATE
+        if (_holding)
+        {
+            if (_rotationMult > 100)
+            {
+                _rotationMult = _startingRotMult;
+            }
+            _rotationMult += (_rotationAccel * Time.deltaTime);
+        }
+        
         if (Shoot == MultiShoot)
         {
             _extraCueBallA.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
@@ -114,7 +128,6 @@ public class Player : MonoBehaviour
             _extraCueBallB.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
             _extraLineB.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
         }//Rotate extra balls and lines when multi shoot active
-
         if (_holdStarted && !_stopShot)
         {
             _holdTimer += Time.deltaTime;
@@ -214,6 +227,12 @@ public class Player : MonoBehaviour
             StartCoroutine((RdmPowerAnim(_holdTimer))); //Handles shot release stuff
 
         }
+    }
+
+
+    private void CurveShoot(ClickStage stage)
+    {
+        //if ()
     }
 
 
@@ -385,6 +404,15 @@ public class Player : MonoBehaviour
         // WASD _rotateInput = context.ReadValue<Vector2>();
         //TEMP NO WASD
         _tempRotateInput = -context.ReadValue<float>();
+        if (context.started)
+        {
+            _holding = true;
+        }
+        if (context.canceled)
+        {
+            _holding = false;
+            _rotationMult = _startingRotMult;
+        }
     }
 
 
@@ -505,6 +533,10 @@ public class Player : MonoBehaviour
         {
             _rdmPowerPU = true;
         }
+        if (powerUP.id == "Curved Shot")
+        {
+            _curvedShot = true;
+        }
     }
 
 
@@ -521,6 +553,11 @@ public class Player : MonoBehaviour
             {
                 _rdmPowerPU = false;
                 Shoot = RdmPowerShoot;
+            }
+            if (_curvedShot)
+            {
+                _curvedShot = false;
+                Shoot = CurveShoot;
             }
         }
     }
