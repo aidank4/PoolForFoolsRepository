@@ -25,7 +25,7 @@ public class PocketManager : MonoBehaviour
 
 
     [Header("Collections")]
-    [SerializeField] private List<GameObject> _pockets = new List<GameObject>();
+    public List<GameObject> pockets = new List<GameObject>();
     [SerializeField] private List<GameObject> _jailCells = new List<GameObject>();
 
 
@@ -215,7 +215,7 @@ public class PocketManager : MonoBehaviour
         {
             if (_choosingPocket)
             {
-                if (_pocketIdx == _pockets.Count - 1)
+                if (_pocketIdx == pockets.Count - 1)
                 {
                     _pocketIdx = 0;
                     HighlightPocket();
@@ -242,7 +242,7 @@ public class PocketManager : MonoBehaviour
             {
                 if (_pocketIdx == 0)
                 {
-                    _pocketIdx = _pockets.Count - 1;
+                    _pocketIdx = pockets.Count - 1;
                     HighlightPocket();
                 }
                 else
@@ -268,9 +268,9 @@ public class PocketManager : MonoBehaviour
                 _controlsUI.gameObject.SetActive(false);
                 _choosingPocket = false;
                 _highlightObject.SetActive(false);
-                StartCoroutine(PlaceJailCell(_jailCells[0], _pockets[_pocketIdx].gameObject.transform.position));
-                _pockets[_pocketIdx].SetActive(false);
-                _pockets.Remove(_pockets[_pocketIdx]);
+                StartCoroutine(PlaceJailCell(_jailCells[0], pockets[_pocketIdx].gameObject.transform.position));
+                pockets[_pocketIdx].SetActive(false);
+                pockets.Remove(pockets[_pocketIdx]);
             }
         }
     }
@@ -325,8 +325,8 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     private void HighlightPocket()
     {
-        EventSystem.current.SetSelectedGameObject(_pockets[_pocketIdx]);
-        _highlightObject.transform.position = _pockets[_pocketIdx].transform.position;
+        EventSystem.current.SetSelectedGameObject(pockets[_pocketIdx]);
+        _highlightObject.transform.position = pockets[_pocketIdx].transform.position;
     }
 
 

@@ -27,6 +27,8 @@ public class BallManager : MonoBehaviour
     private VFXManager _vfxManager;
     [SerializeField] private GameObject _pocketManagerRef;
     private PocketManager _pocketManager;
+    [SerializeField] private GameObject _turnManagerRef;
+    private TurnManager _turnManager;
 
     [Header("Spawn Randomness")]
     [SerializeField] private float _spawnVarianceMin = -0.05f;
@@ -69,8 +71,13 @@ public class BallManager : MonoBehaviour
     [SerializeField] private float _attractionRadius = 3f; 
     [SerializeField] private float _attractionforce = 0.1f; 
     private bool _magnetActive = false;
-    //misc
+    [Header("8Ball")]
     private bool _eightBallPUActive = false;
+    [Header("Giant Balls")]
+    [SerializeField] private float _gbSizeScaler = 3f;
+    private bool _ballsBig = false;
+    private bool _gbActive = false;
+
 
 
     //Events
@@ -87,6 +94,7 @@ public class BallManager : MonoBehaviour
         _rocketModel = _cueBall.transform.Find("Rocket Model");
         _baseCueBallModel = _cueBall.transform.Find("Cue Ball Model");
         _pocketManager = _pocketManagerRef.GetComponent<PocketManager>();
+        _turnManager = _turnManagerRef.GetComponent<TurnManager>();
         #endregion
         //hide
         #region
@@ -109,6 +117,10 @@ public class BallManager : MonoBehaviour
         if (_pocketManager != null)
         {
             _pocketManager.Scratched += HandleScratch;
+        }
+        if (_turnManager != null)
+        {
+            _turnManager.TurnSwitched += HandleTurnSwitch;
         }
         SO_PowerUp.UsePU += HandlePowerUps;
     }
@@ -223,6 +235,11 @@ public class BallManager : MonoBehaviour
         {
             _magnetActive = false;
             _vfxManager.MagnetOff();
+        }
+        if (_ballsBig)
+        {
+            _ballsBig = false;
+            ResetGiantBalls();
         }
     }
 
@@ -527,6 +544,9 @@ public class BallManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Pull in nearby collider objects
+    /// </summary>
     private void MagnetAttract()
     {
         Collider[] closeBalls = Physics.OverlapSphere(_cueBall.transform.position, _attractionRadius);
@@ -544,6 +564,60 @@ public class BallManager : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+
+    /// <summary>
+    /// aside from the cue ball, make all the balls grow in size. Also turn the pockets off
+    /// </summary>
+    private void MakeGiantBalls()
+    {
+        foreach (GameObject ball in _spawnedBalls)
+        {
+            if (ball == _cueBall) // dont make cue ball big
+            {
+                continue;
+            }
+            ball.transform.localScale *= _gbSizeScaler;
+            Rigidbody ballRb = ball.GetComponent<Rigidbody>(); //Turn off and on physics or else balls get stuck "flying"
+            ballRb.isKinematic = true;
+            ballRb.isKinematic = false;
+        }
+    }
+
+    /// <summary>
+    /// return the balls to regular size and turn pockets back on
+    /// </summary>
+    private void ResetGiantBalls()
+    {
+        foreach (GameObject ball in _spawnedBalls)
+        {
+            if (ball == _cueBall) // dont make cue ball small
+            {
+                continue;
+            }
+            ball.transform.localScale /= _gbSizeScaler;
+            Rigidbody ballRb = ball.GetComponent<Rigidbody>(); //Turn off and on physics or else balls get stuck "flying"
+            ballRb.isKinematic = true;
+            ballRb.isKinematic = false;
+        }
+    }
+
+
+    /// <summary>
+    /// On scratch reset cue ball affecting power ups
+    /// </summary>
+    private void HandleScratch()
+    {
+        if (_rocketShotPUActive)
+        {
+            RocketBall();
+        }
+        if (_magnetActive)
+        {
+            _magnetActive = false;
+            _vfxManager.MagnetOff();
         }
     }
 
@@ -573,22 +647,28 @@ public class BallManager : MonoBehaviour
             _magnetActive = true;
             _vfxManager.MagnetOn(_cueBall.transform);
         }
+        if (powerUp.id == "Giant Balls")
+        {
+            _gbActive = true;
+        }
     }
-
 
     /// <summary>
-    /// On scratch reset cue ball affecting power ups
+    /// Update power ups that affect next
     /// </summary>
-    private void HandleScratch()
+    /// <param name="sabotaged"></param>
+    private void HandleTurnSwitch(bool sabotaged)
     {
-        if (_rocketShotPUActive)
+        if (sabotaged)
         {
-            RocketBall();
-        }
-        if (_magnetActive)
-        {
-            _magnetActive = false;
-            _vfxManager.MagnetOff();
+            //check dif PUs
+            if (_gbActive)
+            {
+                _gbActive = false;
+                MakeGiantBalls();
+                _ballsBig = true;
+            }
         }
     }
+
 }

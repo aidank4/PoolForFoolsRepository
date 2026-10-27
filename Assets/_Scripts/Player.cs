@@ -36,8 +36,6 @@ public class Player : MonoBehaviour
     private GameObject _extraCueBallB;
     private GameObject _extraLineA;
     private GameObject _extraLineB;
-    private bool _sabotaged = false;
-    private List<Sprite> _sabotageIcons = new List<Sprite>();
     private bool _rdmPowerPU = false;
 
 
@@ -494,11 +492,6 @@ public class Player : MonoBehaviour
     /// <param name="powerUP"></param>
     private void HandlePUs(SO_PowerUp powerUP)
     {
-        if (powerUP.affectNext && !_sabotaged)
-        {
-            _sabotaged = true;
-            _sabotageIcons.Add(powerUP.icon);
-        }
         if (powerUP.id == "Multi Shot")
         {
             SpawnMultiBalls();
@@ -514,19 +507,21 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void HandleTurnSwitch()
+
+    /// <summary>
+    /// Update power ups that affect next
+    /// </summary>
+    /// <param name="sabotaged"></param>
+    private void HandleTurnSwitch(bool sabotaged)
     {
-        if (_sabotaged)
+        if (sabotaged)
         {
-            _sabotaged = false;
             //check dif PUs
             if (_rdmPowerPU)
             {
                 _rdmPowerPU = false;
                 Shoot = RdmPowerShoot;
             }
-            StartCoroutine(_turnManagerScript.SabotageUI(_sabotageIcons.ToArray()));
-            _sabotageIcons.Clear();
         }
     }
 }
