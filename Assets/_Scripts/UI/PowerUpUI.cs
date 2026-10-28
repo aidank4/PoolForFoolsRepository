@@ -25,8 +25,8 @@ public class PowerUpUI : MonoBehaviour
     [SerializeField] private TMP_Text _sabotageText;
 
     [Header("Power Ups")]
-    [SerializeField]private List<Sprite> _sIcons = new List<Sprite>();
-    [SerializeField]private List<GameObject> _sIconHolder = new List<GameObject>();
+    [SerializeField]private List<Sprite> _sIcons = new List<Sprite>(); //Sabotage Icons that will appear
+    [SerializeField]private List<GameObject> _sIconHolder = new List<GameObject>(); //Game Object to hold those icons
 
     private void Awake()
     {
@@ -44,6 +44,9 @@ public class PowerUpUI : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Subscribe to events
+    /// </summary>
     private void OnEnable()
     {
         if (_turnManager != null)
@@ -52,7 +55,11 @@ public class PowerUpUI : MonoBehaviour
         }
         SO_PowerUp.UsePU += HandlePU;
     }
+    
 
+    /// <summary>
+    /// Unsubscribe
+    /// </summary>
     private void OnDisable()
     {
         if (_turnManager != null)
@@ -65,10 +72,10 @@ public class PowerUpUI : MonoBehaviour
 
 
     /// <summary>
-    /// Set up UI for when there is an extra PU and set controls to UI.
+    /// Set up UI for when there is an extra PU to swap and set controls to UI.
     /// </summary>
     /// <param name="powerUp"></param>
-    public void ShowPUConflictUI(SO_PowerUp powerUp)
+    public void ShowPUConflictUI(SO_PowerUp powerUp) 
     {
         _conflictIcon.sprite = powerUp.icon;
         _descriptionText.text = powerUp.description;
@@ -123,7 +130,7 @@ public class PowerUpUI : MonoBehaviour
     public void HighlightSlotButton()
     {
         ResetButtonHighlight();
-        EventSystem.current.SetSelectedGameObject(_slotA.gameObject); // set to the swapbutton
+        EventSystem.current.SetSelectedGameObject(_slotA.gameObject); // set to a slot
     }
 
 
@@ -143,13 +150,16 @@ public class PowerUpUI : MonoBehaviour
     /// <returns></returns>
     private IEnumerator SabotageUI(Sprite[] icons)
     {
-        _sabotageOverlay.gameObject.SetActive(true); //middle UI On
+        _sabotageOverlay.gameObject.SetActive(true); //center UI On
         _sabotageIconUI.gameObject.SetActive(true);
         foreach (Sprite icon in icons) //Place Icons in center
         {
+            //Create object with an image component and give it the icon of the used sabotage
             GameObject obj = new GameObject("icon");
             Image objImage = obj.AddComponent<Image>();
             objImage.sprite = icon;
+
+            //Set it as a child of the center background and center it
             obj.transform.SetParent(_sabotageIconUI.gameObject.transform, false);
             RectTransform rectTransform = obj.GetComponent<RectTransform>();
             rectTransform.anchoredPosition = new Vector2(0, 0);
@@ -159,10 +169,12 @@ public class PowerUpUI : MonoBehaviour
         _sabotageOverlay.gameObject.SetActive(false);
         _sabotageIconUI.gameObject.SetActive(false);
 
+
         _sabotageCorner.gameObject.SetActive(true);//Corner UI On
         _sabotageText.gameObject.SetActive(true);
         foreach (GameObject obj in _sIconHolder) //Place icons in corner
         {
+            //Set icons as a child to the corner background and center
             obj.transform.SetParent(_sabotageCorner.gameObject.transform, false);
             RectTransform rectTransform = obj.GetComponent<RectTransform>();
             rectTransform.anchoredPosition = new Vector2(0, 0);
@@ -174,9 +186,9 @@ public class PowerUpUI : MonoBehaviour
     /// </summary>
     public void ResetSabotageUI()
     {
-        _sabotageCorner.gameObject.SetActive(false);
+        _sabotageCorner.gameObject.SetActive(false); //Hide corner sabotage UI
         _sabotageText.gameObject.SetActive(false);
-        foreach (GameObject obj in _sIconHolder)
+        foreach (GameObject obj in _sIconHolder) //Clear all the children
         {
             Destroy(obj);
         }

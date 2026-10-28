@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection.Metadata;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -11,21 +12,20 @@ public class InventoryManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private GameObject _powerUpUIRef;
     private PowerUpUI _powerUpUIScript;
-    [SerializeField] private TMP_Text _swapText;
+    [SerializeField] private TMP_Text _swapText; //Swapping UI
     [SerializeField] private GameObject _controlsText;
     [SerializeField] private TMP_Text _slotDescription;
     [SerializeField] private Image _cantUsePUUI;
-    //[SerializeField] private TMP_Text _cantUsePUText;
     [SerializeField] private GameObject _ballManagerRef; //Ball manager for balls stopped event which can trigger power up choices as turn is over
     private BallManager _ballManagerScript;
     [SerializeField] private GameObject _turnManagerRef; //TurnManager to switch turn -- switch turn in Toss Function and BallsStopped Event
     private TurnManager _turnManagerScript;
-    [SerializeField] private GameObject _cueBall;
-    [SerializeField] private Image _imagePU;
-    [SerializeField] private TMP_Text _titleTextPU;
+    [SerializeField] private GameObject _cueBall; //For controlling just the cue ball
+    [SerializeField] private Image _imagePU; //Using power up pop up UI
+    [SerializeField] private TMP_Text _titleTextPU; 
     [SerializeField] private TMP_Text _nameTextPU;
     [SerializeField] private TMP_Text _descriptionTextPU;
-    [SerializeField] private GameObject _vfxPU;
+    [SerializeField] private GameObject _vfxPU; //VFX
     [SerializeField] private GameObject _vfxSabotage;
 
 
@@ -33,17 +33,17 @@ public class InventoryManager : MonoBehaviour
     [Header("Containers")] //inventory size is always maxed at 3
     [SerializeField] private Image[] _slots = new Image[3];
     [SerializeField] private List<SO_PowerUp> _availablePUs = new List<SO_PowerUp>();
-    private List<SO_PowerUp> _usedPUs = new List<SO_PowerUp>();
-    public List<SO_PowerUp> usingPUs { get; private set; } = new List<SO_PowerUp>();
-    private SO_PowerUp[] _currentInventoryPUs = new SO_PowerUp[3];
-    private SO_PowerUp[] _pOnePUs = new SO_PowerUp[3];
-    private SO_PowerUp[] _pTwoPUs = new SO_PowerUp[3];
+    private List<SO_PowerUp> _usedPUs = new List<SO_PowerUp>(); //Which power ups were used last turn
+    public List<SO_PowerUp> usingPUs { get; private set; } = new List<SO_PowerUp>(); //Which powerups are being used this turn
+    private SO_PowerUp[] _currentInventoryPUs = new SO_PowerUp[3]; //Power ups in inventory
+    private SO_PowerUp[] _pOnePUs = new SO_PowerUp[3]; //player ones power ups
+    private SO_PowerUp[] _pTwoPUs = new SO_PowerUp[3]; //player twos power ups
 
 
     [Header("Misc Variables")]
     [SerializeField]private SO_PowerUp _extraPowerUp = null; //if an extra power up gets claimed, this ref is used to swap it or delete it later
     private int _pBCounter = 0; //Cant use pocket block more than 5 times
-    private SO_PowerUp _selectedPU;
+    private SO_PowerUp _selectedPU; //The power up the player tries to use
 
 
     private void Awake()
@@ -67,6 +67,9 @@ public class InventoryManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Subscribe to events
+    /// </summary>
     private void OnEnable()
     {
         if (_ballManagerScript != null)
@@ -76,6 +79,9 @@ public class InventoryManager : MonoBehaviour
     }
     
     
+    /// <summary>
+    /// Unsubscribe to events
+    /// </summary>
     private void OnDisable()
     {
         if (_ballManagerScript != null)
@@ -87,7 +93,7 @@ public class InventoryManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.X))
+        if (Input.GetKeyDown(KeyCode.X)) //HACKS
         {
             AddPowerUp();
         }
@@ -209,7 +215,7 @@ public class InventoryManager : MonoBehaviour
     {
         _powerUpUIScript.HidePUConflictUI();
         _extraPowerUp = null;
-        _turnManagerScript.SwitchTurn();
+        _turnManagerScript.SwitchTurn(); //Turn ends on toss
     }
 
 
@@ -232,7 +238,7 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     /// <param name="selectedSlot"></param>
     /// <returns>int</returns>
-    private int SlotNumber(GameObject selectedSlot)
+    private int SlotNumber(GameObject selectedSlot) //parameter comes from player controls passing in button Game Object on click to StartPowerUp()
     {
         for (int i = 0; i < _slots.Length; i++)
         {
@@ -250,7 +256,7 @@ public class InventoryManager : MonoBehaviour
     /// Swap the extra PU into the selected slot and overwrite the old PU
     /// </summary>
     /// <param name="selectedSlot"></param>
-    private void SwapPowerUp(GameObject selectedSlot)
+    private void SwapPowerUp(GameObject selectedSlot) //parameter comes from player controls passing in button Game Object on click to StartPowerUp()
     {
         _currentInventoryPUs[SlotNumber(selectedSlot)] = _extraPowerUp; //overwrite selected slot with the extra
         SetIcons();
@@ -336,14 +342,14 @@ public class InventoryManager : MonoBehaviour
     /// Check if can use power up. Then start ui and remove the powerup.
     /// </summary>
     /// <param name="selectedSlot"></param>
-    public void StartPowerUp(GameObject selectedSlot)
+    public void StartPowerUp(GameObject selectedSlot) //Called on button inputs in player controls - parameter comes from there
     {
         int i = SlotNumber(selectedSlot);
         _selectedPU = _currentInventoryPUs[i];
 
         if (_currentInventoryPUs[i] != null) //power up selected
         {
-            //Cant use power up
+            //Check if cant use power up
             var accessPU = UsablePUCheck(_selectedPU);
             if (accessPU.dupe)
             {
@@ -361,8 +367,8 @@ public class InventoryManager : MonoBehaviour
             //Can use power up
             else
             {
-                _powerUpUIScript.HidePUConflictUI();
-                InputManager.Instance.SwitchCurrentActionMap("Continue");
+                _powerUpUIScript.HidePUConflictUI(); //Close UI if used through inventory rather than hot key
+                InputManager.Instance.SwitchCurrentActionMap("Continue"); //state where a key is pressed to move forward
 
                 _nameTextPU.text = _selectedPU.id; //UI
                 _descriptionTextPU.text = _selectedPU.description;
@@ -382,6 +388,10 @@ public class InventoryManager : MonoBehaviour
                 }
                 RemovePowerUp(i);
             }
+        }
+        else
+        {
+            //No PU in slot do nothing
         }
     }
 
@@ -435,11 +445,11 @@ public class InventoryManager : MonoBehaviour
     /// <returns></returns>
     IEnumerator PowerUpWarning(string output)
     {
-        TMP_Text puText = _cantUsePUUI.GetComponentInChildren<TMP_Text>();
+        TMP_Text puText = _cantUsePUUI.GetComponentInChildren<TMP_Text>(); //Access warning Text
         puText.text = output;
-        _controlsText.SetActive(false);
+        _controlsText.SetActive(false); //Turn off hotkey text because its in the same spot
         _cantUsePUUI.gameObject.SetActive(true);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1f); //Show warning for 1 sec
         _cantUsePUUI.gameObject.SetActive(false);
         _controlsText.SetActive(true);
     }
