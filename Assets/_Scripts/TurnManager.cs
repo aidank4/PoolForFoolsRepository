@@ -40,12 +40,12 @@ public class TurnManager : MonoBehaviour
 
     [Header("Bools")]
     public bool keepTurn = false; //Used to see if a player scored a team ball
-    private bool _lostTurn = false; // fixes the issuewhere if a good ball was scored after bad ball then keep turn would still be made true
+    private bool _lostTurn = false; // fixes the issue where if a good ball was scored after bad ball then keep turn would still be made true
     public bool scratch = false; //Gets set true by the pocket manager
 
 
     [Header("PowerUps")]
-    [SerializeField]private bool _sabotaged = false;
+    private bool _sabotaged = false; //Set true when the following player is sabotaged - Used to activate PU's at theh correct time
 
 
     //Events
@@ -67,10 +67,14 @@ public class TurnManager : MonoBehaviour
         _pOneIconUI.SetActive(false);
         _pTwoIconUI.SetActive(false);
         #endregion
-        //set p1 as initial player on startup
-        currentPlayer = playerOne;
+        //Misc
+        currentPlayer = playerOne; //set p1 as initial player on startup
     }
 
+
+    /// <summary>
+    /// Subscribe events
+    /// </summary>
     private void OnEnable()
     {
         if (_turnSwitchAnimScript != null)
@@ -81,6 +85,9 @@ public class TurnManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Unsubscribe
+    /// </summary>
     private void OnDisable()
     {
         if (_turnSwitchAnimScript != null)
@@ -96,7 +103,7 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     public void SwitchTurn() //Used in the InventoryManager
     {
-        if (!keepTurn)
+        if (!keepTurn) //Switch turn
         {
             _inventoryScript.UpdateInventory();
             _inventoryScript.ResetOldPUCollections();
@@ -117,10 +124,9 @@ public class TurnManager : MonoBehaviour
             _lostTurn = false; // reset lost turn once the switch turn has been called
             scratch = false;
         }
-        else
+        else //Keep turn
         {
-            //Player keeps turn
-            //when turn switches this is handled by TriggerTurnSwitchEvent down below which gets called once the dart anim ends
+            //Normally handled by turn switch dart event.
             _poolCueScript.shootAvailable = true;
             _poolCueScript.RespawnPoolCue();
             _puUI.ResetSabotageUI();
@@ -139,7 +145,7 @@ public class TurnManager : MonoBehaviour
             if (scratch)
             {
                 keepTurn = false;
-                _lostTurn = true;
+                _lostTurn = true; //Need both for edge cases
             }
             else
             {
@@ -167,7 +173,7 @@ public class TurnManager : MonoBehaviour
             if (scratch)
             {
                 keepTurn = false;
-                _lostTurn= true;
+                _lostTurn = true; //Need both for edge cases
             }
             else
             {
@@ -276,7 +282,7 @@ public class TurnManager : MonoBehaviour
     {
         _poolCueScript.shootAvailable = true;
         _poolCueScript.RespawnPoolCue();
-        TurnSwitched?.Invoke(_sabotaged);
+        TurnSwitched?.Invoke(_sabotaged); // Call the turn switching and pass if following player is sabotaged
         _sabotaged = false;
         //TEMP GIVE PU on turn switch
         _inventoryScript.AddPowerUp();

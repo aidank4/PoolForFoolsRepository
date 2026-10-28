@@ -21,10 +21,10 @@ public class Player : MonoBehaviour
 
     [Header("Modifiable Shot Mechanics")]
     [SerializeField] private float _defaultShotSpeed = 5f;
-    [SerializeField] private float _maxCharge = 1f; // 1 for the seconds of time a player can hold down shoot at max
+    [SerializeField] private float _maxCharge = 1f; //seconds of time a player can hold down shoot at max
     [SerializeField] private float _pullBackSpeed = 1f;
-    [SerializeField] private float _rotationSpeed = 5f;
     [SerializeField] private float _ballSeparation = 0.5f;
+    [SerializeField] private float _rotationSpeed = 5f; //pool cue rotation
     [SerializeField] private float _rotationAccel = 15f;
     [SerializeField] private float _startingRotMult;
     private float _rotationMult = 1f;
@@ -39,8 +39,8 @@ public class Player : MonoBehaviour
     private GameObject _extraCueBallB;
     private GameObject _extraLineA;
     private GameObject _extraLineB;
-    private bool _rdmPowerPU = false;
-    private bool _curvedShot = false;
+    private bool _rdmPowerPU = false; //True when PU gets used
+    private bool _curvedShot = false; //True when PU gets used
 
 
     [Header("Bools")]
@@ -56,7 +56,7 @@ public class Player : MonoBehaviour
     private Vector3 _startingPos; // when shot canceled need to remember where pool cue was to reset its position
     private Vector2 _rotateInput;
     private float _tempRotateInput;
-    private bool _holding = false;
+    private bool _holding = false; //Is true when player is holding the rotate pool cue input
 
 
     //ENUMS
@@ -88,6 +88,10 @@ public class Player : MonoBehaviour
     }
 
 
+
+    /// <summary>
+    /// Subscribe events
+    /// </summary>
     private void OnEnable()
     {
         SO_PowerUp.UsePU += HandlePUs;
@@ -97,6 +101,10 @@ public class Player : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Unsubscribe
+    /// </summary>
     private void OnDisable()
     {
         SO_PowerUp.UsePU -= HandlePUs;

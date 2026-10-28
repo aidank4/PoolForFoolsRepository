@@ -96,7 +96,7 @@ public class PlayerControls : MonoBehaviour
     {
         if (context.performed)
         {
-            if (_poolCueScript.shootAvailable == true) //Cant open power ups if already shot - have to before shooting
+            if (_poolCueScript.shootAvailable == true) //Cant open inventory if already shot - have to before shooting
             {
                 InputManager.Instance.SwitchCurrentActionMap("UI");
                 _powerUpUIScript.HighlightSlotButton();
