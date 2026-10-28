@@ -44,10 +44,8 @@ public class CueBall : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Colliding");
         if (collision.gameObject.tag == "SolidBall" || collision.gameObject.tag == "StripedBall" || collision.gameObject.tag == "EightBall" || collision.gameObject.tag == "Wall")
         {
-            Debug.Log("Hit");
             hit = true;
         }
     }

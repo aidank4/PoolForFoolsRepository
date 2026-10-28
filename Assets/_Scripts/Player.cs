@@ -503,7 +503,6 @@ public class Player : MonoBehaviour
     /// <returns></returns>
     private IEnumerator CalculateCurveShot(GameObject ball, GameObject direction)
     {
-        Debug.Log("Curve Shot");
         if (_holdTimer > _maxCharge) //max out power on shot
         {
             _holdTimer = _maxCharge;
