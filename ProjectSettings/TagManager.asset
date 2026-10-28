@@ -15,6 +15,7 @@ TagManager:
   - CornerPocketD
   - SidePocketA
   - SidePocketB
+  - Wall
   layers:
   - Default
   - TransparentFX

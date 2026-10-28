@@ -13,7 +13,8 @@ public class Player : MonoBehaviour
     private TurnManager _turnManagerScript;
     [SerializeField] private GameObject _predictionLineParent;
     [SerializeField] Scrollbar _chargeVisual;
-    [SerializeField] private GameObject _cueBall;
+    [SerializeField] private GameObject _cueBall; //Ball Object
+    private CueBall _cueBallScript; //Ball Script
     [SerializeField] private GameObject _cueBallExtra;
     [SerializeField] private GameObject _poolCueModel;
     public GameObject poolCueParent { get; private set; }
@@ -31,10 +32,16 @@ public class Player : MonoBehaviour
 
 
     [Header("PowerUp Variables")]
+    [Header("Multi Ball")]
     [SerializeField] private float _multiBallShotAngle = 10;
+    [Header("Rocket Shot")]
     [SerializeField] private float _rocketShotForce = 10f;
+    [Header("Random Shot Power")]
     [SerializeField] private float _minCharge =  0.1f;
     [SerializeField] private float _rdmChargeSpeed =  5f;
+    [Header("Curved Shot")]
+    [SerializeField] private float _curveTime = 1.5f;
+    [SerializeField] private float _curveForce = 1f;
     private GameObject _extraCueBallA;
     private GameObject _extraCueBallB;
     private GameObject _extraLineA;
@@ -74,6 +81,7 @@ public class Player : MonoBehaviour
         //ref
         #region
         _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
+        _cueBallScript = _cueBall.GetComponent<CueBall>();
         poolCueParent = this.gameObject;
         #endregion
         //UI
@@ -232,7 +240,7 @@ public class Player : MonoBehaviour
             _holdTimer = UnityEngine.Random.Range(_minCharge, _maxCharge);
             _chargeVisual.gameObject.SetActive(true);
             //anim
-            StartCoroutine((RdmPowerAnim(_holdTimer))); //Handles shot release stuff
+            StartCoroutine((RdmPowerAnim(_holdTimer))); //Handles shot release stuff in here because must happen at the end of coroutine
 
         }
     }
@@ -240,7 +248,22 @@ public class Player : MonoBehaviour
 
     private void CurveShoot(ClickStage stage)
     {
-        //if ()
+        if (stage == ClickStage.Pressed && shootAvailable)
+        {
+            StartShot();
+            //Need to swap prediction line
+        }
+        if (stage == ClickStage.Released && _shooting && !_stopShot)
+        {
+            _shooting = false;
+            _holdStarted = false;
+            _turnManagerScript.keepTurn = false; //reset keep turn bool to false so that it only gets set true if the correct ball is scored
+
+            StartCoroutine(CalculateCurveShot(_cueBall, _predictionLineParent));
+            StartCoroutine(EndShot());
+            _chargeVisual.gameObject.SetActive(false);
+            Shoot = DefaultShoot;
+        }
     }
 
 
@@ -469,6 +492,54 @@ public class Player : MonoBehaviour
 
         Rigidbody ballRb = ball.GetComponent<Rigidbody>();
         ballRb.AddForceAtPosition(shotDir.normalized * shotForce, hitPos, ForceMode.Impulse); // Impulse gives all force at once - realistic for pool
+    }
+
+
+    /// <summary>
+    /// Shot the ball and have it curve to the right for 1.5 seconds
+    /// </summary>
+    /// <param name="ball"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
+    private IEnumerator CalculateCurveShot(GameObject ball, GameObject direction)
+    {
+        Debug.Log("Curve Shot");
+        if (_holdTimer > _maxCharge) //max out power on shot
+        {
+            _holdTimer = _maxCharge;
+        }
+
+        //Normal shot calculation
+        float shotForce = _defaultShotSpeed * _holdTimer;
+        Vector3 shotDir = direction.transform.forward;
+        //calculate where to hit the ball
+        Vector3 hitPos = ball.transform.position - (shotDir * _ballRadius); // Perfect center of the ball no added spin
+        //Vector3 hitPosSpin = new Vector3(hitPos.x, hitPos.y - 1, hitPos.z); // Change these values to affect spin
+        poolCueParent.transform.position = hitPos; //snap pool cue forward to "hit the ball"
+        Rigidbody ballRb = ball.GetComponent<Rigidbody>();
+        ballRb.AddForceAtPosition(shotDir.normalized * shotForce, hitPos, ForceMode.Impulse); // Impulse gives all force at once - realistic for pool
+
+        //Add curve
+        float timer = 0f;
+        shotDir = direction.transform.right;
+        while (timer < _curveTime)
+        {
+            if (_cueBallScript.hit) //If ball gets hit stop curving
+            {
+                timer = _curveTime;
+                break; 
+            }
+            else if (_turnManagerScript.scratch) //If ball gets scratched stop curving
+            {
+                timer = _curveTime;
+                break; 
+            }
+            hitPos = ball.transform.position - (shotDir * _ballRadius); //update hit pos to the side of the ball
+            ballRb.AddForceAtPosition((shotDir.normalized * _curveForce) / shotForce, hitPos, ForceMode.Force); //Give force divided by original shot force to not overload with speed
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
     }
 
 

@@ -82,6 +82,7 @@ public class BallManager : MonoBehaviour
 
     //Events
     public Action BallsStopped;
+    public Action CueBallHit;
 
 
 
@@ -681,5 +682,4 @@ public class BallManager : MonoBehaviour
             }
         }
     }
-
 }

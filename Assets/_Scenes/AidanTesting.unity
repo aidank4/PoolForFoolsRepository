@@ -19512,7 +19512,7 @@ GameObject:
   - component: {fileID: 5848444128058340234}
   m_Layer: 0
   m_Name: LeftWall (2)
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -20131,7 +20131,6 @@ MonoBehaviour:
   _solidsIcon: {fileID: 21300000, guid: 963292ee5d4c75c4a96f066763bde6f1, type: 3}
   keepTurn: 0
   scratch: 0
-  _sabotaged: 0
 --- !u!114 &4264846191734543706
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20688,7 +20687,7 @@ GameObject:
   - component: {fileID: 5764407163367619901}
   m_Layer: 0
   m_Name: LeftWall (1)
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -21784,7 +21783,7 @@ GameObject:
   - component: {fileID: 8340666404432769154}
   m_Layer: 0
   m_Name: LeftWall (3)
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -22047,8 +22046,7 @@ MonoBehaviour:
   - {fileID: 1947731074149184172}
   - {fileID: 7203519996056606106}
   _availablePUs:
-  - {fileID: 11400000, guid: a7024bd178d9a7d42937413ff5697166, type: 2}
-  - {fileID: 11400000, guid: fb0343564af02ea4aab6706bf0758123, type: 2}
+  - {fileID: 11400000, guid: 1bfb96eff602c5f438838a20a8256e34, type: 2}
   _extraPowerUp: {fileID: 0}
 --- !u!1001 &5628699300941441875
 PrefabInstance:
@@ -23762,7 +23760,7 @@ GameObject:
   - component: {fileID: 5168933977844697292}
   m_Layer: 0
   m_Name: FrontWall (1)
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -28846,7 +28844,7 @@ GameObject:
   - component: {fileID: 5174981229577612450}
   m_Layer: 0
   m_Name: LeftWall (4)
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -30022,7 +30020,7 @@ GameObject:
   - component: {fileID: 2228906173612475283}
   m_Layer: 0
   m_Name: FrontWall
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -31178,7 +31176,7 @@ GameObject:
   - component: {fileID: 5642117933205004097}
   m_Layer: 0
   m_Name: LeftWall
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -31281,7 +31279,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8491427364133113310, guid: f2a5f11a58621b344b2851dbb1c217b9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4735585732675677689}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6417604634978986916, guid: f2a5f11a58621b344b2851dbb1c217b9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8578502539859669337}
   m_SourcePrefab: {fileID: 100100000, guid: f2a5f11a58621b344b2851dbb1c217b9, type: 3}
 --- !u!1 &8578502539859669332 stripped
 GameObject:
@@ -31293,6 +31294,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8491427364133113310, guid: f2a5f11a58621b344b2851dbb1c217b9, type: 3}
   m_PrefabInstance: {fileID: 8578502539859669331}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8578502539859669337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8578502539859669332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1be85e63e81d6f541a3e506757006be4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CueBall
+  _turnManagerRef: {fileID: 4757813463566609894}
 --- !u!1 &8581794171349956632
 GameObject:
   m_ObjectHideFlags: 0
