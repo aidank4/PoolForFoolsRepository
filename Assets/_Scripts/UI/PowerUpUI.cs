@@ -154,10 +154,13 @@ public class PowerUpUI : MonoBehaviour
         _sabotageIconUI.gameObject.SetActive(true);
         foreach (Sprite icon in icons) //Place Icons in center
         {
-            //Create object with an image component and give it the icon of the used sabotage
+            //Create object with an image component and give it the icon of the used sabotage along with description
             GameObject obj = new GameObject("icon");
             Image objImage = obj.AddComponent<Image>();
             objImage.sprite = icon;
+            TMP_Text objDescription = obj.AddComponent<TMP_Text>();
+            //objDescription.text = 
+
 
             //Set it as a child of the center background and center it
             obj.transform.SetParent(_sabotageIconUI.gameObject.transform, false);
