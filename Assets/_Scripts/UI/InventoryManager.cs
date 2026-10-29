@@ -368,7 +368,7 @@ public class InventoryManager : MonoBehaviour
             else
             {
                 _powerUpUIScript.HidePUConflictUI(); //Close UI if used through inventory rather than hot key
-                InputManager.Instance.SwitchCurrentActionMap("Continue"); //state where a key is pressed to move forward
+                InputManager.Instance.SwitchCurrentActionMap("PowerUpUI"); //state where a key is pressed to move forward
 
                 _nameTextPU.text = _selectedPU.id; //UI
                 _descriptionTextPU.text = _selectedPU.description;

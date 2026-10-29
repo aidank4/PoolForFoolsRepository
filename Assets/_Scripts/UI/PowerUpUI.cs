@@ -21,12 +21,15 @@ public class PowerUpUI : MonoBehaviour
     [SerializeField] private TMP_Text _slotDescription;
     [SerializeField] private Image _sabotageOverlay; //SabotageUI
     [SerializeField] private Image _sabotageIconUI;
+    [SerializeField] private Image _sabotageDescriptionUI;
     [SerializeField] private Image _sabotageCorner;
     [SerializeField] private TMP_Text _sabotageText;
 
-    [Header("Power Ups")]
-    [SerializeField]private List<Sprite> _sIcons = new List<Sprite>(); //Sabotage Icons that will appear
-    [SerializeField]private List<GameObject> _sIconHolder = new List<GameObject>(); //Game Object to hold those icons
+    [Header("Sabotage UI")]
+    private List<SO_PowerUp> _sPowerUps = new List<SO_PowerUp>(); //Sabotage Icons and descriptions that will appear
+    private List<GameObject> _sIconsHolder = new List<GameObject>(); //Game Object to hold those icons
+    private List<GameObject> _sDescriptionsHolder = new List<GameObject>(); //Game Object to hold those descriptions
+    private float _sabotageUIHeight;
 
     private void Awake()
     {
@@ -38,9 +41,12 @@ public class PowerUpUI : MonoBehaviour
         _powerUpIcon.gameObject.SetActive(false);
         _sabotageOverlay.gameObject.SetActive(false);
         _sabotageIconUI.gameObject.SetActive(false);
+        _sabotageDescriptionUI.gameObject.SetActive(false);
         _sabotageCorner.gameObject.SetActive(false);
         _sabotageText.gameObject.SetActive(false);
         #endregion
+        //Extra
+        _sabotageUIHeight = _sabotageIconUI.GetComponent<RectTransform>().rect.height;
     }
 
 
@@ -144,58 +150,94 @@ public class PowerUpUI : MonoBehaviour
 
 
     /// <summary>
+    /// Hide center sabotage UI and move it to the corner
+    /// </summary>
+    public void CornerSabotageUI()
+    {
+        //Hide center sabotage UI
+        _sabotageOverlay.gameObject.SetActive(false);
+        _sabotageIconUI.gameObject.SetActive(false);
+        _sabotageDescriptionUI.gameObject.SetActive(false);
+
+        //Activate corner UI
+        _sabotageCorner.gameObject.SetActive(true);
+        _sabotageText.gameObject.SetActive(true);
+
+        foreach (GameObject obj in _sIconsHolder) //Place icons in corner
+        {
+            obj.transform.SetParent(_sabotageCorner.gameObject.transform, false);
+        }
+    }
+
+
+    /// <summary>
     /// Show UI displaying the player has been sabotaged.
     /// </summary>
     /// <param name="icons"></param>
     /// <returns></returns>
-    private IEnumerator SabotageUI(Sprite[] icons)
+    private void CenterSabotageUI(SO_PowerUp[] powerUps)
     {
-        _sabotageOverlay.gameObject.SetActive(true); //center UI On
+        //Activate UI
+        _sabotageOverlay.gameObject.SetActive(true);
         _sabotageIconUI.gameObject.SetActive(true);
-        foreach (Sprite icon in icons) //Place Icons in center
+        _sabotageDescriptionUI.gameObject.SetActive(true);
+
+        //Size UI
+        RectTransform iRect = _sabotageIconUI.GetComponent<RectTransform>();
+        iRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, _sabotageUIHeight * powerUps.Length);
+        RectTransform dRect = _sabotageDescriptionUI.GetComponent<RectTransform>();
+        dRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, _sabotageUIHeight * powerUps.Length);
+
+        foreach (SO_PowerUp powerUp in powerUps) //Place UI in center
         {
-            //Create object with an image component and give it the icon of the used sabotage along with description
-            GameObject obj = new GameObject("icon");
-            Image objImage = obj.AddComponent<Image>();
-            objImage.sprite = icon;
-            TMP_Text objDescription = obj.AddComponent<TMP_Text>();
-            //objDescription.text = 
+            //Create object with an image component
+            GameObject iObj = new GameObject("powerUpIcon");
+            Image iImage = iObj.AddComponent<Image>();
+            iImage.sprite = powerUp.icon; //asiign image to sabotage icon
+            iObj.transform.SetParent(_sabotageIconUI.gameObject.transform, false); //Set icons as children of the center background and center them
 
 
-            //Set it as a child of the center background and center it
-            obj.transform.SetParent(_sabotageIconUI.gameObject.transform, false);
-            RectTransform rectTransform = obj.GetComponent<RectTransform>();
-            rectTransform.anchoredPosition = new Vector2(0, 0);
-            _sIconHolder.Add(obj);
-        }
-        yield return new WaitForSeconds(1.5f);
-        _sabotageOverlay.gameObject.SetActive(false);
-        _sabotageIconUI.gameObject.SetActive(false);
+            //Create object with a text component
+            GameObject dObj = new GameObject("powerUpDescription");
+            TextMeshProUGUI dText = dObj.AddComponent<TextMeshProUGUI>();
+            dText.text = powerUp.description; //Assign text to sabotage description
+            dText.alignment = TextAlignmentOptions.Center;
+            dObj.transform.SetParent(_sabotageDescriptionUI.gameObject.transform, false); //add as a child of background
+            GridLayoutGroup dGrid = _sabotageDescriptionUI.GetComponent<GridLayoutGroup>();
+
+            //Set grid size to change depending on amount of descriptions
+            float cellX = (dRect.rect.width - 50); //50 serves as padding
+            float cellY = (dRect.rect.height - 50) / powerUps.Length; //1 object takes full space but multiple share space
+            dGrid.cellSize = new Vector2(cellX, cellY);
 
 
-        _sabotageCorner.gameObject.SetActive(true);//Corner UI On
-        _sabotageText.gameObject.SetActive(true);
-        foreach (GameObject obj in _sIconHolder) //Place icons in corner
-        {
-            //Set icons as a child to the corner background and center
-            obj.transform.SetParent(_sabotageCorner.gameObject.transform, false);
-            RectTransform rectTransform = obj.GetComponent<RectTransform>();
-            rectTransform.anchoredPosition = new Vector2(0, 0);
+            //save reference
+            _sIconsHolder.Add(iObj);
+            _sDescriptionsHolder.Add(dObj);
+
+            InputManager.Instance.SwitchCurrentActionMap("SabotageUI");
         }
     }
 
     /// <summary>
-    /// Hide remaining sabotage UI and reset list of icons
+    /// Hide remaining sabotage UI and reset lists
     /// </summary>
     public void ResetSabotageUI()
     {
         _sabotageCorner.gameObject.SetActive(false); //Hide corner sabotage UI
         _sabotageText.gameObject.SetActive(false);
-        foreach (GameObject obj in _sIconHolder) //Clear all the children
+
+        //Clear all the children
+        foreach (GameObject obj in _sIconsHolder)
         {
             Destroy(obj);
         }
-        _sIconHolder.Clear();
+        foreach (GameObject obj in _sDescriptionsHolder)
+        {
+            Destroy(obj);
+        }
+        _sIconsHolder.Clear();
+        _sDescriptionsHolder.Clear();
     }
 
 
@@ -207,8 +249,8 @@ public class PowerUpUI : MonoBehaviour
     {
         if (sabotaged)
         {
-            StartCoroutine(SabotageUI(_sIcons.ToArray()));
-            _sIcons.Clear();
+            CenterSabotageUI(_sPowerUps.ToArray());
+            _sPowerUps.Clear();
         }
     }
 
@@ -221,7 +263,7 @@ public class PowerUpUI : MonoBehaviour
     {
         if (powerUp.affectNext)
         {
-            _sIcons.Add(powerUp.icon);
+            _sPowerUps.Add(powerUp);
         }
     }
 }

@@ -453,7 +453,7 @@
             ]
         },
         {
-            "name": "Continue",
+            "name": "PowerUpUI",
             "id": "d8af6ef1-61f1-4875-b93e-ed39185e60e8",
             "actions": [
                 {
@@ -471,6 +471,35 @@
                 {
                     "name": "",
                     "id": "fd8ef1ba-e977-411f-8814-9d89fbf2e5dd",
+                    "path": "<Keyboard>/anyKey",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Close",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "SabotageUI",
+            "id": "851826ad-2989-48b6-ab57-f2c33f881f4b",
+            "actions": [
+                {
+                    "name": "Close",
+                    "type": "Button",
+                    "id": "0871e476-a6fa-4331-abd2-33d471be9113",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "2711452d-179c-4f94-beaf-1b35360346b8",
                     "path": "<Keyboard>/anyKey",
                     "interactions": "",
                     "processors": "",

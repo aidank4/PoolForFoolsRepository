@@ -86,7 +86,22 @@ public class PlayerControls : MonoBehaviour
     }
     #endregion
 
-    
+
+    /// <summary>
+    /// Invokes CornerSabotageUI() which moves the UI from the center to the corner.
+    /// Then changes input to gameplay
+    /// </summary>
+    /// <param name="context"></param>
+    public void CloseSabotageUI(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            _powerUpUIScript.CornerSabotageUI();
+            InputManager.Instance.SwitchCurrentActionMap("Gameplay");
+        }
+    }
+
+
 
     /// <summary>
     /// switches to UI inputs and highlights an inventory slot

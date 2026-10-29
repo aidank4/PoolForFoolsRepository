@@ -42,6 +42,7 @@ public class Player : MonoBehaviour
     [Header("Curved Shot")]
     [SerializeField] private float _curveTime = 1.5f;
     [SerializeField] private float _curveForce = 1f;
+    [SerializeField] private float _curveStopHeight = 1.5f;
     private GameObject _extraCueBallA;
     private GameObject _extraCueBallB;
     private GameObject _extraLineA;
@@ -526,15 +527,20 @@ public class Player : MonoBehaviour
             if (_cueBallScript.hit) //If ball gets hit stop curving
             {
                 timer = _curveTime;
-                break; 
+                break;
             }
             else if (_turnManagerScript.scratch) //If ball gets scratched stop curving
             {
                 timer = _curveTime;
-                break; 
+                break;
+            }
+            else if (_cueBall.transform.position.y > _curveStopHeight) //If ball starts riding wall stop curving
+            {
+                timer = _curveTime;
+                break;
             }
             hitPos = ball.transform.position - (shotDir * _ballRadius); //update hit pos to the side of the ball
-            ballRb.AddForceAtPosition((shotDir.normalized * _curveForce) / shotForce, hitPos, ForceMode.Force); //Give force divided by original shot force to not overload with speed
+            ballRb.AddForceAtPosition((shotDir.normalized * _curveForce), hitPos, ForceMode.Force); //Give force divided by original shot force to not overload with speed
             timer += Time.deltaTime;
             yield return null;
         }
