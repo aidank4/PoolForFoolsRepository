@@ -86,7 +86,22 @@ public class PlayerControls : MonoBehaviour
     }
     #endregion
 
-    
+
+    /// <summary>
+    /// Invokes CornerSabotageUI() which moves the UI from the center to the corner.
+    /// Then changes input to gameplay
+    /// </summary>
+    /// <param name="context"></param>
+    public void CloseSabotageUI(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            _powerUpUIScript.CornerSabotageUI();
+            InputManager.Instance.SwitchCurrentActionMap("Gameplay");
+        }
+    }
+
+
 
     /// <summary>
     /// switches to UI inputs and highlights an inventory slot
@@ -96,7 +111,7 @@ public class PlayerControls : MonoBehaviour
     {
         if (context.performed)
         {
-            if (_poolCueScript.shootAvailable == true) //Cant open power ups if already shot - have to before shooting
+            if (_poolCueScript.shootAvailable == true) //Cant open inventory if already shot - have to before shooting
             {
                 InputManager.Instance.SwitchCurrentActionMap("UI");
                 _powerUpUIScript.HighlightSlotButton();

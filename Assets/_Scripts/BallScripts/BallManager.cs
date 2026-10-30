@@ -25,7 +25,10 @@ public class BallManager : MonoBehaviour
     [SerializeField] private GameObject _cueBall;
     [SerializeField] private GameObject _vfxManagerRef;
     private VFXManager _vfxManager;
-
+    [SerializeField] private GameObject _pocketManagerRef;
+    private PocketManager _pocketManager;
+    [SerializeField] private GameObject _turnManagerRef;
+    private TurnManager _turnManager;
 
     [Header("Spawn Randomness")]
     [SerializeField] private float _spawnVarianceMin = -0.05f;
@@ -45,7 +48,7 @@ public class BallManager : MonoBehaviour
     private float _timer;
     private float _maxTimer;
     private float _minWaitTime = 0.25f;
-    private float _maxWaitTime = 3f; // seconds
+    private float _maxWaitTime = 3f; //seconds
 
 
     [Header("Power Ups")]
@@ -59,21 +62,27 @@ public class BallManager : MonoBehaviour
     [SerializeField] private float _initialBlinkSpeed = 0.5f;
     private float _blinkMultiplier = 1f;
     private int _blinkCount = 0;
-    private bool _bombBlastActive = false;
+    private bool _bombBlastActive = false; //When bomb PU is active
     [Header("Rocket")]
-    private bool _rocketShotPUActive = false;
+    private bool _rocketShotPUActive = false; //When Rocket PU is active
     private Transform _rocketModel;
     private Transform _baseCueBallModel;
     [Header("Magnet")]
     [SerializeField] private float _attractionRadius = 3f; 
     [SerializeField] private float _attractionforce = 0.1f; 
-    private bool _magnetActive = false;
-    //misc
-    private bool _eightBallPUActive = false;
+    private bool _magnetActive = false; //When Magnet PU is active
+    [Header("8Ball")]
+    private bool _eightBallPUActive = false; //When 8ball PU is active
+    [Header("Giant Balls")]
+    [SerializeField] private float _gbSizeScaler = 3f;
+    private bool _ballsBig = false; //The balls are currently big or not
+    private bool _gbActive = false; //Giant Balls PU got activated -- affects following turn
+
 
 
     //Events
     public Action BallsStopped;
+    public Action CueBallHit;
 
 
 
@@ -85,6 +94,8 @@ public class BallManager : MonoBehaviour
         _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
         _rocketModel = _cueBall.transform.Find("Rocket Model");
         _baseCueBallModel = _cueBall.transform.Find("Cue Ball Model");
+        _pocketManager = _pocketManagerRef.GetComponent<PocketManager>();
+        _turnManager = _turnManagerRef.GetComponent<TurnManager>();
         #endregion
         //hide
         #region
@@ -98,29 +109,48 @@ public class BallManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Subscribe to Events
+    /// </summary>
     private void OnEnable()
     {
         if (_poolCueScript != null)
         {
             _poolCueScript.ShotCompleted += HandleShotEvent;
-            SO_PowerUp.UsePU += HandlePowerUps;
         }
+        if (_pocketManager != null)
+        {
+            _pocketManager.Scratched += HandleScratch;
+        }
+        if (_turnManager != null)
+        {
+            _turnManager.TurnSwitched += HandleTurnSwitch;
+        }
+        SO_PowerUp.UsePU += HandlePowerUps;
     }
 
+
+    /// <summary>
+    /// Unsubscribe
+    /// </summary>
     private void OnDisable()
     {
         if (_poolCueScript != null)
         {
             _poolCueScript.ShotCompleted -= HandleShotEvent;
-            SO_PowerUp.UsePU += HandlePowerUps;
         }
+        if (_pocketManager != null)
+        {
+            _pocketManager.Scratched -= HandleScratch;
+        }
+        SO_PowerUp.UsePU += HandlePowerUps;
     }
 
 
     private void FixedUpdate()
     {
         BallCheck();
-        if (_rocketShotPUActive && !_checkBalls)
+        if (_rocketShotPUActive && !_checkBalls) //Rotate rocket while player aims
         {
             RocketRotation();
         }
@@ -128,7 +158,7 @@ public class BallManager : MonoBehaviour
 
     private void Update()
     {
-        if (_magnetActive && _cueBall.GetComponent<Rigidbody>().linearVelocity.magnitude > .2f) //if under .2 balls should stop magnitizing
+        if (_magnetActive && _cueBall.GetComponent<Rigidbody>().linearVelocity.magnitude > .2f) //if under .2 balls should stop magnitizing to let cue ball stop
         {
             MagnetAttract();
         }
@@ -197,10 +227,12 @@ public class BallManager : MonoBehaviour
     /// </summary>
     private void BallCheckOver()
     {
-        _checkBalls = false;
         BallsStoppedEvent();
+        _checkBalls = false;
         _timer = 0;
         _maxTimer = 0;
+
+        //Reset Power Ups
         if (_eightBallPUActive)
         {
             EightBallPU(false);
@@ -213,6 +245,11 @@ public class BallManager : MonoBehaviour
         {
             _magnetActive = false;
             _vfxManager.MagnetOff();
+        }
+        if (_ballsBig)
+        {
+            _ballsBig = false;
+            ResetGiantBalls();
         }
     }
 
@@ -273,7 +310,7 @@ public class BallManager : MonoBehaviour
         int indexB;
         int holder = solidOptions.Count;
         solidOptions.Add(tempBall);
-        for (int i = 0; i < 30; i++)
+        for (int i = 0; i < 30; i++) //30 swaps to randomize order
         {
             bool different = false;
             indexA = UnityEngine.Random.Range(0, solidOptions.Count - 2); // - 2 because holder is in here being null
@@ -312,7 +349,7 @@ public class BallManager : MonoBehaviour
         int indexB;
         int holder = stripesOptions.Count;
         stripesOptions.Add(tempBall);
-        for (int i = 0; i < 30; i++)
+        for (int i = 0; i < 30; i++) //30 swaps to randomize order
         {
             bool different = false;
             indexA = UnityEngine.Random.Range(0, stripesOptions.Count - 2); // - 2 because holder is in here being null
@@ -344,7 +381,7 @@ public class BallManager : MonoBehaviour
         int stripesIndex = 0;
         for (int i = 0; i < _balls.Length; i++)
         {
-            if (i == 4)
+            if (i == 4) //8 ball must spawn 4th to be in the center
             {
                 for (int idx = 0; idx < _balls.Length; idx++)
                 {
@@ -471,17 +508,18 @@ public class BallManager : MonoBehaviour
     {
         _checkBalls = false;
         _blinkMultiplier *= 0.25f;
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1f); // After 1 second blink faster
         _blinkMultiplier *= 0.25f;
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(.5f); //After 0.5 secs blow up
         StopAllCoroutines();
         _blinkMultiplier = 1f; //reset
         _cueBall.GetComponentInChildren<Renderer>().material = _blinkBaseColor;
         _vfxManager.ExplosionEffect(_cueBall.transform.position);
+
         Collider[] nearbyObjects = Physics.OverlapSphere(_cueBall.transform.position, _explosiveRadius);
         foreach (Collider obj in nearbyObjects)
         {
-            if (obj != _cueBall.GetComponent<Collider>())
+            if (obj != _cueBall.GetComponent<Collider>()) //don't blow up cue ball
             { 
                 if (obj.TryGetComponent(out Rigidbody rb))
                 {
@@ -513,27 +551,85 @@ public class BallManager : MonoBehaviour
             _blinkCount++;
         }
         yield return new WaitForSeconds(_initialBlinkSpeed * _blinkMultiplier);
-        StartCoroutine(BlastBlink(ballMesh));
+        StartCoroutine(BlastBlink(ballMesh)); // Keep calling to blink
     }
 
 
+    /// <summary>
+    /// Pull in nearby collider objects
+    /// </summary>
     private void MagnetAttract()
     {
         Collider[] closeBalls = Physics.OverlapSphere(_cueBall.transform.position, _attractionRadius);
         foreach (Collider victim in closeBalls)
         {
-            if (victim != _cueBall.GetComponent<Collider>())
+            if (victim != _cueBall.GetComponent<Collider>()) //Pull all balls except for cue ball
             {
                 if (victim.TryGetComponent(out Rigidbody rb))
                 {
                     Vector3 direction = rb.gameObject.transform.position - _cueBall.transform.position;
-                    float distance = direction.magnitude;
-                    if (distance > 0.75f)
+                    float distance = direction.magnitude; //How far from cue ball
+                    if (distance > 0.75f) //don't pull objects to close to the cue ball - or else they always push it
                     {
                         rb.AddForce(direction.normalized * (-_attractionforce/distance), ForceMode.Force);
                     }
                 }
             }
+        }
+    }
+
+
+    /// <summary>
+    /// aside from the cue ball, make all the balls grow in size. Also turn the pockets off
+    /// </summary>
+    private void MakeGiantBalls()
+    {
+        foreach (GameObject ball in _spawnedBalls)
+        {
+            if (ball == _cueBall) // dont make cue ball big
+            {
+                continue;
+            }
+            ball.transform.localScale *= _gbSizeScaler;
+            Rigidbody ballRb = ball.GetComponent<Rigidbody>(); //Turn off and on physics or else balls get stuck "flying"
+            ballRb.isKinematic = true;
+            ballRb.isKinematic = false;
+        }
+    }
+
+
+    /// <summary>
+    /// return the balls to regular size and turn pockets back on
+    /// </summary>
+    private void ResetGiantBalls()
+    {
+        foreach (GameObject ball in _spawnedBalls)
+        {
+            if (ball == _cueBall) // dont make cue ball small
+            {
+                continue;
+            }
+            ball.transform.localScale /= _gbSizeScaler;
+            Rigidbody ballRb = ball.GetComponent<Rigidbody>(); //Turn off and on physics or else balls get stuck "flying"
+            ballRb.isKinematic = true;
+            ballRb.isKinematic = false;
+        }
+    }
+
+
+    /// <summary>
+    /// On scratch reset cue ball affecting power ups
+    /// </summary>
+    private void HandleScratch()
+    {
+        if (_rocketShotPUActive)
+        {
+            RocketBall();
+        }
+        if (_magnetActive)
+        {
+            _magnetActive = false;
+            _vfxManager.MagnetOff();
         }
     }
 
@@ -562,6 +658,28 @@ public class BallManager : MonoBehaviour
         {
             _magnetActive = true;
             _vfxManager.MagnetOn(_cueBall.transform);
+        }
+        if (powerUp.id == "Giant Balls")
+        {
+            _gbActive = true;
+        }
+    }
+
+    /// <summary>
+    /// Update power ups that affect next
+    /// </summary>
+    /// <param name="sabotaged"></param>
+    private void HandleTurnSwitch(bool sabotaged)
+    {
+        if (sabotaged)
+        {
+            //check dif PUs
+            if (_gbActive)
+            {
+                _gbActive = false;
+                MakeGiantBalls();
+                _ballsBig = true;
+            }
         }
     }
 }

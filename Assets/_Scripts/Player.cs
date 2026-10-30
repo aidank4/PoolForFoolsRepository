@@ -13,34 +13,42 @@ public class Player : MonoBehaviour
     private TurnManager _turnManagerScript;
     [SerializeField] private GameObject _predictionLineParent;
     [SerializeField] Scrollbar _chargeVisual;
-    [SerializeField] private GameObject _cueBall;
+    [SerializeField] private GameObject _cueBall; //Ball Object
+    private CueBall _cueBallScript; //Ball Script
     [SerializeField] private GameObject _cueBallExtra;
     [SerializeField] private GameObject _poolCueModel;
     public GameObject poolCueParent { get; private set; }
-    [SerializeField] private GameObject _vfxManagerRef;
-    private VFXManager _vfxManager;
 
 
     [Header("Modifiable Shot Mechanics")]
     [SerializeField] private float _defaultShotSpeed = 5f;
-    [SerializeField] private float _maxCharge = 1f; // 1 for the seconds of time a player can hold down shoot at max
+    [SerializeField] private float _maxCharge = 1f; //seconds of time a player can hold down shoot at max
     [SerializeField] private float _pullBackSpeed = 1f;
-    [SerializeField] private float _rotationSpeed = 50f;
     [SerializeField] private float _ballSeparation = 0.5f;
+    [SerializeField] private float _rotationSpeed = 5f; //pool cue rotation
+    [SerializeField] private float _rotationAccel = 15f;
+    [SerializeField] private float _startingRotMult;
+    private float _rotationMult = 1f;
 
 
     [Header("PowerUp Variables")]
+    [Header("Multi Ball")]
     [SerializeField] private float _multiBallShotAngle = 10;
+    [Header("Rocket Shot")]
     [SerializeField] private float _rocketShotForce = 10f;
+    [Header("Random Shot Power")]
     [SerializeField] private float _minCharge =  0.1f;
     [SerializeField] private float _rdmChargeSpeed =  5f;
+    [Header("Curved Shot")]
+    [SerializeField] private float _curveTime = 1.5f;
+    [SerializeField] private float _curveForce = 1f;
+    [SerializeField] private float _curveStopHeight = 1.5f;
     private GameObject _extraCueBallA;
     private GameObject _extraCueBallB;
     private GameObject _extraLineA;
     private GameObject _extraLineB;
-    private bool _sabotaged = false;
-    private List<Sprite> _sabotageIcons = new List<Sprite>();
-    private bool _rdmPowerPU = false;
+    private bool _rdmPowerPU = false; //True when PU gets used
+    private bool _curvedShot = false; //True when PU gets used
 
 
     [Header("Bools")]
@@ -56,6 +64,7 @@ public class Player : MonoBehaviour
     private Vector3 _startingPos; // when shot canceled need to remember where pool cue was to reset its position
     private Vector2 _rotateInput;
     private float _tempRotateInput;
+    private bool _holding = false; //Is true when player is holding the rotate pool cue input
 
 
     //ENUMS
@@ -73,8 +82,8 @@ public class Player : MonoBehaviour
         //ref
         #region
         _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
+        _cueBallScript = _cueBall.GetComponent<CueBall>();
         poolCueParent = this.gameObject;
-        _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
         #endregion
         //UI
         _chargeVisual.gameObject.SetActive(false);
@@ -83,10 +92,15 @@ public class Player : MonoBehaviour
         _ballRadius = _cueBall.GetComponent<SphereCollider>().radius; //used for shoot math but the radius only needs to be gathered once so I have it here in Awake.
         _predictionLineParent.transform.position = _cueBall.transform.position + new Vector3(0, 0, _ballSeparation); //set up prediction lines position and rotation
         _predictionLineParent.transform.eulerAngles = new Vector3(0, 0, 0);
+        _startingRotMult = _rotationMult;
         Shoot = DefaultShoot;
     }
 
 
+
+    /// <summary>
+    /// Subscribe events
+    /// </summary>
     private void OnEnable()
     {
         SO_PowerUp.UsePU += HandlePUs;
@@ -96,6 +110,10 @@ public class Player : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Unsubscribe
+    /// </summary>
     private void OnDisable()
     {
         SO_PowerUp.UsePU -= HandlePUs;
@@ -108,10 +126,18 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        //Debug.Log(_poolCueParent.transform.right);
-        //If given input rotate pool cue and visual indicator
-        poolCueParent.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
-        _predictionLineParent.transform.RotateAround(_cueBall.transform.position, new Vector3 (0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime); //USING TEMP ROTATE
+        //Rotate pool cue
+        poolCueParent.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), (_rotationSpeed * _rotationMult) * Time.deltaTime);
+        _predictionLineParent.transform.RotateAround(_cueBall.transform.position, new Vector3 (0, _tempRotateInput, 0), (_rotationSpeed * _rotationMult) * Time.deltaTime); //USING TEMP ROTATE
+        if (_holding)
+        {
+            if (_rotationMult > 100)
+            {
+                _rotationMult = _startingRotMult;
+            }
+            _rotationMult += (_rotationAccel * Time.deltaTime);
+        }
+        
         if (Shoot == MultiShoot)
         {
             _extraCueBallA.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
@@ -119,7 +145,6 @@ public class Player : MonoBehaviour
             _extraCueBallB.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
             _extraLineB.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
         }//Rotate extra balls and lines when multi shoot active
-
         if (_holdStarted && !_stopShot)
         {
             _holdTimer += Time.deltaTime;
@@ -216,8 +241,29 @@ public class Player : MonoBehaviour
             _holdTimer = UnityEngine.Random.Range(_minCharge, _maxCharge);
             _chargeVisual.gameObject.SetActive(true);
             //anim
-            StartCoroutine((RdmPowerAnim(_holdTimer))); //Handles shot release stuff
+            StartCoroutine((RdmPowerAnim(_holdTimer))); //Handles shot release stuff in here because must happen at the end of coroutine
 
+        }
+    }
+
+
+    private void CurveShoot(ClickStage stage)
+    {
+        if (stage == ClickStage.Pressed && shootAvailable)
+        {
+            StartShot();
+            //Need to swap prediction line
+        }
+        if (stage == ClickStage.Released && _shooting && !_stopShot)
+        {
+            _shooting = false;
+            _holdStarted = false;
+            _turnManagerScript.keepTurn = false; //reset keep turn bool to false so that it only gets set true if the correct ball is scored
+
+            StartCoroutine(CalculateCurveShot(_cueBall, _predictionLineParent));
+            StartCoroutine(EndShot());
+            _chargeVisual.gameObject.SetActive(false);
+            Shoot = DefaultShoot;
         }
     }
 
@@ -390,6 +436,15 @@ public class Player : MonoBehaviour
         // WASD _rotateInput = context.ReadValue<Vector2>();
         //TEMP NO WASD
         _tempRotateInput = -context.ReadValue<float>();
+        if (context.started)
+        {
+            _holding = true;
+        }
+        if (context.canceled)
+        {
+            _holding = false;
+            _rotationMult = _startingRotMult;
+        }
     }
 
 
@@ -438,6 +493,59 @@ public class Player : MonoBehaviour
 
         Rigidbody ballRb = ball.GetComponent<Rigidbody>();
         ballRb.AddForceAtPosition(shotDir.normalized * shotForce, hitPos, ForceMode.Impulse); // Impulse gives all force at once - realistic for pool
+    }
+
+
+    /// <summary>
+    /// Shot the ball and have it curve to the right for 1.5 seconds
+    /// </summary>
+    /// <param name="ball"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
+    private IEnumerator CalculateCurveShot(GameObject ball, GameObject direction)
+    {
+        if (_holdTimer > _maxCharge) //max out power on shot
+        {
+            _holdTimer = _maxCharge;
+        }
+
+        //Normal shot calculation
+        float shotForce = _defaultShotSpeed * _holdTimer;
+        Vector3 shotDir = direction.transform.forward;
+        //calculate where to hit the ball
+        Vector3 hitPos = ball.transform.position - (shotDir * _ballRadius); // Perfect center of the ball no added spin
+        //Vector3 hitPosSpin = new Vector3(hitPos.x, hitPos.y - 1, hitPos.z); // Change these values to affect spin
+        poolCueParent.transform.position = hitPos; //snap pool cue forward to "hit the ball"
+        Rigidbody ballRb = ball.GetComponent<Rigidbody>();
+        ballRb.AddForceAtPosition(shotDir.normalized * shotForce, hitPos, ForceMode.Impulse); // Impulse gives all force at once - realistic for pool
+
+        //Add curve
+        float timer = 0f;
+        shotDir = direction.transform.right;
+        while (timer < _curveTime)
+        {
+            Debug.Log("curving");
+            if (_cueBallScript.hit) //If ball gets hit stop curving
+            {
+                timer = _curveTime;
+                break;
+            }
+            else if (_turnManagerScript.scratch) //If ball gets scratched stop curving
+            {
+                timer = _curveTime;
+                break;
+            }
+            else if (_cueBall.transform.position.y > _curveStopHeight) //If ball starts riding wall stop curving
+            {
+                timer = _curveTime;
+                break;
+            }
+            hitPos = ball.transform.position - (shotDir * _ballRadius); //update hit pos to the side of the ball
+            ballRb.AddForceAtPosition((shotDir.normalized * _curveForce) * Time.deltaTime, hitPos, ForceMode.Force); //Give force divided by original shot force to not overload with speed
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
     }
 
 
@@ -497,11 +605,6 @@ public class Player : MonoBehaviour
     /// <param name="powerUP"></param>
     private void HandlePUs(SO_PowerUp powerUP)
     {
-        if (powerUP.affectNext && !_sabotaged)
-        {
-            _sabotaged = true;
-            _sabotageIcons.Add(powerUP.icon);
-        }
         if (powerUP.id == "Multi Shot")
         {
             SpawnMultiBalls();
@@ -515,21 +618,32 @@ public class Player : MonoBehaviour
         {
             _rdmPowerPU = true;
         }
+        if (powerUP.id == "Curved Shot")
+        {
+            _curvedShot = true;
+        }
     }
 
-    private void HandleTurnSwitch()
+
+    /// <summary>
+    /// Update power ups that affect next
+    /// </summary>
+    /// <param name="sabotaged"></param>
+    private void HandleTurnSwitch(bool sabotaged)
     {
-        if (_sabotaged)
+        if (sabotaged)
         {
-            _sabotaged = false;
             //check dif PUs
             if (_rdmPowerPU)
             {
                 _rdmPowerPU = false;
                 Shoot = RdmPowerShoot;
             }
-            StartCoroutine(_turnManagerScript.SabotageUI(_sabotageIcons.ToArray()));
-            _sabotageIcons.Clear();
+            if (_curvedShot)
+            {
+                _curvedShot = false;
+                Shoot = CurveShoot;
+            }
         }
     }
 }

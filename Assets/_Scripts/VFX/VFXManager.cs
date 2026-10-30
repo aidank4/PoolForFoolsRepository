@@ -10,11 +10,11 @@ public class VFXManager : MonoBehaviour
     [SerializeField] private VisualEffect _magnet;
 
 
-    private bool _magnetPlaying = false;
-    private bool _explosionPlaying = false;
+    private bool _magnetPlaying = false; //Magnet Vfx is on
+    private bool _explosionPlaying = false; //Explosive Vfx is on
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    void Awake()
     {
         //Hide
         #region
@@ -29,13 +29,13 @@ public class VFXManager : MonoBehaviour
     {
         if (_explosionPlaying)
         {
-            if (_explosion.aliveParticleCount == 0)
+            if (_explosion.aliveParticleCount == 0) //Turn off explosive VFX once it ends
             {
                 _explosion.gameObject.SetActive(false);
                 _explosionPlaying = false;
             }
         }
-        if (_magnetPlaying)
+        if (_magnetPlaying) //Keep magnet still so it doesn't rotate with the ball
         {
             _magnet.gameObject.transform.rotation = Quaternion.identity;
         }
@@ -61,7 +61,7 @@ public class VFXManager : MonoBehaviour
     public void RocketOn(Transform parent)
     {
         _rocket.gameObject.transform.SetParent(parent, false);
-        _rocket.gameObject.transform.rotation = Quaternion.LookRotation(parent.up);
+        _rocket.gameObject.transform.rotation = Quaternion.LookRotation(parent.up); //parent is pool cue and up faces the rocket correctly
         _rocket.gameObject.SetActive(true);
     }
 
@@ -83,8 +83,7 @@ public class VFXManager : MonoBehaviour
     public void MagnetOn(Transform parent)
     {
         _magnetPlaying = true;
-        _magnet.gameObject.transform.SetParent(parent, false);
-        //_magnet.gameObject.transform.rotation.
+        _magnet.gameObject.transform.SetParent(parent, false); //Cue ball is parent
         _magnet.gameObject.SetActive(true);
     }
 
