@@ -35,6 +35,66 @@
                     "interactions": "",
                     "initialStateCheck": false,
                     "priority": 0
+                },
+                {
+                    "name": "OpenUI",
+                    "type": "Button",
+                    "id": "586709d5-6e5e-44fe-b9cd-712c60c7cf62",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "Controls",
+                    "type": "Button",
+                    "id": "4f333a98-7a31-4213-9b8a-4dd66356857d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "PowerUpA",
+                    "type": "Button",
+                    "id": "057a0ccd-3f4c-4bef-bb6f-0e617d0f54dc",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "PowerUpB",
+                    "type": "Button",
+                    "id": "9f3fc1b7-994b-42ae-bca4-0de0bd529862",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "PowerUpC",
+                    "type": "Button",
+                    "id": "9f6c090e-4bc7-4157-8b43-06c5f9ea9327",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "TempRotate",
+                    "type": "Value",
+                    "id": "f1beb9c4-a8a0-43b6-bd71-0c2dbb354b98",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -112,6 +172,310 @@
                     "processors": "",
                     "groups": "",
                     "action": "CancelShot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "af195310-af69-48ba-99d0-00873cef5114",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "OpenUI",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "828ae768-c499-468a-90fb-a0074165ea6a",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Controls",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "41d7d267-cac1-454e-a199-95d48d65fd84",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PowerUpA",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3cae7411-84c2-4f70-a6ff-59f233d0925b",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PowerUpB",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b5b7583b-0eba-48ab-818c-9044ee778fb8",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PowerUpC",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "1D Axis",
+                    "id": "f566872e-5deb-4a08-b1a4-13eb0d7e2a3a",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TempRotate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "4a1f56b0-527a-43b5-a2d8-19c2ec52b131",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TempRotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "9dc478fa-df50-4b24-bc70-00dbd07acc6f",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TempRotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "1D Axis",
+                    "id": "3f70cfa6-5330-43b3-b978-8f6923690d06",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TempRotate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "27d7cc31-8c04-4a1f-b1de-c8ff5a2f9546",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TempRotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "18fe0016-0dca-409a-a49e-ab1a22633ce6",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TempRotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                }
+            ]
+        },
+        {
+            "name": "UI",
+            "id": "83cf56c4-5eb4-4d01-a740-7de2b0beaa81",
+            "actions": [
+                {
+                    "name": "CloseUI",
+                    "type": "Button",
+                    "id": "049b8909-a08f-43a4-82ef-f4f7041ebd76",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "Controls",
+                    "type": "Button",
+                    "id": "1cbde3be-e1dc-40b4-99b7-5a2e700a81f2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "d86f2de0-3005-4706-bd60-c35c0c51afcb",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CloseUI",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e4288e65-af45-4306-8634-3771a07364ab",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Controls",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "PocketPick",
+            "id": "255352e7-d33a-482b-a31d-c5b5c65aba2c",
+            "actions": [
+                {
+                    "name": "CycleLeft",
+                    "type": "Button",
+                    "id": "90f99a63-7218-4983-8bd5-cb55b3b619e0",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "CycleRight",
+                    "type": "Button",
+                    "id": "62f95d85-7dd9-4400-8068-834b46cdf227",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "ConfirmPocket",
+                    "type": "Button",
+                    "id": "6a7e8533-9a31-4f2c-9097-c97f780149cf",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b03b2df6-a090-461f-9eab-9cbd9d7e7bab",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "43d637d8-4066-4d88-9731-cbf029eee9e2",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dcddf4fe-995e-45ae-822d-e361342e4d36",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ConfirmPocket",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7c3dc81a-4fe8-49c6-bcbf-64d5cdc4c7be",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ConfirmPocket",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c66da6f5-67e9-4cab-b578-1de0e4e50239",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "136ba543-bc0b-4ce9-a544-da99b41d3ebe",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Continue",
+            "id": "d8af6ef1-61f1-4875-b93e-ed39185e60e8",
+            "actions": [
+                {
+                    "name": "Close",
+                    "type": "Button",
+                    "id": "95ff3249-c1fe-47c6-970f-91c367967768",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "fd8ef1ba-e977-411f-8814-9d89fbf2e5dd",
+                    "path": "<Keyboard>/anyKey",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Close",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -10,6 +10,11 @@ TagManager:
   - EightBall
   - CueBall
   - CornerPocketA
+  - CornerPocketB
+  - CornerPocketC
+  - CornerPocketD
+  - SidePocketA
+  - SidePocketB
   layers:
   - Default
   - TransparentFX
