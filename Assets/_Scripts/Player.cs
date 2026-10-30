@@ -524,6 +524,7 @@ public class Player : MonoBehaviour
         shotDir = direction.transform.right;
         while (timer < _curveTime)
         {
+            Debug.Log("curving");
             if (_cueBallScript.hit) //If ball gets hit stop curving
             {
                 timer = _curveTime;
@@ -540,7 +541,7 @@ public class Player : MonoBehaviour
                 break;
             }
             hitPos = ball.transform.position - (shotDir * _ballRadius); //update hit pos to the side of the ball
-            ballRb.AddForceAtPosition((shotDir.normalized * _curveForce), hitPos, ForceMode.Force); //Give force divided by original shot force to not overload with speed
+            ballRb.AddForceAtPosition((shotDir.normalized * _curveForce) * Time.deltaTime, hitPos, ForceMode.Force); //Give force divided by original shot force to not overload with speed
             timer += Time.deltaTime;
             yield return null;
         }

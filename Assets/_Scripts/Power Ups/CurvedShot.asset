@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_PowerUp
   id: Curved Shot
   description: Your opponents shot will be curved!
+  sabDescription: Your shot curves right!
   sabotage: 1
   affectNext: 1
   affectShot: 1

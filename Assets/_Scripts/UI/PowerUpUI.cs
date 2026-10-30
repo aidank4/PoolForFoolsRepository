@@ -200,7 +200,7 @@ public class PowerUpUI : MonoBehaviour
             //Create object with a text component
             GameObject dObj = new GameObject("powerUpDescription");
             TextMeshProUGUI dText = dObj.AddComponent<TextMeshProUGUI>();
-            dText.text = powerUp.description; //Assign text to sabotage description
+            dText.text = powerUp.sabDescription; //Assign text to sabotage description
             dText.alignment = TextAlignmentOptions.Center;
             dObj.transform.SetParent(_sabotageDescriptionUI.gameObject.transform, false); //add as a child of background
             GridLayoutGroup dGrid = _sabotageDescriptionUI.GetComponent<GridLayoutGroup>();

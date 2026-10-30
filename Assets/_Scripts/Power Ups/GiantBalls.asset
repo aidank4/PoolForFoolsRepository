@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_PowerUp
   id: Giant Balls
   description: Your opponents balls are ginormous for one turn!
+  sabDescription: All the balls are huge!
   sabotage: 1
   affectNext: 1
   affectShot: 0
