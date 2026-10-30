@@ -21,13 +21,11 @@ public class FireWorks : MonoBehaviour
     {
         if(!sabotage)
         {
-            //_fireworkPU.transform.position = new Vector3 (spawnLocation.x, _fireworkPU.transform.position.y, spawnLocation.z);
             _fireworkPU.transform.position = spawnLocation;
             _fireworkPU.SetActive(true);
         }
         else
         {
-            //_fireworkSabotage.transform.position = new Vector3(spawnLocation.x, _fireworkSabotage.transform.position.y, spawnLocation.z);
             _fireworkSabotage.transform.position = spawnLocation;
             _fireworkSabotage.SetActive(true);
         }

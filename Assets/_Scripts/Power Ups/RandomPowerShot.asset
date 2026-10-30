@@ -15,6 +15,7 @@ MonoBehaviour:
   id: Random Power Shot
   description: Your opponent has no control over their shot power during their next
     turn!
+  sabDescription: Your shot power is random!
   sabotage: 1
   affectNext: 1
   affectShot: 1

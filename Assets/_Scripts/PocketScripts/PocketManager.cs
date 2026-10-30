@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,7 +17,7 @@ public class PocketManager : MonoBehaviour
     [SerializeField] private GameObject _inventoryRef;
     private InventoryManager _inventoryScript;
     [SerializeField] private GameObject _highlightObject;
-    [SerializeField] private Image _controlsUI;
+    [SerializeField] private Image _controlsUI; //Controls text when selecting a pocket to interact with
     [SerializeField] private GameObject _fireworkRef;
     private FireWorks _fireworkScript;
     [SerializeField] private Image _winScreenPOne;
@@ -24,13 +25,18 @@ public class PocketManager : MonoBehaviour
 
 
     [Header("Collections")]
-    [SerializeField] private List<GameObject> _pockets = new List<GameObject>();
-    [SerializeField] private List<GameObject> _jailCells = new List<GameObject>();
+    public List<GameObject> pockets = new List<GameObject>();
+    [SerializeField] private List<GameObject> _corks = new List<GameObject>();
 
 
     [Header("Misc Variables")]
-    private bool _choosingPocket = false;
+    private bool _choosingPocket = false; //When true the player can cycle through pocket selections
     private int _pocketIdx;
+
+
+    //Events
+    public event Action Scratched;
+
 
     private void Awake()
     {
@@ -41,23 +47,32 @@ public class PocketManager : MonoBehaviour
         _inventoryScript = _inventoryRef.GetComponent<InventoryManager>();
         _fireworkScript = _fireworkRef.GetComponent<FireWorks>();
         #endregion
-        //Hide
+        //UI / Hide
+        #region
         _highlightObject.SetActive(false);
         _controlsUI.gameObject.SetActive(false);
         _winScreenPOne.gameObject.SetActive(false);
         _winScreenPTwo.gameObject.SetActive(false);
-        foreach(GameObject cell in _jailCells)
+        foreach(GameObject cell in _corks)
         {
             cell.SetActive(false);
         }
+        #endregion
     }
 
 
+    /// <summary>
+    /// Subscribe to events
+    /// </summary>
     private void OnEnable()
     {
         SO_PowerUp.UsePU += HandlePUs;
     }
 
+
+    /// <summary>
+    /// Unsubscribe
+    /// </summary>
     private void OnDisable()
     {
         SO_PowerUp.UsePU -= HandlePUs;
@@ -69,7 +84,7 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     /// <param name="child"></param>
     /// <param name="other"></param>
-    public void OnChildCollision(Collider child, Collider other)
+    public void OnChildCollision(Collider child, Collider other) //Called by pocket script on collision
     {
         switch (other.gameObject.tag)
         {
@@ -84,13 +99,13 @@ public class PocketManager : MonoBehaviour
                         _inventoryScript.AddPowerUp();
                         StartCoroutine(PlayFireworks(child.gameObject.transform.position, false));
                     }
-                    else
+                    else //Play sabotage fireworks if player scored wrong ball
                     {
                         StartCoroutine(PlayFireworks(child.gameObject.transform.position, true));
                     }
 
                     _turnManagerScript.TurnDeciderStripes();
-                    Destroy(other.gameObject);
+                    Destroy(other.gameObject); //ball
                     AddStripeScore();
                     break;
                 }
@@ -106,19 +121,20 @@ public class PocketManager : MonoBehaviour
                         _inventoryScript.AddPowerUp();
                         StartCoroutine(PlayFireworks(child.gameObject.transform.position, false));
                     }
-                    else
+                    else //Play sabotage fireworks if player scored wrong ball
                     {
                         StartCoroutine(PlayFireworks(child.gameObject.transform.position, true));
                     }
 
                     _turnManagerScript.TurnDeciderSolids();
-                    Destroy(other.gameObject);
+                    Destroy(other.gameObject); //ball
                     AddSolidScore();
                     break;
                 }
             case "EightBall":
                 {
                     Debug.Log("EightBall");
+                    //TEMP player has scored all the balls and 8 ball
                     if(_scoreboardScript.pOneScore == 7 && _turnManagerScript.currentPlayer == _turnManagerScript.playerOne)
                     {
                         //Debug.Log("Player 1 Wins!");
@@ -129,9 +145,9 @@ public class PocketManager : MonoBehaviour
                         //Debug.Log("Player 2 Wins!");
                         _winScreenPTwo.gameObject.SetActive(true);
                     }
-                    else
+                    else //TEMP player scored 8 ball early
                     {
-                        Debug.Log("Player " + _turnManagerScript.currentPlayer.ToString() + " loses");
+                        //Debug.Log("Player " + _turnManagerScript.currentPlayer.ToString() + " loses");
                         if(_turnManagerScript.currentPlayer == _turnManagerScript.playerOne)
                         {
                             _winScreenPTwo.gameObject.SetActive(true);
@@ -141,13 +157,14 @@ public class PocketManager : MonoBehaviour
                             _winScreenPOne.gameObject.SetActive(true);
                         }
                     }
-                        Destroy(other.gameObject);
+                    Destroy(other.gameObject); //Ball
                     break;
                 }
             case "CueBall":
                 {
                     _turnManagerScript.scratch = true;
                     _turnManagerScript.keepTurn = false;
+                    Scratched?.Invoke();
                     break;
                 }
         }
@@ -187,13 +204,13 @@ public class PocketManager : MonoBehaviour
 
 
     /// <summary>
-    /// Play a firework at a certain position for 5 seconds
+    /// Play a firework at a certain position for 4 seconds
     /// </summary>
     /// <param name="pos"></param>
-    IEnumerator PlayFireworks(Vector3 pos, bool sabotage)
+    IEnumerator PlayFireworks(Vector3 pos, bool sabotage) //Should Move this to firework script script
     {
         _fireworkScript.ActivateFirework(sabotage, pos);
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(4f);
         _fireworkScript.HideFireWork(sabotage);
     }
 
@@ -208,7 +225,7 @@ public class PocketManager : MonoBehaviour
         {
             if (_choosingPocket)
             {
-                if (_pocketIdx == _pockets.Count - 1)
+                if (_pocketIdx == pockets.Count - 1) //Restart if at the end
                 {
                     _pocketIdx = 0;
                     HighlightPocket();
@@ -233,9 +250,9 @@ public class PocketManager : MonoBehaviour
         {
             if (_choosingPocket)
             {
-                if (_pocketIdx == 0)
+                if (_pocketIdx == 0) //Restart if at the end
                 {
-                    _pocketIdx = _pockets.Count - 1;
+                    _pocketIdx = pockets.Count - 1;
                     HighlightPocket();
                 }
                 else
@@ -258,43 +275,44 @@ public class PocketManager : MonoBehaviour
         {
             if (_choosingPocket)
             {
-                _controlsUI.gameObject.SetActive(false);
+                _controlsUI.gameObject.SetActive(false); //UI
                 _choosingPocket = false;
                 _highlightObject.SetActive(false);
-                StartCoroutine(PlaceJailCell(_jailCells[0], _pockets[_pocketIdx].gameObject.transform.position));
-                _pockets[_pocketIdx].SetActive(false);
-                _pockets.Remove(_pockets[_pocketIdx]);
+
+                StartCoroutine(PlaceCork(_corks[0], pockets[_pocketIdx].gameObject.transform.position)); //0th cork because we just go until theres none - all corks the same
+                pockets[_pocketIdx].SetActive(false);
+                pockets.Remove(pockets[_pocketIdx]);
             }
         }
     }
 
 
     /// <summary>
-    /// Spawn a jail cell above the chosen pocket.
+    /// Spawn a cork above the chosen pocket.
     /// Then move it onto the pocket and switch inputs back to gameplay.
     /// </summary>
-    /// <param name="jailCell"></param>
+    /// <param name="cork"></param>
     /// <param name="targetPos"></param>
     /// <returns></returns>
-    IEnumerator PlaceJailCell(GameObject jailCell,Vector3 targetPos)
+    IEnumerator PlaceCork(GameObject cork,Vector3 targetPos)
     {
         float timer = 0f;
         float maxTime = 3f;
-        jailCell.transform.position = targetPos + new Vector3(0, 5, 0); // set jail cell pos above target pocket
-        jailCell.SetActive(true);
-        Vector3 startingPos = jailCell.transform.position;
+        cork.transform.position = targetPos + new Vector3(0, 5, 0); // set jail cell pos above target pocket - Should make 5 a variable for designer
+        cork.SetActive(true);
+        Vector3 startingPos = cork.transform.position;
         while (timer < maxTime)
         {
             float percent = timer / maxTime;
-            jailCell.transform.position = Vector3.Lerp(startingPos, targetPos, percent); // move toward pocket over time
-            jailCell.transform.Rotate(new Vector3(0, 90, 0) * Time.deltaTime);
+            cork.transform.position = Vector3.Lerp(startingPos, targetPos, percent); // move toward pocket over time
+            cork.transform.Rotate(new Vector3(0, 90, 0) * Time.deltaTime); //Spin cork
             timer += Time.deltaTime;
             yield return null;
 
         }
-        jailCell.transform.position = targetPos; //Set pos exactly on pocket
-        jailCell.transform.rotation = Quaternion.identity;
-        _jailCells.Remove(jailCell);
+        cork.transform.position = targetPos; //Set pos exactly on pocket
+        cork.transform.rotation = Quaternion.identity;
+        _corks.Remove(cork);
         InputManager.Instance.SwitchCurrentActionMap("Gameplay");
     }
 
@@ -318,8 +336,8 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     private void HighlightPocket()
     {
-        EventSystem.current.SetSelectedGameObject(_pockets[_pocketIdx]);
-        _highlightObject.transform.position = _pockets[_pocketIdx].transform.position;
+        EventSystem.current.SetSelectedGameObject(pockets[_pocketIdx]);
+        _highlightObject.transform.position = pockets[_pocketIdx].transform.position;
     }
 
 

@@ -3,15 +3,15 @@ using UnityEngine;
 public class Pockets : MonoBehaviour
 {
     //references
-    private PocketManager _pocketManagerRef;
+    private PocketManager _pocketManager;
 
     private void Awake()
     {
-        _pocketManagerRef = GetComponentInParent<PocketManager>();
+        _pocketManager = GetComponentInParent<PocketManager>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        _pocketManagerRef.OnChildCollision(GetComponent<Collider>(), other); //send out this collider and the other collider
+        _pocketManager.OnChildCollision(GetComponent<Collider>(), other); //send out this collider and the other collider (other being a ball)
     }
 }

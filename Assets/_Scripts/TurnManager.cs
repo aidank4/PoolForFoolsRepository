@@ -17,6 +17,8 @@ public class TurnManager : MonoBehaviour
     [SerializeField] private TMP_Text _turnText; //Turn switch transition
     [SerializeField] private GameObject _turnSwitchUI;
     private DartAnimEndController _turnSwitchAnimScript;
+    [SerializeField] private GameObject _puUIRef;
+    private PowerUpUI _puUI;
     [SerializeField] private GameObject _teamAssignUI; //Team assignment UI
     [SerializeField] private Sprite _teamStripesSprite;
     [SerializeField] private Sprite _teamSolidsSprite;
@@ -24,10 +26,6 @@ public class TurnManager : MonoBehaviour
     [SerializeField] private GameObject _pTwoIconUI;
     [SerializeField] private Sprite _stripesIcon;
     [SerializeField] private Sprite _solidsIcon;
-    [SerializeField] private Image _sabotageOverlay; //SabotageUI
-    [SerializeField] private Image _sabotageIconUI;
-    [SerializeField] private Image _sabotageCorner;
-    [SerializeField] private TMP_Text _sabotageText;
 
 
 
@@ -42,16 +40,16 @@ public class TurnManager : MonoBehaviour
 
     [Header("Bools")]
     public bool keepTurn = false; //Used to see if a player scored a team ball
-    private bool _lostTurn = false; // fixes the issuewhere if a good ball was scored after bad ball then keep turn would still be made true
+    private bool _lostTurn = false; // fixes the issue where if a good ball was scored after bad ball then keep turn would still be made true
     public bool scratch = false; //Gets set true by the pocket manager
 
 
     [Header("PowerUps")]
-    private List<GameObject> _sabotageIcons = new List<GameObject>();
+    private bool _sabotaged = false; //Set true when the following player is sabotaged - Used to activate PU's at theh correct time
 
 
     //Events
-    public event Action TurnSwitched;
+    public event Action<bool> TurnSwitched;
 
     private void Awake()
     {
@@ -60,6 +58,7 @@ public class TurnManager : MonoBehaviour
         _poolCueScript = _poolCueRef.GetComponent<Player>();
         _turnSwitchAnimScript = _turnSwitchUI.GetComponent<DartAnimEndController>();
         _inventoryScript = _inventoryRef.GetComponent<InventoryManager>();
+        _puUI = _puUIRef.GetComponent<PowerUpUI>();
         #endregion
         //UI
         #region
@@ -67,30 +66,35 @@ public class TurnManager : MonoBehaviour
         _teamAssignUI.SetActive(false);
         _pOneIconUI.SetActive(false);
         _pTwoIconUI.SetActive(false);
-        _sabotageOverlay.gameObject.SetActive(false);
-        _sabotageCorner.gameObject.SetActive(false);
-        _sabotageIconUI.gameObject.SetActive(false);
-        _sabotageText.gameObject.SetActive(false);
         #endregion
-        //set p1 as initial player on startup
-        currentPlayer = playerOne;
+        //Misc
+        currentPlayer = playerOne; //set p1 as initial player on startup
     }
 
+
+    /// <summary>
+    /// Subscribe events
+    /// </summary>
     private void OnEnable()
     {
         if (_turnSwitchAnimScript != null)
         {
             _turnSwitchAnimScript.OnAnimationComplete += TriggerTurnSwitchEvent; //Gets called when dart animation ends
         }
+        SO_PowerUp.UsePU += HandlePU;
     }
 
 
+    /// <summary>
+    /// Unsubscribe
+    /// </summary>
     private void OnDisable()
     {
         if (_turnSwitchAnimScript != null)
         {
             _turnSwitchAnimScript.OnAnimationComplete -= TriggerTurnSwitchEvent; //Gets called when dart animation ends
         }
+        SO_PowerUp.UsePU -= HandlePU;
     }
 
     
@@ -99,11 +103,11 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     public void SwitchTurn() //Used in the InventoryManager
     {
-        if (!keepTurn)
+        if (!keepTurn) //Switch turn
         {
             _inventoryScript.UpdateInventory();
             _inventoryScript.ResetOldPUCollections();
-            ResetSabotageUI();
+            _puUI.ResetSabotageUI();
             _turnSwitchUI.SetActive(true); //Play the turn transition
             _turnText.text = string.Empty;
 
@@ -120,13 +124,12 @@ public class TurnManager : MonoBehaviour
             _lostTurn = false; // reset lost turn once the switch turn has been called
             scratch = false;
         }
-        else
+        else //Keep turn
         {
-            //Player keeps turn
-            //when turn switches this is handled by TriggerTurnSwitchEvent down below which gets called once the dart anim ends
+            //Normally handled by turn switch dart event.
             _poolCueScript.shootAvailable = true;
             _poolCueScript.RespawnPoolCue();
-            ResetSabotageUI();
+            _puUI.ResetSabotageUI();
             _inventoryScript.usingPUs.Clear();
         }
     }
@@ -142,7 +145,7 @@ public class TurnManager : MonoBehaviour
             if (scratch)
             {
                 keepTurn = false;
-                _lostTurn = true;
+                _lostTurn = true; //Need both for edge cases
             }
             else
             {
@@ -170,7 +173,7 @@ public class TurnManager : MonoBehaviour
             if (scratch)
             {
                 keepTurn = false;
-                _lostTurn= true;
+                _lostTurn = true; //Need both for edge cases
             }
             else
             {
@@ -273,62 +276,28 @@ public class TurnManager : MonoBehaviour
 
 
     /// <summary>
-    /// Show UI displaying the player has been sabotaged.
-    /// </summary>
-    /// <param name="icons"></param>
-    /// <returns></returns>
-    public IEnumerator SabotageUI(Sprite[] icons)
-    {
-        _sabotageOverlay.gameObject.SetActive(true);
-        _sabotageIconUI.gameObject.SetActive(true);
-        foreach (Sprite icon in icons) //Place Icons in center
-        {
-            GameObject obj = new GameObject("icon");
-            Image objImage = obj.AddComponent<Image>();
-            objImage.sprite = icon;
-            obj.transform.SetParent(_sabotageIconUI.gameObject.transform, false);
-            RectTransform rectTransform = obj.GetComponent<RectTransform>();
-            rectTransform.anchoredPosition = new Vector2(0, 0);
-            _sabotageIcons.Add(obj);
-        }
-        yield return new WaitForSeconds(1.5f);
-        _sabotageOverlay.gameObject.SetActive(false);
-        _sabotageIconUI.gameObject.SetActive(false);
-        _sabotageCorner.gameObject.SetActive(true);
-        _sabotageText.gameObject.SetActive(true);
-        foreach (GameObject obj in _sabotageIcons) //Place icons in corner
-        {
-            obj.transform.SetParent(_sabotageCorner.gameObject.transform, false);
-            RectTransform rectTransform = obj.GetComponent<RectTransform>();
-            rectTransform.anchoredPosition = new Vector2(0, 0);
-        }
-    }
-
-
-    /// <summary>
-    /// Hide remaining sabotage UI and reset list of icons
-    /// </summary>
-    public void ResetSabotageUI()
-    {
-        _sabotageCorner.gameObject.SetActive(false);
-        _sabotageText.gameObject.SetActive(false);
-        foreach(GameObject obj in _sabotageIcons)
-        {
-            Destroy(obj);
-        }
-        _sabotageIcons.Clear();
-    }
-
-
-    /// <summary>
     /// Turns on shootAvailable, respawn pool cue, and invoke event.
     /// </summary>
     private void TriggerTurnSwitchEvent()
     {
         _poolCueScript.shootAvailable = true;
         _poolCueScript.RespawnPoolCue();
-        TurnSwitched?.Invoke();
+        TurnSwitched?.Invoke(_sabotaged); // Call the turn switching and pass if following player is sabotaged
+        _sabotaged = false;
         //TEMP GIVE PU on turn switch
         _inventoryScript.AddPowerUp();
+    }
+
+
+    /// <summary>
+    /// on power up use set sabotaged true if affect next was true
+    /// </summary>
+    /// <param name="powerUp"></param>
+    private void HandlePU(SO_PowerUp powerUp)
+    {
+        if (powerUp.affectNext)
+        {
+            _sabotaged = true;
+        }
     }
 }
