@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
@@ -16,10 +17,8 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private GameObject _controlsText;
     [SerializeField] private TMP_Text _slotDescription;
     [SerializeField] private Image _cantUsePUUI;
-    [SerializeField] private GameObject _ballManagerRef; //Ball manager for balls stopped event which can trigger power up choices as turn is over
-    private BallManager _ballManagerScript;
     [SerializeField] private GameObject _turnManagerRef; //TurnManager to switch turn -- switch turn in Toss Function and BallsStopped Event
-    private TurnManager _turnManagerScript;
+    private TurnManager _turnManager;
     [SerializeField] private GameObject _cueBall; //For controlling just the cue ball
     [SerializeField] private Image _imagePU; //Using power up pop up UI
     [SerializeField] private TMP_Text _titleTextPU; 
@@ -46,12 +45,15 @@ public class InventoryManager : MonoBehaviour
     private SO_PowerUp _selectedPU; //The power up the player tries to use
 
 
+    //EVENTS
+    public event Action InventoryReady;
+
+
     private void Awake()
     {
         //Ref init
         #region
-        _ballManagerScript = _ballManagerRef.GetComponent<BallManager>();
-        _turnManagerScript = _turnManagerRef.GetComponent<TurnManager>();
+        _turnManager = _turnManagerRef.GetComponent<TurnManager>();
         _powerUpUIScript = _powerUpUIRef.GetComponent<PowerUpUI>();
         #endregion
         //UI init
@@ -64,30 +66,6 @@ public class InventoryManager : MonoBehaviour
         _vfxSabotage.SetActive(false);
         #endregion
 
-    }
-
-
-    /// <summary>
-    /// Subscribe to events
-    /// </summary>
-    private void OnEnable()
-    {
-        if (_ballManagerScript != null)
-        {
-            _ballManagerScript.BallsStopped += BallsStoppedEventTriggered; //gets called when balls are stopped
-        }
-    }
-    
-    
-    /// <summary>
-    /// Unsubscribe to events
-    /// </summary>
-    private void OnDisable()
-    {
-        if (_ballManagerScript != null)
-        {
-            _ballManagerScript.BallsStopped -= BallsStoppedEventTriggered; //gets called when balls are stopped
-        }
     }
 
 
@@ -113,13 +91,13 @@ public class InventoryManager : MonoBehaviour
     public void UpdateInventory()
     {
         //p1
-        if (_turnManagerScript.currentPlayer == _turnManagerScript.playerOne)
+        if (_turnManager.currentPlayer == _turnManager.playerOne)
         {
             _pOnePUs = _currentInventoryPUs;
             _currentInventoryPUs = _pTwoPUs;
         }
         //p2
-        else if (_turnManagerScript.currentPlayer == _turnManagerScript.playerTwo)
+        else if (_turnManager.currentPlayer == _turnManager.playerTwo)
         {
             _pTwoPUs = _currentInventoryPUs;
             _currentInventoryPUs = _pOnePUs;
@@ -215,7 +193,7 @@ public class InventoryManager : MonoBehaviour
     {
         _powerUpUIScript.HidePUConflictUI();
         _extraPowerUp = null;
-        _turnManagerScript.SwitchTurn(); //Turn ends on toss
+        InventoryReady?.Invoke(); //TurnManager listening to know when turn can be switched
     }
 
 
@@ -468,21 +446,20 @@ public class InventoryManager : MonoBehaviour
         usingPUs.Clear();
     }
 
-
     /// <summary>
     /// If there is an extra PU then player must deal with it.
-    /// Else switch turn.
+    /// Else inventory ready for switch turn.
     /// </summary>
-    private void BallsStoppedEventTriggered() //Called by BallManager
+    public void CheckForUIConflict() //Accessed by turn manager
     {
         if (_extraPowerUp != null)
         {
+            Debug.Log("Show Conflict");
             _powerUpUIScript.ShowPUConflictUI(_extraPowerUp); //have to swap or toss extra PU before turn switch
         }
         else
         {
-            //Switch Turn
-            _turnManagerScript.SwitchTurn(); // also gets called in TossExtraPowerUp
+            InventoryReady?.Invoke(); //TurnManager listening to know when turn can be switched
         }
     }
 }

@@ -48,7 +48,7 @@ public class BallManager : MonoBehaviour
     private float _timer;
     private float _maxTimer;
     private float _minWaitTime = 0.25f;
-    private float _maxWaitTime = 3f; //seconds
+    //private float _maxWaitTime = 3f; //seconds
 
 
     [Header("Power Ups")]
@@ -121,6 +121,7 @@ public class BallManager : MonoBehaviour
         if (_pocketManager != null)
         {
             _pocketManager.Scratched += HandleScratch;
+            _pocketManager.PocketExplosion += HandlePocketExplosion; //Set checkballs to true again as balls got moved
         }
         if (_turnManager != null)
         {
@@ -142,8 +143,9 @@ public class BallManager : MonoBehaviour
         if (_pocketManager != null)
         {
             _pocketManager.Scratched -= HandleScratch;
+            _pocketManager.PocketExplosion -= HandlePocketExplosion;
         }
-        SO_PowerUp.UsePU += HandlePowerUps;
+        SO_PowerUp.UsePU -= HandlePowerUps;
     }
 
 
@@ -212,11 +214,13 @@ public class BallManager : MonoBehaviour
             {
                 _timer = 0;
             }
-            if (_maxTimer >= _maxWaitTime && _cueBall.GetComponent<Rigidbody>().IsSleeping()) //covers long wait if cueballs ready
-            {
-                BallCheckOver();
-                return;
-            }
+            //NOTE PROBLEMATIC WITH DOME
+            //covers long wait if cueballs ready
+            //if (_maxTimer >= _maxWaitTime && _cueBall.GetComponent<Rigidbody>().IsSleeping()) //covers long wait if cueballs ready
+            //{
+            //    BallCheckOver();
+            //    return;
+            //}
 
         }
     }
@@ -428,6 +432,20 @@ public class BallManager : MonoBehaviour
         }
     }
 
+    private void HandlePocketExplosion()
+    {
+        Debug.Log("Shot event");
+        _checkBalls = true;
+        StartCoroutine(EmergencyFix());
+        Debug.Log("Check balls = " + _checkBalls);
+    }
+
+
+    IEnumerator EmergencyFix()
+    {
+        yield return new WaitForSeconds(0.2f);
+        _checkBalls = true;
+    }
 
     /// <summary>
     /// Finds the 8 ball and sets is kinematic.

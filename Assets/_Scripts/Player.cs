@@ -93,6 +93,7 @@ public class Player : MonoBehaviour
         _predictionLineParent.transform.position = _cueBall.transform.position + new Vector3(0, 0, _ballSeparation); //set up prediction lines position and rotation
         _predictionLineParent.transform.eulerAngles = new Vector3(0, 0, 0);
         _startingRotMult = _rotationMult;
+        _startingPos = poolCueParent.transform.position;
         Shoot = DefaultShoot;
     }
 
@@ -455,6 +456,7 @@ public class Player : MonoBehaviour
     {
         _poolCueModel.gameObject.SetActive(true);
         poolCueParent.transform.position = _cueBall.transform.position - new Vector3(0f, 0f, _ballSeparation);
+        _startingPos = poolCueParent.transform.position;
 
         //set up prediction lines position and rotation
         _predictionLineParent.gameObject.SetActive(true);
@@ -524,7 +526,6 @@ public class Player : MonoBehaviour
         shotDir = direction.transform.right;
         while (timer < _curveTime)
         {
-            Debug.Log("curving");
             if (_cueBallScript.hit) //If ball gets hit stop curving
             {
                 timer = _curveTime;
