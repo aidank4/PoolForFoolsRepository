@@ -29,10 +29,18 @@ public class PocketManager : MonoBehaviour
     [SerializeField] private Image _winScreenPTwo;
 
 
+    [Serializable]
+    public struct PocketedBallData
+    {
+        public Collider pocket;
+        public List<Collider> balls;
+    }
+
     [Header("Collections")]
+    private PocketedBallData[] _pocketedBalls;
     public List<GameObject> pockets = new List<GameObject>();
-    [SerializeField] private List<GameObject> _corks = new List<GameObject>();
     private List<GameObject> _tempCoveredPockets = new List<GameObject>();
+
 
 
     [Header("Misc Variables")]
@@ -43,6 +51,7 @@ public class PocketManager : MonoBehaviour
 
     [Header("PowerUps")]
     private bool _pocketBlockActive = false; //For differentiating what to do when a pocket is chosen
+    private bool _reverseCardActive = false; //For differentiating what to do when a pocket is chosen
     public bool pocketsCovered { get; private set; } = false; //used to know when to release covered pockets at end of turn
     private bool _coverPockets = false; //Used to know when to cover pockets on turn switch
 
@@ -68,11 +77,14 @@ public class PocketManager : MonoBehaviour
         _controlsUI.gameObject.SetActive(false);
         _winScreenPOne.gameObject.SetActive(false);
         _winScreenPTwo.gameObject.SetActive(false);
-        foreach(GameObject cell in _corks)
-        {
-            cell.SetActive(false);
-        }
         #endregion
+        //Initialize struct Lists
+        _pocketedBalls = new PocketedBallData[6];
+        for (int i = 0; i <  _pocketedBalls.Length; i++)
+        {
+            _pocketedBalls[i].pocket = pockets[i].GetComponent<Collider>();
+            _pocketedBalls[i].balls = new List<Collider>();
+        }
     }
 
 
@@ -104,14 +116,26 @@ public class PocketManager : MonoBehaviour
     }
 
 
+    private void MatchPocket(Collider child)
+    {
+        for (int i = 0; i < _pocketedBalls.Length; i++)
+        {
+            if (_pocketedBalls[i].pocket == child)
+            {
+
+            }
+        }
+    }
+
+
     /// <summary>
     /// Handles pockets collisions with different types of balls.
     /// </summary>
     /// <param name="child"></param>
-    /// <param name="other"></param>
-    public void OnChildCollision(Collider child, Collider other) //Called by pocket script on collision
+    /// <param name="ball"></param>
+    public void OnChildCollision(Collider child, Collider ball) //Called by pocket script on collision
     {
-        switch (other.gameObject.tag)
+        switch (ball.gameObject.tag)
         {
             case "StripedBall":
                 {
@@ -130,8 +154,19 @@ public class PocketManager : MonoBehaviour
                     }
 
                     _turnManager.TurnDeciderStripes();
-                    Destroy(other.gameObject); //ball
+                    //Destroy(ball.gameObject); //ball
                     AddStripeScore();
+
+                    for (int i = 0; i < _pocketedBalls.Length; i++)
+                    {
+                        if (_pocketedBalls[i].pocket == child)
+                        {
+                            _pocketedBalls[i].balls.Add(ball); //Keep ref of ball
+                            ball.gameObject.SetActive(false);
+                        }
+                    }
+
+
                     break;
                 }
             case "SolidBall":
@@ -152,7 +187,16 @@ public class PocketManager : MonoBehaviour
                     }
 
                     _turnManager.TurnDeciderSolids();
-                    Destroy(other.gameObject); //ball
+                    //Destroy(ball.gameObject); //ball
+                    for (int i = 0; i < _pocketedBalls.Length; i++)
+                    {
+                        if (_pocketedBalls[i].pocket == child)
+                        {
+                            _pocketedBalls[i].balls.Add(ball); //Keep ref of ball
+                            ball.gameObject.SetActive(false);
+                        }
+                    }
+
                     AddSolidScore();
                     break;
                 }
@@ -182,7 +226,7 @@ public class PocketManager : MonoBehaviour
                             _winScreenPOne.gameObject.SetActive(true);
                         }
                     }
-                    Destroy(other.gameObject); //Ball
+                    Destroy(ball.gameObject); //Ball
                     break;
                 }
             case "CueBall":
@@ -304,6 +348,10 @@ public class PocketManager : MonoBehaviour
                 {
                     RemovePocket();
                     _pocketBlockActive = false;
+                }
+                if (_reverseCardActive) //Reverse card
+                {
+                    _reverseCardActive = false;
                 }
                 else if (_turnManager.ctsActive == true) //Call their shot
                 {
@@ -533,8 +581,6 @@ public class PocketManager : MonoBehaviour
     }
 
 
-
-
     /// <summary>
     /// On turn switch show the pockets being covered if player covered them
     /// </summary>
@@ -565,6 +611,12 @@ public class PocketManager : MonoBehaviour
         if (powerUp.id == "Call Their Shot")
         {
             _turnManager.ctsActive = true;
+        }
+        if (powerUp.id == "Reverse Card")
+        {
+            _reverseCardActive = true;
+            HideTempCorks();
+            StartChoosingPocket("Choose a pocket to bring back its most recent scored ball");
         }
     }
 }
