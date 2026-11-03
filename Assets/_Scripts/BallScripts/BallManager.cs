@@ -121,7 +121,7 @@ public class BallManager : MonoBehaviour
         if (_pocketManager != null)
         {
             _pocketManager.Scratched += HandleScratch;
-            _pocketManager.PocketExplosion += HandlePocketExplosion; //Set checkballs to true again as balls got moved
+            _pocketManager.PocketExplosion += HandleShotEvent; //Set checkballs to true again as balls got moved
         }
         if (_turnManager != null)
         {
@@ -143,7 +143,7 @@ public class BallManager : MonoBehaviour
         if (_pocketManager != null)
         {
             _pocketManager.Scratched -= HandleScratch;
-            _pocketManager.PocketExplosion -= HandlePocketExplosion;
+            _pocketManager.PocketExplosion -= HandleShotEvent;
         }
         SO_PowerUp.UsePU -= HandlePowerUps;
     }
@@ -231,10 +231,10 @@ public class BallManager : MonoBehaviour
     /// </summary>
     private void BallCheckOver()
     {
-        BallsStoppedEvent();
         _checkBalls = false;
         _timer = 0;
         _maxTimer = 0;
+        BallsStoppedEvent();
 
         //Reset Power Ups
         if (_eightBallPUActive)
@@ -432,20 +432,6 @@ public class BallManager : MonoBehaviour
         }
     }
 
-    private void HandlePocketExplosion()
-    {
-        Debug.Log("Shot event");
-        _checkBalls = true;
-        StartCoroutine(EmergencyFix());
-        Debug.Log("Check balls = " + _checkBalls);
-    }
-
-
-    IEnumerator EmergencyFix()
-    {
-        yield return new WaitForSeconds(0.2f);
-        _checkBalls = true;
-    }
 
     /// <summary>
     /// Finds the 8 ball and sets is kinematic.

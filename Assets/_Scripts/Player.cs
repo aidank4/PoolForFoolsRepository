@@ -248,6 +248,10 @@ public class Player : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Shoot with a curve
+    /// </summary>
+    /// <param name="stage"></param>
     private void CurveShoot(ClickStage stage)
     {
         if (stage == ClickStage.Pressed && shootAvailable)

@@ -19,6 +19,7 @@ public class PocketManager : MonoBehaviour
     [SerializeField] private GameObject _inventoryRef;
     private InventoryManager _inventory;
     [SerializeField] private GameObject _highlightObject;
+    [SerializeField] private GameObject _tableCenter;
     [SerializeField] private Image _controlsUI; //Controls text when selecting a pocket to interact with
     [SerializeField] private TMP_Text _controlsUIDesc; //description
     [SerializeField] private GameObject _fireworkRef;
@@ -343,21 +344,24 @@ public class PocketManager : MonoBehaviour
     {
         pocketsCovered = false;
 
-        foreach (GameObject pocket in _tempCoveredPockets)
+        foreach (GameObject pocket in _tempCoveredPockets) //Push away nearby balls so they dont score
         {
-            //Push away nearby balls so they dont score
             Collider[] nearbyBalls = Physics.OverlapSphere(pocket.transform.position, _pocketPushRadius);
             foreach (Collider collider in nearbyBalls)
             {
                 if (collider.TryGetComponent(out Rigidbody rb))
                 {
                     Debug.Log("BANG");
-                    rb.AddExplosionForce(_pocketPushForce, pocket.transform.position, _pocketPushRadius, 0f, ForceMode.Impulse);
+                    Vector3 targetDir = _tableCenter.transform.position - rb.transform.position;
+                    rb.AddForce(targetDir.normalized * _pocketPushForce, ForceMode.Impulse);
                 }
             }
+        }
 
-            yield return new WaitForFixedUpdate(); //let balls get moved before destroying corks
-            //Remove temporary corks
+        yield return new WaitForSeconds(.5f); //let balls get moved before destroying corks
+
+        foreach (GameObject pocket in _tempCoveredPockets) //Remove temporary corks
+        {
             if (pocket.transform.GetChild(0).gameObject != null)
             {
                 Destroy(pocket.transform.GetChild(0).gameObject); //Destroy cork
@@ -368,11 +372,9 @@ public class PocketManager : MonoBehaviour
             }
             pocket.GetComponent<Collider>().enabled = true;
         }
+
+
         _tempCoveredPockets.Clear();
-        //if (!_turnManager.ctsActive) //Dont call this if we are also selecting pocket because then the event turn switch will get looped
-        //{
-        //    PocketExplosion?.Invoke(); //Moved balls so must tell ball manager to check movement
-        //}
         PocketExplosion?.Invoke(); //Moved balls so must tell ball manager to check movement
     }
 
