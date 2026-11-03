@@ -348,7 +348,7 @@ public class TurnManager : MonoBehaviour
     {
         _ballsStopped = true;
         Debug.Log("Turn Ending");
-        if (ctsActive || _pocketManager.pocketsCovered) //Pocket PU stuff to do before turn can switch
+        if ((ctsActive && !keepTurn) || _pocketManager.pocketsCovered) //Pocket PU stuff to do before turn can switch
         {
             TurnEnding?.Invoke();
         }

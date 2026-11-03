@@ -33,6 +33,7 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private Image[] _slots = new Image[3];
     [SerializeField] private List<SO_PowerUp> _availablePUs = new List<SO_PowerUp>();
     private List<SO_PowerUp> _usedPUs = new List<SO_PowerUp>(); //Which power ups were used last turn
+    private bool _ctsInUse = false; //Bool is here because it acts the same as the lists but can only have one var so might as well be a bool
     public List<SO_PowerUp> usingPUs { get; private set; } = new List<SO_PowerUp>(); //Which powerups are being used this turn
     private SO_PowerUp[] _currentInventoryPUs = new SO_PowerUp[3]; //Power ups in inventory
     private SO_PowerUp[] _pOnePUs = new SO_PowerUp[3]; //player ones power ups
@@ -261,6 +262,10 @@ public class InventoryManager : MonoBehaviour
         }
         _selectedPU.Activate();
         usingPUs.Add(_selectedPU);
+        if (_selectedPU.id == "Call Their Shot")
+        {
+            _ctsInUse = true;
+        }
     }
 
 
@@ -341,6 +346,10 @@ public class InventoryManager : MonoBehaviour
             else if (accessPU.reAffectingOpShot)
             {
                 StartCoroutine(PowerUpWarning("Opponents shot is already sabotaged"));
+            }
+            else if (_ctsInUse == true && _selectedPU.id == "Call Their Shot") //call their shot been used and being used again after scoring
+            {
+                StartCoroutine(PowerUpWarning("Already active, will activate at the end of turn"));
             }
             //Can use power up
             else
@@ -438,6 +447,7 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     public void ResetOldPUCollections()
     {
+        _ctsInUse = false;
         _usedPUs.Clear();
         foreach (SO_PowerUp powerup in usingPUs)
         {

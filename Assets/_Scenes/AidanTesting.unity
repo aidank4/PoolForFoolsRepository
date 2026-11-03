@@ -153,8 +153,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 778.80005, y: 200}
+  m_AnchoredPosition: {x: 0, y: -176.94}
+  m_SizeDelta: {x: 1050, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &488422883
 MonoBehaviour:
@@ -176,7 +176,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: temp
+  m_text: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -185,8 +185,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281908199
-  m_fontColor: {r: 0.9056604, g: 0.73140854, b: 0.21787111, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -530,7 +530,6 @@ MonoBehaviour:
   - {fileID: 4958539204354093760}
   - {fileID: 2616756822121962577}
   _availablePUs:
-  - {fileID: 11400000, guid: fb0343564af02ea4aab6706bf0758123, type: 2}
   - {fileID: 11400000, guid: e9ee3148d6b68bf42a59d79b307474c4, type: 2}
   _extraPowerUp: {fileID: 0}
 --- !u!1 &16446048197054167
@@ -17026,11 +17025,11 @@ PrefabInstance:
       objectReference: {fileID: 630673031965279024}
     - target: {fileID: 4378250812818283918, guid: 5d6795b89673c54489264f53fb186b4e, type: 3}
       propertyPath: _pocketPushForce
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4378250812818283918, guid: 5d6795b89673c54489264f53fb186b4e, type: 3}
       propertyPath: _pocketPushRadius
-      value: 2
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 4378250812818283918, guid: 5d6795b89673c54489264f53fb186b4e, type: 3}
       propertyPath: pockets.Array.size
@@ -23577,7 +23576,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.90588236, g: 0.27434617, b: 0.21960784, a: 0.03529412}
+  m_Color: {r: 0.18867922, g: 0.020483825, b: 0.0062299776, a: 0.6039216}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

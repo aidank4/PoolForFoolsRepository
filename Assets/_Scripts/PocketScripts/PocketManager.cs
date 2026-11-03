@@ -337,9 +337,9 @@ public class PocketManager : MonoBehaviour
 
 
     /// <summary>
-    /// destroy temporary corks and re enable pockets
+    /// push balls away from corks then .destroy temporary corks and re enable pockets
     /// </summary>
-    private void ReleasePockets()
+    private IEnumerator ReleasePockets()
     {
         pocketsCovered = false;
 
@@ -356,6 +356,7 @@ public class PocketManager : MonoBehaviour
                 }
             }
 
+            yield return new WaitForFixedUpdate(); //let balls get moved before destroying corks
             //Remove temporary corks
             if (pocket.transform.GetChild(0).gameObject != null)
             {
@@ -517,9 +518,9 @@ public class PocketManager : MonoBehaviour
         //NOTE if both are active at end of turn - release pockets - then calls balls stopped which calls this and then start choosing pocket
         if (pocketsCovered) //release pockets at the end of the turn
         {
-            ReleasePockets();
+            StartCoroutine(ReleasePockets());
         }
-        else if (_turnManager.ctsActive) //When call their shot active start choosing at end of turn
+        else if (_turnManager.ctsActive && !_turnManager.keepTurn) //choose only if goin to switch turn after
         {
             StartChoosingPocket("Choose only one pocket for your opponent to have available!");
         }
