@@ -42,7 +42,7 @@ public class PocketManager : MonoBehaviour
     [SerializeField] private PocketedBallData[] _pocketedBalls;
     public List<GameObject> pockets = new List<GameObject>();
     private List<GameObject> _tempCoveredPockets = new List<GameObject>();
-    private List<GameObject> _availablePockets = new List<GameObject>();
+    [SerializeField] private List<GameObject> _availablePockets = new List<GameObject>();
 
 
 
@@ -317,9 +317,7 @@ public class PocketManager : MonoBehaviour
             if (_choosingPocket)
             {
 
-
-
-                if (_pocketIdx == pockets.Count - 1) //Restart if at the end
+                if (_pocketIdx == _availablePockets.Count - 1) //Restart if at the end
                 {
                     _pocketIdx = 0;
                     HighlightPocket();
@@ -346,7 +344,7 @@ public class PocketManager : MonoBehaviour
             {
                 if (_pocketIdx == 0) //Restart if at the end
                 {
-                    _pocketIdx = pockets.Count - 1;
+                    _pocketIdx = _availablePockets.Count - 1;
                     HighlightPocket();
                 }
                 else
@@ -369,7 +367,8 @@ public class PocketManager : MonoBehaviour
         {
             if (_choosingPocket)
             {
-                _selectedPocket = EventSystem.current.currentSelectedGameObject;
+                _selectedPocket = EventSystem.current.currentSelectedGameObject; //Ref selected pocket
+                _availablePockets.Clear(); //reset avialable pockets
                 if (_pocketBlockActive) //Pocket Block - This must be above because both PUs could be called on same turn but this one would play first
                 {
                     RemovePocket();
@@ -415,27 +414,45 @@ public class PocketManager : MonoBehaviour
     }
 
 
+    public bool CanReverse()
+    {
+        return true;
+    }
+
+    /// <summary>
+    /// Set which pockets can be looked through
+    /// </summary>
     private void AdjustAvailablePockets()
     {
-        for (int i = 0; i < _pocketedBalls.Length; i++)
+        if (_reverseCardActive) //Only unblocked pockets with balls are available
         {
-            PocketedBallData data = _pocketedBalls[i];
-            if (data.balls.Count > 0)
+            for (int i = 0; i < _pocketedBalls.Length; i++)
             {
-                _availablePockets.Add(data.pocket.gameObject); //Add pocket with balls
-                bool stay = false;
-                for (int j = 0; j < pockets.Count; j++) //Remove if the pocket is blocked
+                PocketedBallData data = _pocketedBalls[i];
+                if (data.balls.Count > 0)
                 {
-                    if (pockets[j] == data.pocket)
+                    _availablePockets.Add(data.pocket.gameObject); //Add pocket with balls
+                    bool stay = false;
+                    for (int j = 0; j < pockets.Count; j++) //Check for blocked pockets
                     {
-                        stay = true;
-                        break;
+                        if (pockets[j].name == data.pocket.name)
+                        {
+                            stay = true;
+                            break;
+                        }
+                    }
+                    if (!stay) //Remove if the pocket is blocked
+                    {
+                        _availablePockets.Remove(data.pocket.gameObject);
                     }
                 }
-                if (!stay)
-                {
-                    _availablePockets.Remove(data.pocket.gameObject);
-                }
+            }
+        }
+        else //Standard pocket check
+        {
+            foreach (GameObject pocket in pockets) //All unblocked pockets available
+            {
+                _availablePockets.Add(pocket);
             }
         }
     }
@@ -449,7 +466,7 @@ public class PocketManager : MonoBehaviour
     {
         for (int i = 0; i < _pocketedBalls.Length; i++)
         {
-            if (_pocketedBalls[i].pocket.gameObject == pockets[_pocketIdx]) //Look at balls inside selected pocket
+            if (_pocketedBalls[i].pocket.gameObject == _selectedPocket) //Look at balls inside selected pocket
             {
                 if (_pocketedBalls[i].balls.Count == 0) //Picked a pocket with no balls
                 {
@@ -474,16 +491,16 @@ public class PocketManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator RespawnBall(GameObject ball)
     {
-        pockets[_pocketIdx].SetActive(false); //disable pocket so ball doesn't insta get eaten
+        _selectedPocket.SetActive(false); //disable pocket so ball doesn't insta get eaten
         Vector3 upDir = new Vector3(0, 3, 0);
-        ball.transform.position = pockets[_pocketIdx].transform.position + upDir; //Respawn it above pocket
+        ball.transform.position = _selectedPocket.transform.position + upDir; //Respawn it above pocket
         ball.SetActive(true);
 
         Vector3 targetPos = _tableCenter.transform.position - ball.transform.position;
         ball.GetComponent<Rigidbody>().AddForce((targetPos.normalized + upDir) * (_pocketPushForce), ForceMode.Impulse); //Push it towards the table
 
         yield return new WaitForSeconds(0.2f);
-        pockets[_pocketIdx].SetActive(true); //reenable pocket
+        _selectedPocket.SetActive(true); //reenable pocket
         BallRespawned?.Invoke(ball);
     }
 
@@ -495,7 +512,7 @@ public class PocketManager : MonoBehaviour
     {
         for (int i = 0; i < pockets.Count; i++)
         {
-            if (i != _pocketIdx) //skip selected pocket
+            if (pockets[i] != _selectedPocket) //skip selected pocket
             {
                 StartCoroutine(PlaceCork(pockets[i], false));
                 pockets[i].gameObject.GetComponent<Collider>().enabled = false;
@@ -557,9 +574,9 @@ public class PocketManager : MonoBehaviour
         _controlsUI.gameObject.SetActive(false); //UI
         _highlightObject.SetActive(false);
 
-        StartCoroutine(PlaceCork(pockets[_pocketIdx], true));
-        pockets[_pocketIdx].GetComponent<Collider>().enabled = false;
-        pockets.Remove(pockets[_pocketIdx]);
+        StartCoroutine(PlaceCork(_selectedPocket, true));
+        _selectedPocket.GetComponent<Collider>().enabled = false;
+        pockets.Remove(_selectedPocket);
     }
 
 
@@ -654,6 +671,7 @@ public class PocketManager : MonoBehaviour
         _choosingPocket = true;
         _pocketIdx = 0;
         _highlightObject.SetActive(true);
+        AdjustAvailablePockets();
         HighlightPocket();
     }
 
@@ -675,8 +693,8 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     private void HighlightPocket()
     {
-        EventSystem.current.SetSelectedGameObject(pockets[_pocketIdx]);
-        _highlightObject.transform.position = pockets[_pocketIdx].transform.position;
+        EventSystem.current.SetSelectedGameObject(_availablePockets[_pocketIdx]);
+        _highlightObject.transform.position = _availablePockets[_pocketIdx].transform.position;
     }
 
 
