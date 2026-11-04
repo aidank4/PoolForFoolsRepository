@@ -22,7 +22,7 @@ public class PocketManager : MonoBehaviour
 
     [Header("Reference")]
     [SerializeField] private GameObject _scoreboardRef;
-    private Scoreboard _scoreboardScript;
+    private Scoreboard _scoreboard;
     [SerializeField] private GameObject _turnManagerRef;
     private TurnManager _turnManager;
     [SerializeField] private GameObject _inventoryRef;
@@ -41,8 +41,22 @@ public class PocketManager : MonoBehaviour
     [Header("Collections")]
     [SerializeField] private PocketedBallData[] _pocketedBalls;
     public List<GameObject> pockets = new List<GameObject>();
-    [SerializeField] private List<GameObject> _tempCoveredPockets = new List<GameObject>();
+    private List<GameObject> _tempCoveredPockets = new List<GameObject>();
     private List<GameObject> _availablePockets = new List<GameObject>();
+
+
+    [Header("EndPocket")]
+    [SerializeField] private GameObject _endPocket;
+    [SerializeField] private GameObject _minXBounds;
+    [SerializeField] private GameObject _maxXBounds;
+    [SerializeField] private GameObject _minZBounds;
+    [SerializeField] private GameObject _maxZBounds;
+    [SerializeField] private float _yHideValue = -1;
+    [SerializeField] private float _yShowValue = 1;
+    [SerializeField] private float _epAnimTime = 3f;
+    private Vector3 _epHidePos;
+    private Vector3 _epShowPos;
+    private bool _epRaised = false; //If true on turn switch lower ep
 
 
 
@@ -50,6 +64,7 @@ public class PocketManager : MonoBehaviour
     [SerializeField] private float _pocketPushRadius = 3f;
     [SerializeField] private float _pocketPushForce = 2f;
     private bool _choosingPocket = false; //When true the player can cycle through pocket selections
+    private bool _endPocketActive = false; //For if the last pocket is active
     private int _pocketIdx;
     private GameObject _selectedPocket;
 
@@ -72,11 +87,12 @@ public class PocketManager : MonoBehaviour
     {
         //ref
         #region
-        _scoreboardScript = _scoreboardRef.GetComponent<Scoreboard>();
+        _scoreboard = _scoreboardRef.GetComponent<Scoreboard>();
         _turnManager = _turnManagerRef.GetComponent<TurnManager>();
         _inventory = _inventoryRef.GetComponent<InventoryManager>();
         _fireworkScript = _fireworkRef.GetComponent<FireWorks>();
         #endregion
+
         //UI / Hide
         #region
         _highlightObject.SetActive(false);
@@ -84,6 +100,7 @@ public class PocketManager : MonoBehaviour
         _winScreenPOne.gameObject.SetActive(false);
         _winScreenPTwo.gameObject.SetActive(false);
         #endregion
+
         //Initialize struct Lists
         _pocketedBalls = new PocketedBallData[6];
         for (int i = 0; i <  _pocketedBalls.Length; i++)
@@ -91,6 +108,9 @@ public class PocketManager : MonoBehaviour
             _pocketedBalls[i].pocket = pockets[i].GetComponent<Collider>();
             _pocketedBalls[i].balls = new List<Collider>();
         }
+
+        //Set End Pocket
+        SetEndPocketPos();
     }
 
 
@@ -134,22 +154,22 @@ public class PocketManager : MonoBehaviour
         {
             if (add)
             {
-                _scoreboardScript.pOneScore++;
+                _scoreboard.pOneScore++;
             }
             else
             {
-                _scoreboardScript.pOneScore--;
+                _scoreboard.pOneScore--;
             }
         }
         else
         {
             if (add)
             {
-                _scoreboardScript.pTwoScore++;
+                _scoreboard.pTwoScore++;
             }
             else
             {
-                _scoreboardScript.pTwoScore--;
+                _scoreboard.pTwoScore--;
             }
         }
     }
@@ -165,22 +185,22 @@ public class PocketManager : MonoBehaviour
         {
             if (add)
             {
-                _scoreboardScript.pOneScore++;
+                _scoreboard.pOneScore++;
             }
             else
             {
-                _scoreboardScript.pOneScore--;
+                _scoreboard.pOneScore--;
             }
         }
         else
         {
             if (add)
             {
-                _scoreboardScript.pTwoScore++;
+                _scoreboard.pTwoScore++;
             }
             else
             {
-                _scoreboardScript.pTwoScore--;
+                _scoreboard.pTwoScore--;
             }
         }
     }
@@ -262,29 +282,29 @@ public class PocketManager : MonoBehaviour
             case "EightBall":
                 {
                     Debug.Log("EightBall");
-                    //TEMP player has scored all the balls and 8 ball
-                    if(_scoreboardScript.pOneScore == 7 && _turnManager.currentPlayer == _turnManager.playerOne)
-                    {
-                        //Debug.Log("Player 1 Wins!");
-                        _winScreenPOne.gameObject.SetActive(true);
-                    }
-                    else if(_scoreboardScript.pTwoScore == 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
-                    {
-                        //Debug.Log("Player 2 Wins!");
-                        _winScreenPTwo.gameObject.SetActive(true);
-                    }
-                    else //TEMP player scored 8 ball early
-                    {
-                        //Debug.Log("Player " + _turnManagerScript.currentPlayer.ToString() + " loses");
-                        if(_turnManager.currentPlayer == _turnManager.playerOne)
-                        {
-                            _winScreenPTwo.gameObject.SetActive(true);
-                        }
-                        else if(_turnManager.currentPlayer == _turnManager.playerTwo)
-                        {
-                            _winScreenPOne.gameObject.SetActive(true);
-                        }
-                    }
+                    ////TEMP player has scored all the balls and 8 ball
+                    //if(_scoreboard.pOneScore == 7 && _turnManager.currentPlayer == _turnManager.playerOne)
+                    //{
+                    //    //Debug.Log("Player 1 Wins!");
+                    //    _winScreenPOne.gameObject.SetActive(true);
+                    //}
+                    //else if(_scoreboard.pTwoScore == 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
+                    //{
+                    //    //Debug.Log("Player 2 Wins!");
+                    //    _winScreenPTwo.gameObject.SetActive(true);
+                    //}
+                    //else //TEMP player scored 8 ball early
+                    //{
+                    //    //Debug.Log("Player " + _turnManagerScript.currentPlayer.ToString() + " loses");
+                    //    if(_turnManager.currentPlayer == _turnManager.playerOne)
+                    //    {
+                    //        _winScreenPTwo.gameObject.SetActive(true);
+                    //    }
+                    //    else if(_turnManager.currentPlayer == _turnManager.playerTwo)
+                    //    {
+                    //        _winScreenPOne.gameObject.SetActive(true);
+                    //    }
+                    //}
                     Destroy(ball.gameObject); //Ball
                     break;
                 }
@@ -471,10 +491,9 @@ public class PocketManager : MonoBehaviour
         Vector3 startingPos = cork.transform.position;
 
         float timer = 0f;
-        float maxTime = 3f;
-        while (timer < maxTime)
+        while (timer < _epAnimTime)
         {
-            float percent = timer / maxTime;
+            float percent = timer / _epAnimTime;
             cork.transform.position = Vector3.Lerp(startingPos, targetPos, percent); // move toward pocket over time
             cork.transform.Rotate(new Vector3(0, 90, 0) * Time.deltaTime); //Spin cork
             timer += Time.deltaTime;
@@ -595,16 +614,26 @@ public class PocketManager : MonoBehaviour
     /// <summary>
     /// Cover every pocket except the pocket at pocketIdx
     /// </summary>
-    private void CoverPockets()
+    private void CoverPockets(bool coverAll)
     {
         InputManager.Instance.SwitchCurrentActionMap("PocketPick");
+        pocketsCovered = true;
         for (int i = 0; i < pockets.Count; i++)
         {
-            if (pockets[i] != _selectedPocket) //skip selected pocket
+            if (coverAll) //Hide every pocket
             {
                 StartCoroutine(PlaceCork(pockets[i], false));
                 pockets[i].gameObject.GetComponent<Collider>().enabled = false;
                 _tempCoveredPockets.Add(pockets[i]); //add here to re enable later
+            }
+            else //Hide all pockets except selected
+            {
+                if (pockets[i] != _selectedPocket) //skip selected pocket
+                {
+                    StartCoroutine(PlaceCork(pockets[i], false));
+                    pockets[i].gameObject.GetComponent<Collider>().enabled = false;
+                    _tempCoveredPockets.Add(pockets[i]); //add here to re enable later
+                }
             }
         }
     }
@@ -755,6 +784,83 @@ public class PocketManager : MonoBehaviour
 
 
 
+
+    //END POCKET
+    #region
+
+    /// <summary>
+    /// Set end pocket to random position on the table and hide it.
+    /// </summary>
+    private void SetEndPocketPos()
+    {
+        //Get random location on the table
+        float xPos = UnityEngine.Random.Range(_minXBounds.transform.position.x, _maxXBounds.transform.position.x);
+        float zPos = UnityEngine.Random.Range(_minZBounds.transform.position.x, _maxZBounds.transform.position.x);
+        
+        //Set positions the pocket will move between
+        _epHidePos = new Vector3 (xPos, _yHideValue ,zPos);
+        _epShowPos = new Vector3(xPos, _yShowValue, zPos);
+
+        //set pocket position and hide it
+        _endPocket.transform.position = _epHidePos;
+        _endPocket.SetActive(false);
+    }
+
+
+    /// <summary>
+    /// Raise End Pocket out of the floor and turn on UI/FX
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator RaiseEndPocket()
+    {
+        _endPocket.SetActive(true);
+        
+        //SFX
+
+        float timer = 0;
+        while (timer < _epAnimTime)
+        {
+            float percent = timer / _epAnimTime;
+            _endPocket.transform.position = Vector3.Lerp(_epHidePos, _epShowPos, percent); //Move towards end pos
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        _endPocket.transform.position = _epShowPos; //Set it as the position will be almost there
+
+        //VFX UI ON
+        _epRaised = true;
+    }
+
+
+    /// <summary>
+    /// Lower end pocket into the floor and turn off UI/FX
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator LowerEndPocket()
+    {
+        //Switch Action Map
+        //SFX - VFX - UI Off
+
+        float timer = 0;
+        while (timer < _epAnimTime)
+        {
+            float percent = timer / _epAnimTime;
+            _endPocket.transform.position = Vector3.Lerp(_epShowPos, _epHidePos, percent); //Move towards end pos
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        _endPocket.transform.position = _epHidePos;
+
+        _endPocket.SetActive(false);
+        _epRaised = false;
+    }
+
+
+    #endregion
+
+
+
+
     //HANDLE EVENTS
     #region
 
@@ -786,11 +892,48 @@ public class PocketManager : MonoBehaviour
     /// <param name="sabotaged"></param>
     private void HandleTurnSwitched(bool sabotaged)
     {
-        if (_coverPockets)
+        //Check if this turn needs the End Pocket
+        if (_scoreboard.pOneScore == 7 && _turnManager.currentPlayer == _turnManager.playerOne)
         {
-            _coverPockets = false;
-            CoverPockets();
-            pocketsCovered = true;
+            _endPocketActive = true;
+        }
+        else if (_scoreboard.pTwoScore == 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
+        {
+            _endPocketActive = true;
+        }
+        else
+        {
+            _endPocketActive = false;
+        }
+
+
+
+
+
+       
+        if (_endPocketActive && _epRaised) //EndPocket time active and already raised
+        {
+            Debug.Log("Do Nothing");
+            //Do nothing
+        }
+        else if (_endPocketActive && !_epRaised) //EndPocket needs to be raise
+        {
+            Debug.Log("Raise");
+            StartCoroutine(RaiseEndPocket());
+            CoverPockets(true);
+        }
+        else if (!_endPocketActive && _epRaised) //End Pocket needs to be lowered
+        {
+            Debug.Log("Lower");
+            StartCoroutine(LowerEndPocket());
+        }
+        else //NORMAL TURN
+        {
+            if (_coverPockets) //Check for call their shot asking to cover pockets
+            {
+                _coverPockets = false;
+                CoverPockets(false);
+            }
         }
     }
 
