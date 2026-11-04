@@ -128,44 +128,9 @@ public class TurnManager : MonoBehaviour
         SO_PowerUp.UsePU -= HandlePU;
     }
 
-    
-    /// <summary>
-    /// Checks if the player keeps their turn. Then handles switching or keeping turn.
-    /// </summary>
-    private void SwitchTurn()
-    {
-        if (!keepTurn) //Switch turn
-        {
-            _inventory.UpdateInventory();
-            _inventory.ResetOldPUCollections();
-            _puUI.ResetSabotageUI();
-            _turnSwitchUI.SetActive(true); //Play the turn transition
-            _turnText.text = string.Empty;
 
-            if (currentPlayer == playerOne)
-            {
-                currentPlayer = playerTwo;
-                _turnText.text = "Player 2";
-            }
-            else
-            {
-                currentPlayer = playerOne;
-                _turnText.text = "Player 1";
-            }
-            _lostTurn = false; // reset lost turn once the switch turn has been called
-            scratch = false;
-        }
-        else //Keep turn
-        {
-            //Normally handled by turn switch dart event.
-            _poolCueScript.shootAvailable = true;
-            _poolCueScript.RespawnPoolCue();
-            _puUI.ResetSabotageUI();
-            _inventory.usingPUs.Clear();
-        }
-    }
-
-
+    //TEAM FUNCTIONS
+    #region
     /// <summary>
     /// Determines if stripes gets to keep turn
     /// </summary>
@@ -304,6 +269,43 @@ public class TurnManager : MonoBehaviour
             pOneGlow.transform.localScale = Vector3.zero;
         }
     }
+    #endregion
+
+    /// <summary>
+    /// Checks if the player keeps their turn. Then handles switching or keeping turn.
+    /// </summary>
+    private void SwitchTurn()
+    {
+        if (!keepTurn) //Switch turn
+        {
+            _inventory.UpdateInventory();
+            _inventory.ResetOldPUCollections();
+            _puUI.ResetSabotageUI();
+            _turnSwitchUI.SetActive(true); //Play the turn transition
+            _turnText.text = string.Empty;
+
+            if (currentPlayer == playerOne)
+            {
+                currentPlayer = playerTwo;
+                _turnText.text = "Player 2";
+            }
+            else
+            {
+                currentPlayer = playerOne;
+                _turnText.text = "Player 1";
+            }
+            _lostTurn = false; // reset lost turn once the switch turn has been called
+            scratch = false;
+        }
+        else //Keep turn
+        {
+            //Normally handled by turn switch dart event.
+            _poolCueScript.shootAvailable = true;
+            _poolCueScript.RespawnPoolCue();
+            _puUI.ResetSabotageUI();
+            _inventory.usingPUs.Clear();
+        }
+    }
 
 
     /// <summary>
@@ -319,7 +321,8 @@ public class TurnManager : MonoBehaviour
         _inventory.AddPowerUp();
     }
 
-
+    //EVENT HANDLING
+    #region
     /// <summary>
     /// When balls are stopped invoke turn ending
     /// </summary>
@@ -335,6 +338,7 @@ public class TurnManager : MonoBehaviour
         }
     
     }
+
 
     /// <summary>
     /// Set inventory ready true and try to switch turns
@@ -365,4 +369,6 @@ public class TurnManager : MonoBehaviour
             _sabotaged = true;
         }
     }
+    #endregion
+
 }

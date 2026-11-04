@@ -41,8 +41,8 @@ public class PocketManager : MonoBehaviour
     [Header("Collections")]
     [SerializeField] private PocketedBallData[] _pocketedBalls;
     public List<GameObject> pockets = new List<GameObject>();
-    private List<GameObject> _tempCoveredPockets = new List<GameObject>();
-    [SerializeField] private List<GameObject> _availablePockets = new List<GameObject>();
+    [SerializeField] private List<GameObject> _tempCoveredPockets = new List<GameObject>();
+    private List<GameObject> _availablePockets = new List<GameObject>();
 
 
 
@@ -56,6 +56,7 @@ public class PocketManager : MonoBehaviour
     [Header("PowerUps")]
     private bool _pocketBlockActive = false; //For differentiating what to do when a pocket is chosen
     private bool _reverseCardActive = false; //For differentiating what to do when a pocket is chosen
+    private bool _callingShot = false; //For differentiating what to do when a pocket is chosen
     public bool pocketsCovered { get; private set; } = false; //used to know when to release covered pockets at end of turn
     private bool _coverPockets = false; //Used to know when to cover pockets on turn switch
 
@@ -121,117 +122,8 @@ public class PocketManager : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// Handles pockets collisions with different types of balls.
-    /// </summary>
-    /// <param name="child"></param>
-    /// <param name="ball"></param>
-    public void OnChildCollision(Collider child, Collider ball) //Called by pocket script on collision
-    {
-        switch (ball.gameObject.tag)
-        {
-            case "StripedBall":
-                {
-                    if (_turnManager.teamStripes == 0) //Check if team stripes has not been assigned
-                    {
-                        _turnManager.AssignStripes();
-                    }
-                    if (_turnManager.currentPlayer == _turnManager.teamStripes) //Add powerUp and playfireworks
-                    {
-                        _inventory.AddPowerUp();
-                        StartCoroutine(PlayFireworks(child.gameObject.transform.position, false));
-                    }
-                    else //Play sabotage fireworks if player scored wrong ball
-                    {
-                        StartCoroutine(PlayFireworks(child.gameObject.transform.position, true));
-                    }
-
-                    _turnManager.TurnDeciderStripes();
-                    //Destroy(ball.gameObject); //ball
-                    ChangeStripeScore(true);
-
-                    for (int i = 0; i < _pocketedBalls.Length; i++)
-                    {
-                        if (_pocketedBalls[i].pocket == child)
-                        {
-                            _pocketedBalls[i].balls.Add(ball); //Keep ref of ball
-                            ball.gameObject.SetActive(false);
-                        }
-                    }
-
-
-                    break;
-                }
-            case "SolidBall":
-                {
-                    if ( _turnManager.teamSolids == 0) //Check if team solids has not been assigned
-                    {
-                        _turnManager.AssignSolids();
-                    }
-                    if (_turnManager.currentPlayer == _turnManager.teamSolids)//Add powerUp and playfireworks
-                    {
-                        _inventory.AddPowerUp();
-                        StartCoroutine(PlayFireworks(child.gameObject.transform.position, false));
-                    }
-                    else //Play sabotage fireworks if player scored wrong ball
-                    {
-                        StartCoroutine(PlayFireworks(child.gameObject.transform.position, true));
-                    }
-
-                    _turnManager.TurnDeciderSolids();
-                    //Destroy(ball.gameObject); //ball
-                    for (int i = 0; i < _pocketedBalls.Length; i++)
-                    {
-                        if (_pocketedBalls[i].pocket == child)
-                        {
-                            _pocketedBalls[i].balls.Add(ball); //Keep ref of ball
-                            ball.gameObject.SetActive(false);
-                        }
-                    }
-
-                    ChangeSolidScore(true);
-                    break;
-                }
-            case "EightBall":
-                {
-                    Debug.Log("EightBall");
-                    //TEMP player has scored all the balls and 8 ball
-                    if(_scoreboardScript.pOneScore == 7 && _turnManager.currentPlayer == _turnManager.playerOne)
-                    {
-                        //Debug.Log("Player 1 Wins!");
-                        _winScreenPOne.gameObject.SetActive(true);
-                    }
-                    else if(_scoreboardScript.pTwoScore == 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
-                    {
-                        //Debug.Log("Player 2 Wins!");
-                        _winScreenPTwo.gameObject.SetActive(true);
-                    }
-                    else //TEMP player scored 8 ball early
-                    {
-                        //Debug.Log("Player " + _turnManagerScript.currentPlayer.ToString() + " loses");
-                        if(_turnManager.currentPlayer == _turnManager.playerOne)
-                        {
-                            _winScreenPTwo.gameObject.SetActive(true);
-                        }
-                        else if(_turnManager.currentPlayer == _turnManager.playerTwo)
-                        {
-                            _winScreenPOne.gameObject.SetActive(true);
-                        }
-                    }
-                    Destroy(ball.gameObject); //Ball
-                    break;
-                }
-            case "CueBall":
-                {
-                    _turnManager.scratch = true;
-                    _turnManager.keepTurn = false;
-                    Scratched?.Invoke();
-                    break;
-                }
-        }
-    }
-
-
+    //SCORE
+    #region
     /// <summary>
     /// Increment stripes score +1 or -1
     /// </summary>
@@ -292,19 +184,123 @@ public class PocketManager : MonoBehaviour
             }
         }
     }
+    #endregion
 
 
     /// <summary>
-    /// Play a firework at a certain position for 4 seconds
+    /// Handles pockets collisions with different types of balls.
     /// </summary>
-    /// <param name="pos"></param>
-    IEnumerator PlayFireworks(Vector3 pos, bool sabotage) //Should Move this to firework script script
+    /// <param name="child"></param>
+    /// <param name="ball"></param>
+    /// 
+    public void OnChildCollision(Collider child, Collider ball) //Called by pocket script on collision
     {
-        _fireworkScript.ActivateFirework(sabotage, pos);
-        yield return new WaitForSeconds(4f);
-        _fireworkScript.HideFireWork(sabotage);
+        switch (ball.gameObject.tag)
+        {
+            case "StripedBall":
+                {
+                    if (_turnManager.teamStripes == 0) //Check if team stripes has not been assigned
+                    {
+                        _turnManager.AssignStripes();
+                    }
+                    if (_turnManager.currentPlayer == _turnManager.teamStripes) //Add powerUp and playfireworks
+                    {
+                        _inventory.AddPowerUp();
+                        StartCoroutine(_fireworkScript.PlayFireworks(child.gameObject.transform.position, false));
+                    }
+                    else //Play sabotage fireworks if player scored wrong ball
+                    {
+                        StartCoroutine(_fireworkScript.PlayFireworks(child.gameObject.transform.position, true));
+                    }
+
+                    _turnManager.TurnDeciderStripes();
+                    //Destroy(ball.gameObject); //ball
+                    ChangeStripeScore(true);
+
+                    for (int i = 0; i < _pocketedBalls.Length; i++)
+                    {
+                        if (_pocketedBalls[i].pocket == child)
+                        {
+                            _pocketedBalls[i].balls.Add(ball); //Keep ref of ball
+                            ball.gameObject.SetActive(false);
+                        }
+                    }
+
+
+                    break;
+                }
+            case "SolidBall":
+                {
+                    if ( _turnManager.teamSolids == 0) //Check if team solids has not been assigned
+                    {
+                        _turnManager.AssignSolids();
+                    }
+                    if (_turnManager.currentPlayer == _turnManager.teamSolids)//Add powerUp and playfireworks
+                    {
+                        _inventory.AddPowerUp();
+                        StartCoroutine(_fireworkScript.PlayFireworks(child.gameObject.transform.position, false));
+                    }
+                    else //Play sabotage fireworks if player scored wrong ball
+                    {
+                        StartCoroutine(_fireworkScript.PlayFireworks(child.gameObject.transform.position, true));
+                    }
+
+                    _turnManager.TurnDeciderSolids();
+                    //Destroy(ball.gameObject); //ball
+                    for (int i = 0; i < _pocketedBalls.Length; i++)
+                    {
+                        if (_pocketedBalls[i].pocket == child)
+                        {
+                            _pocketedBalls[i].balls.Add(ball); //Keep ref of ball
+                            ball.gameObject.SetActive(false);
+                        }
+                    }
+
+                    ChangeSolidScore(true);
+                    break;
+                }
+            case "EightBall":
+                {
+                    Debug.Log("EightBall");
+                    //TEMP player has scored all the balls and 8 ball
+                    if(_scoreboardScript.pOneScore == 7 && _turnManager.currentPlayer == _turnManager.playerOne)
+                    {
+                        //Debug.Log("Player 1 Wins!");
+                        _winScreenPOne.gameObject.SetActive(true);
+                    }
+                    else if(_scoreboardScript.pTwoScore == 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
+                    {
+                        //Debug.Log("Player 2 Wins!");
+                        _winScreenPTwo.gameObject.SetActive(true);
+                    }
+                    else //TEMP player scored 8 ball early
+                    {
+                        //Debug.Log("Player " + _turnManagerScript.currentPlayer.ToString() + " loses");
+                        if(_turnManager.currentPlayer == _turnManager.playerOne)
+                        {
+                            _winScreenPTwo.gameObject.SetActive(true);
+                        }
+                        else if(_turnManager.currentPlayer == _turnManager.playerTwo)
+                        {
+                            _winScreenPOne.gameObject.SetActive(true);
+                        }
+                    }
+                    Destroy(ball.gameObject); //Ball
+                    break;
+                }
+            case "CueBall":
+                {
+                    _turnManager.scratch = true;
+                    _turnManager.keepTurn = false;
+                    Scratched?.Invoke();
+                    break;
+                }
+        }
     }
 
+
+    //POCKET SELECTION CORE
+    #region
 
     /// <summary>
     /// Cycle through the pockets going left
@@ -369,11 +365,8 @@ public class PocketManager : MonoBehaviour
             {
                 _selectedPocket = EventSystem.current.currentSelectedGameObject; //Ref selected pocket
                 _availablePockets.Clear(); //reset avialable pockets
-                if (_pocketBlockActive) //Pocket Block - This must be above because both PUs could be called on same turn but this one would play first
-                {
-                    RemovePocket();
-                    _pocketBlockActive = false;
-                }
+
+
                 if (_reverseCardActive) //Reverse card
                 {
                     _controlsUI.gameObject.SetActive(false); //UI
@@ -399,7 +392,15 @@ public class PocketManager : MonoBehaviour
                     InputManager.Instance.SwitchCurrentActionMap("Gameplay");
                     _reverseCardActive = false;
                 }
-                else if (_turnManager.ctsActive == true) //Call their shot
+
+
+                if (_pocketBlockActive) //Pocket Block - This must be above CTS because the else is necessary to come from this
+                {
+                    RemovePocket();
+                    _pocketBlockActive = false;
+                }
+
+                if (_callingShot) //Call their shot - need else so it doesn't get called same time as pocket block - make sure others inactive
                 {
                     _controlsUI.gameObject.SetActive(false); //UI
                     _highlightObject.SetActive(false);
@@ -407,17 +408,93 @@ public class PocketManager : MonoBehaviour
                     _choosingPocket = false;
                     _coverPockets = true;
                     _turnManager.ctsActive = false;
+                    _callingShot = false;
                     StartCoroutine(CallPocketSelected()); //Must wait till end of frame or else this input gets registered in the UI that appears after the event trigger
                 }
             }
         }
     }
-
-
-    public bool CanReverse()
+    
+    
+    /// <summary>
+    /// Switch the input map and highlight the first pocket.
+    /// Text is the description on screen for the player
+    /// </summary>
+    /// <param name="text"></param>
+    private void StartChoosingPocket(string text)
     {
-        return true;
+        InputManager.Instance.SwitchCurrentActionMap("PocketPick");
+        _controlsUIDesc.text = text;
+        _controlsUI.gameObject.SetActive(true);
+        _choosingPocket = true;
+        _pocketIdx = 0;
+        _highlightObject.SetActive(true);
+        AdjustAvailablePockets();
+        HighlightPocket();
     }
+
+
+    /// <summary>
+    /// Set pocket as selected and move the highlight object position to the pocket
+    /// </summary>
+    private void HighlightPocket()
+    {
+        EventSystem.current.SetSelectedGameObject(_availablePockets[_pocketIdx]);
+        _highlightObject.transform.position = _availablePockets[_pocketIdx].transform.position;
+    }
+
+    #endregion
+
+
+
+
+    //POCKET SELECTION HELPER FUNCTIONS
+
+    //GENERAL
+    #region
+
+    /// <summary>
+    /// Spawn a cork above the chosen pocket.
+    /// Then move it onto the pocket and switch inputs back to gameplay.
+    /// check is to check if there were temp corks that need to be unhidden.
+    /// </summary>
+    /// <param name="pocket"></param>
+    /// <param name="check"></param>
+    /// <returns></returns>
+    IEnumerator PlaceCork(GameObject pocket, bool check)
+    {
+        GameObject cork = Instantiate(_cork);
+        cork.transform.SetParent(pocket.transform); //Set parent to pocket so we can later remove cork if needed
+        cork.SetActive(true);
+        Vector3 targetPos = pocket.transform.position;
+        cork.transform.position = targetPos + new Vector3(0, 5, 0); // set cork pos above target pocket - Should make 5 a variable for designer
+        Vector3 startingPos = cork.transform.position;
+
+        float timer = 0f;
+        float maxTime = 3f;
+        while (timer < maxTime)
+        {
+            float percent = timer / maxTime;
+            cork.transform.position = Vector3.Lerp(startingPos, targetPos, percent); // move toward pocket over time
+            cork.transform.Rotate(new Vector3(0, 90, 0) * Time.deltaTime); //Spin cork
+            timer += Time.deltaTime;
+            yield return null;
+
+        }
+        cork.transform.position = targetPos; //Set pos exactly on pocket
+        cork.transform.rotation = Quaternion.identity;
+
+        if (InputManager.Instance.currentActionMap.name != "Gameplay") //Player cant shoot until cork is down
+        {
+            InputManager.Instance.SwitchCurrentActionMap("Gameplay");
+        }
+
+        if (check)
+        {
+            ShowHiddenCorks();
+        }
+    }
+
 
     /// <summary>
     /// Set which pockets can be looked through
@@ -455,6 +532,174 @@ public class PocketManager : MonoBehaviour
                 _availablePockets.Add(pocket);
             }
         }
+    }
+
+
+    /// <summary>
+    /// Put a cork and remove the selected pocket.
+    /// Set input state back to gameplay
+    /// </summary>
+    private void RemovePocket()
+    {
+        _choosingPocket = false;
+        _controlsUI.gameObject.SetActive(false); //UI
+        _highlightObject.SetActive(false);
+
+        StartCoroutine(PlaceCork(_selectedPocket, true));
+        _selectedPocket.GetComponent<Collider>().enabled = false;
+        pockets.Remove(_selectedPocket);
+    }
+
+
+    /// <summary>
+    /// Look through hidden corks and reactivate them unless a permanent one has been placed on top
+    /// </summary>
+    private void ShowHiddenCorks()
+    {
+        foreach (GameObject obj in _tempCoveredPockets)
+        {
+            if (obj.transform.GetChild(0) != null)
+            {
+                obj.transform.GetChild(0).gameObject.SetActive(true); // corks were false
+            }
+            else
+            {
+                Debug.Log("NO children");
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Hide all the temp corks
+    /// </summary>
+    private void HideTempCorks()
+    {
+        foreach (GameObject pocket in _tempCoveredPockets)
+        {
+            if (pocket.transform.GetChild(0) != null)
+            {
+                pocket.transform.GetChild(0).gameObject.SetActive(false); //hide all temp corks while player picks a pocket to block
+            }
+        }
+    }
+
+    #endregion
+
+
+
+
+    //CALL THEIR SHOT
+    #region
+
+    /// <summary>
+    /// Cover every pocket except the pocket at pocketIdx
+    /// </summary>
+    private void CoverPockets()
+    {
+        InputManager.Instance.SwitchCurrentActionMap("PocketPick");
+        for (int i = 0; i < pockets.Count; i++)
+        {
+            if (pockets[i] != _selectedPocket) //skip selected pocket
+            {
+                StartCoroutine(PlaceCork(pockets[i], false));
+                pockets[i].gameObject.GetComponent<Collider>().enabled = false;
+                _tempCoveredPockets.Add(pockets[i]); //add here to re enable later
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// push balls away from corks then .destroy temporary corks and re enable pockets
+    /// </summary>
+    private IEnumerator ReleasePockets()
+    {
+        pocketsCovered = false;
+
+        foreach (GameObject pocket in _tempCoveredPockets) //Push away nearby balls so they dont score
+        {
+            Collider[] nearbyBalls = Physics.OverlapSphere(pocket.transform.position, _pocketPushRadius);
+            foreach (Collider collider in nearbyBalls)
+            {
+                if (collider.TryGetComponent(out Rigidbody rb))
+                {
+                    Vector3 targetDir = _tableCenter.transform.position - rb.transform.position;
+                    rb.AddForce(targetDir.normalized * _pocketPushForce, ForceMode.Impulse);
+                }
+            }
+        }
+
+        yield return new WaitForSeconds(.5f); //let balls get moved before destroying corks
+
+        foreach (GameObject pocket in _tempCoveredPockets) //Remove temporary corks
+        {
+            if (pocket.transform.GetChild(0).gameObject != null)
+            {
+                Destroy(pocket.transform.GetChild(0).gameObject); //Destroy cork
+            }
+            else
+            {
+                Debug.Log("null");
+            }
+            pocket.GetComponent<Collider>().enabled = true;
+        }
+
+
+        _tempCoveredPockets.Clear();
+        PocketExplosion?.Invoke(); //Moved balls so must tell ball manager to check movement
+    }
+
+
+    /// <summary>
+    /// Wait for next frame and invoke PocketSelected
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator CallPocketSelected()
+    {
+        yield return new WaitForEndOfFrame();
+        PocketSelected?.Invoke();
+    }
+
+    #endregion
+
+
+
+
+    //REVERSE
+    #region
+
+    /// <summary>
+    /// Returns a bool for if a player can use the reverse sabotage
+    /// </summary>
+    /// <returns></returns>
+    public bool CanReverse()
+    {
+        bool reversable = false;
+        for (int i = 0; i < _pocketedBalls.Length; i++)
+        {
+            PocketedBallData data = _pocketedBalls[i];
+            if (data.balls.Count > 0) //Pocket has been scored into
+            {
+                for (int j = 0; j < pockets.Count; j++) //Look in avaiable pockets
+                {
+                    if (pockets[j].name == data.pocket.name) //if theres a match can reverse
+                    {
+                        reversable = true;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+            else
+            {
+                continue;
+            }
+        }
+
+        return reversable;
     }
 
 
@@ -501,202 +746,17 @@ public class PocketManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f);
         _selectedPocket.SetActive(true); //reenable pocket
+        ShowHiddenCorks(); //if theres hidden corks show them
         BallRespawned?.Invoke(ball);
     }
 
-
-    /// <summary>
-    /// Cover every pocket except the pocket at pocketIdx
-    /// </summary>
-    private void CoverPockets()
-    {
-        for (int i = 0; i < pockets.Count; i++)
-        {
-            if (pockets[i] != _selectedPocket) //skip selected pocket
-            {
-                StartCoroutine(PlaceCork(pockets[i], false));
-                pockets[i].gameObject.GetComponent<Collider>().enabled = false;
-                _tempCoveredPockets.Add(pockets[i]); //add here to re enable later
-            }
-        }
-    }
+    #endregion
 
 
-    /// <summary>
-    /// push balls away from corks then .destroy temporary corks and re enable pockets
-    /// </summary>
-    private IEnumerator ReleasePockets()
-    {
-        pocketsCovered = false;
-
-        foreach (GameObject pocket in _tempCoveredPockets) //Push away nearby balls so they dont score
-        {
-            Collider[] nearbyBalls = Physics.OverlapSphere(pocket.transform.position, _pocketPushRadius);
-            foreach (Collider collider in nearbyBalls)
-            {
-                if (collider.TryGetComponent(out Rigidbody rb))
-                {
-                    Debug.Log("BANG");
-                    Vector3 targetDir = _tableCenter.transform.position - rb.transform.position;
-                    rb.AddForce(targetDir.normalized * _pocketPushForce, ForceMode.Impulse);
-                }
-            }
-        }
-
-        yield return new WaitForSeconds(.5f); //let balls get moved before destroying corks
-
-        foreach (GameObject pocket in _tempCoveredPockets) //Remove temporary corks
-        {
-            if (pocket.transform.GetChild(0).gameObject != null)
-            {
-                Destroy(pocket.transform.GetChild(0).gameObject); //Destroy cork
-            }
-            else
-            {
-                Debug.Log("null");
-            }
-            pocket.GetComponent<Collider>().enabled = true;
-        }
 
 
-        _tempCoveredPockets.Clear();
-        PocketExplosion?.Invoke(); //Moved balls so must tell ball manager to check movement
-    }
-
-
-    /// <summary>
-    /// Put a cork and remove the selected pocket.
-    /// Set input state back to gameplay
-    /// </summary>
-    private void RemovePocket()
-    {
-        _choosingPocket = false;
-        _controlsUI.gameObject.SetActive(false); //UI
-        _highlightObject.SetActive(false);
-
-        StartCoroutine(PlaceCork(_selectedPocket, true));
-        _selectedPocket.GetComponent<Collider>().enabled = false;
-        pockets.Remove(_selectedPocket);
-    }
-
-
-    /// <summary>
-    /// Spawn a cork above the chosen pocket.
-    /// Then move it onto the pocket and switch inputs back to gameplay.
-    /// check is to check if there were temp corks that need to be unhidden.
-    /// </summary>
-    /// <param name="pocket"></param>
-    /// <param name="check"></param>
-    /// <returns></returns>
-    IEnumerator PlaceCork(GameObject pocket, bool check)
-    {
-        GameObject cork = Instantiate(_cork);
-        cork.transform.SetParent(pocket.transform); //Set parent to pocket so we can later remove cork if needed
-        cork.SetActive(true);
-        Vector3 targetPos = pocket.transform.position;
-        cork.transform.position = targetPos + new Vector3(0, 5, 0); // set cork pos above target pocket - Should make 5 a variable for designer
-        Vector3 startingPos = cork.transform.position;
-
-        float timer = 0f;
-        float maxTime = 3f;
-        while (timer < maxTime)
-        {
-            float percent = timer / maxTime;
-            cork.transform.position = Vector3.Lerp(startingPos, targetPos, percent); // move toward pocket over time
-            cork.transform.Rotate(new Vector3(0, 90, 0) * Time.deltaTime); //Spin cork
-            timer += Time.deltaTime;
-            yield return null;
-
-        }
-        cork.transform.position = targetPos; //Set pos exactly on pocket
-        cork.transform.rotation = Quaternion.identity;
-
-        if (InputManager.Instance.currentActionMap.name != "Gameplay") //Player cant shoot until cork is down
-        {
-            InputManager.Instance.SwitchCurrentActionMap("Gameplay");
-        }
-
-        if (check)
-        {
-            ShowHiddenCorks();
-        }
-    }
-
-
-    /// <summary>
-    /// Look through hidden corks and reactivate them unless a permanent one has been placed on top
-    /// </summary>
-    private void ShowHiddenCorks()
-    {
-        foreach (GameObject obj in _tempCoveredPockets)
-        {
-            Debug.Log(obj.name);
-            if (obj.transform.GetChild(0) != null)
-            {
-                obj.transform.GetChild(0).gameObject.SetActive(true); // corks were false
-            }
-            else
-            {
-                Debug.Log("NO children");
-            }
-        }
-    }
-
-
-    /// <summary>
-    /// Hide all the temp corks
-    /// </summary>
-    private void HideTempCorks()
-    {
-        foreach (GameObject pocket in _tempCoveredPockets)
-        {
-            if (pocket.transform.GetChild(0) != null)
-            {
-                pocket.transform.GetChild(0).gameObject.SetActive(false); //hide all temp corks while player picks a pocket to block
-            }
-        }
-    }
-
-
-    /// <summary>
-    /// Switch the input map and highlight the first pocket.
-    /// Text is the description on screen for the player
-    /// </summary>
-    /// <param name="text"></param>
-    private void StartChoosingPocket(string text)
-    {
-        InputManager.Instance.SwitchCurrentActionMap("PocketPick");
-        _controlsUIDesc.text = text;
-        _controlsUI.gameObject.SetActive(true);
-        _choosingPocket = true;
-        _pocketIdx = 0;
-        _highlightObject.SetActive(true);
-        AdjustAvailablePockets();
-        HighlightPocket();
-    }
-
-
-    /// <summary>
-    /// Wait for next frame and invoke PocketSelected
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator CallPocketSelected()
-    {
-        yield return new WaitForEndOfFrame();
-        Debug.Log("Selected");
-        PocketSelected?.Invoke();
-    }
-
-
-    /// <summary>
-    /// Set pocket as selected and move the highlight object position to the pocket
-    /// </summary>
-    private void HighlightPocket()
-    {
-        EventSystem.current.SetSelectedGameObject(_availablePockets[_pocketIdx]);
-        _highlightObject.transform.position = _availablePockets[_pocketIdx].transform.position;
-    }
-
+    //HANDLE EVENTS
+    #region
 
     /// <summary>
     /// turn is ending and going to switch to next player
@@ -710,6 +770,7 @@ public class PocketManager : MonoBehaviour
         }
         else if (_turnManager.ctsActive && !_turnManager.keepTurn) //choose only if goin to switch turn after
         {
+            _callingShot = true;
             StartChoosingPocket("Choose only one pocket for your opponent to have available!");
         }
         else
@@ -757,4 +818,7 @@ public class PocketManager : MonoBehaviour
             StartChoosingPocket("Choose a pocket to bring back its most recent scored ball");
         }
     }
+
+    #endregion
+
 }

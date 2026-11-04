@@ -19,6 +19,8 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private Image _cantUsePUUI;
     [SerializeField] private GameObject _turnManagerRef; //TurnManager to switch turn -- switch turn in Toss Function and BallsStopped Event
     private TurnManager _turnManager;
+    [SerializeField] private GameObject _pocketManagerRef;
+    private PocketManager _pocketManager;
     [SerializeField] private GameObject _cueBall; //For controlling just the cue ball
     [SerializeField] private Image _imagePU; //Using power up pop up UI
     [SerializeField] private TMP_Text _titleTextPU; 
@@ -56,6 +58,7 @@ public class InventoryManager : MonoBehaviour
         #region
         _turnManager = _turnManagerRef.GetComponent<TurnManager>();
         _powerUpUIScript = _powerUpUIRef.GetComponent<PowerUpUI>();
+        _pocketManager = _pocketManagerRef.GetComponent<PocketManager>();
         #endregion
         //UI init
         #region
@@ -350,6 +353,10 @@ public class InventoryManager : MonoBehaviour
             else if (_ctsInUse == true && _selectedPU.id == "Call Their Shot") //call their shot been used and being used again after scoring
             {
                 StartCoroutine(PowerUpWarning("Already active, will activate at the end of turn"));
+            }
+            else if (_selectedPU.id == "Reverse Card" && !_pocketManager.CanReverse())
+            {
+                StartCoroutine(PowerUpWarning("No available pocket has a ball to respawn"));
             }
             //Can use power up
             else

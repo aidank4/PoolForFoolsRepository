@@ -438,7 +438,10 @@ public class BallManager : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// Add the respawned ball back into balls list
+    /// </summary>
+    /// <param name="ball"></param>
     private void HandleBallRespawn(GameObject ball)
     {
         _spawnedBalls.Add(ball);
