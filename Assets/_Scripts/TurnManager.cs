@@ -46,8 +46,6 @@ public class TurnManager : MonoBehaviour
     public bool keepTurn = false; //Used to see if a player scored a team ball
     private bool _lostTurn = false; // fixes the issue where if a good ball was scored after bad ball then keep turn would still be made true
     public bool scratch = false; //Gets set true by the pocket manager
-    private bool _ballsStopped = false; //Used to know if can switch turn
-    private bool _inventoryReady = false; //Used to know if can switch turn
 
     [Header("PowerUps")]
     private bool _sabotaged = false; //Set true when the following player is sabotaged - Used to activate PU's at theh correct time
@@ -164,25 +162,6 @@ public class TurnManager : MonoBehaviour
             _poolCueScript.RespawnPoolCue();
             _puUI.ResetSabotageUI();
             _inventory.usingPUs.Clear();
-        }
-    }
-
-
-    /// <summary>
-    /// Check if everything is ready for turn switch.
-    /// If inventory, balls, and power ups ready.
-    /// </summary>
-    private void TryToSwitchTurn()
-    {
-        if (_inventoryReady && _ballsStopped && !ctsActive)
-        {
-            SwitchTurn();
-            _ballsStopped = false;
-            _inventoryReady = false;
-        }
-        else
-        {
-            //not ready
         }
     }
 
@@ -346,8 +325,6 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     private void HandleBallsStopped()
     {
-        _ballsStopped = true;
-        Debug.Log("Turn Ending");
         if ((ctsActive && !keepTurn) || _pocketManager.pocketsCovered) //Pocket PU stuff to do before turn can switch
         {
             TurnEnding?.Invoke();
@@ -364,8 +341,6 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     private void HandleInventoryReady()
     {
-        _inventoryReady = true;
-        //TryToSwitchTurn();
         SwitchTurn(); //if Ui is ready than everything is done to switch turn
     }
 

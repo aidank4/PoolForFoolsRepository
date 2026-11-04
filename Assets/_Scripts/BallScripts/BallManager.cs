@@ -122,6 +122,7 @@ public class BallManager : MonoBehaviour
         {
             _pocketManager.Scratched += HandleScratch;
             _pocketManager.PocketExplosion += HandleShotEvent; //Set checkballs to true again as balls got moved
+            _pocketManager.BallRespawned += HandleBallRespawn;
         }
         if (_turnManager != null)
         {
@@ -144,6 +145,7 @@ public class BallManager : MonoBehaviour
         {
             _pocketManager.Scratched -= HandleScratch;
             _pocketManager.PocketExplosion -= HandleShotEvent;
+            _pocketManager.BallRespawned -= HandleBallRespawn;
         }
         SO_PowerUp.UsePU -= HandlePowerUps;
     }
@@ -178,7 +180,7 @@ public class BallManager : MonoBehaviour
             bool checkBallsStopped = true;
             foreach (GameObject ball in _spawnedBalls) //Check each ball and if any are moving it will set stopped bool to false
             {
-                if (ball == null) //check if ball has been removed from the game
+                if (ball == null || !ball.activeSelf) //check if ball has been removed from the game
                 {
                     _spawnedBalls.Remove(ball);
                     break; //break so that the foreach loop doesn't continue with a missing element
@@ -189,6 +191,10 @@ public class BallManager : MonoBehaviour
                     if (!ballRb.IsSleeping())
                     {
                         checkBallsStopped = false;
+                    }
+                    else
+                    {
+                        //re check
                     }
                 }
             }
@@ -430,6 +436,12 @@ public class BallManager : MonoBehaviour
             _cueBall.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
             _vfxManager.RocketOff();
         }
+    }
+
+
+    private void HandleBallRespawn(GameObject ball)
+    {
+        _spawnedBalls.Add(ball);
     }
 
 

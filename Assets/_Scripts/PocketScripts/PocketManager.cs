@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -11,6 +12,14 @@ using UnityEngine.UI;
 
 public class PocketManager : MonoBehaviour
 {
+    [System.Serializable]
+    public struct PocketedBallData
+    {
+        public Collider pocket;
+        public List<Collider> balls;
+    }
+
+
     [Header("Reference")]
     [SerializeField] private GameObject _scoreboardRef;
     private Scoreboard _scoreboardScript;
@@ -29,17 +38,11 @@ public class PocketManager : MonoBehaviour
     [SerializeField] private Image _winScreenPTwo;
 
 
-    [Serializable]
-    public struct PocketedBallData
-    {
-        public Collider pocket;
-        public List<Collider> balls;
-    }
-
     [Header("Collections")]
-    private PocketedBallData[] _pocketedBalls;
+    [SerializeField] private PocketedBallData[] _pocketedBalls;
     public List<GameObject> pockets = new List<GameObject>();
     private List<GameObject> _tempCoveredPockets = new List<GameObject>();
+    private List<GameObject> _availablePockets = new List<GameObject>();
 
 
 
@@ -48,6 +51,7 @@ public class PocketManager : MonoBehaviour
     [SerializeField] private float _pocketPushForce = 2f;
     private bool _choosingPocket = false; //When true the player can cycle through pocket selections
     private int _pocketIdx;
+    private GameObject _selectedPocket;
 
     [Header("PowerUps")]
     private bool _pocketBlockActive = false; //For differentiating what to do when a pocket is chosen
@@ -60,6 +64,7 @@ public class PocketManager : MonoBehaviour
     public event Action Scratched;
     public event Action PocketSelected;
     public event Action PocketExplosion;
+    public event Action<GameObject> BallRespawned;
 
 
     private void Awake()
@@ -116,18 +121,6 @@ public class PocketManager : MonoBehaviour
     }
 
 
-    private void MatchPocket(Collider child)
-    {
-        for (int i = 0; i < _pocketedBalls.Length; i++)
-        {
-            if (_pocketedBalls[i].pocket == child)
-            {
-
-            }
-        }
-    }
-
-
     /// <summary>
     /// Handles pockets collisions with different types of balls.
     /// </summary>
@@ -155,7 +148,7 @@ public class PocketManager : MonoBehaviour
 
                     _turnManager.TurnDeciderStripes();
                     //Destroy(ball.gameObject); //ball
-                    AddStripeScore();
+                    ChangeStripeScore(true);
 
                     for (int i = 0; i < _pocketedBalls.Length; i++)
                     {
@@ -175,7 +168,6 @@ public class PocketManager : MonoBehaviour
                     {
                         _turnManager.AssignSolids();
                     }
-
                     if (_turnManager.currentPlayer == _turnManager.teamSolids)//Add powerUp and playfireworks
                     {
                         _inventory.AddPowerUp();
@@ -197,7 +189,7 @@ public class PocketManager : MonoBehaviour
                         }
                     }
 
-                    AddSolidScore();
+                    ChangeSolidScore(true);
                     break;
                 }
             case "EightBall":
@@ -241,33 +233,63 @@ public class PocketManager : MonoBehaviour
 
 
     /// <summary>
-    /// Increment stripes score +1
+    /// Increment stripes score +1 or -1
     /// </summary>
-    private void AddStripeScore()
+    /// <param name="add"></param>
+    private void ChangeStripeScore(bool add)
     {
         if (_turnManager.playerOne == _turnManager.teamStripes)
         {
-            _scoreboardScript.pOneScore++;
+            if (add)
+            {
+                _scoreboardScript.pOneScore++;
+            }
+            else
+            {
+                _scoreboardScript.pOneScore--;
+            }
         }
         else
         {
-            _scoreboardScript.pTwoScore++;
+            if (add)
+            {
+                _scoreboardScript.pTwoScore++;
+            }
+            else
+            {
+                _scoreboardScript.pTwoScore--;
+            }
         }
     }
 
 
     /// <summary>
-    /// Increments solid score +1
+    /// Increments solid score +1 or -1
     /// </summary>
-    private void AddSolidScore()
+    /// <param name="add"></param>
+    private void ChangeSolidScore(bool add)
     {
         if (_turnManager.playerOne == _turnManager.teamSolids)
         {
-            _scoreboardScript.pOneScore++;
+            if (add)
+            {
+                _scoreboardScript.pOneScore++;
+            }
+            else
+            {
+                _scoreboardScript.pOneScore--;
+            }
         }
         else
         {
-            _scoreboardScript.pTwoScore++;
+            if (add)
+            {
+                _scoreboardScript.pTwoScore++;
+            }
+            else
+            {
+                _scoreboardScript.pTwoScore--;
+            }
         }
     }
 
@@ -294,6 +316,9 @@ public class PocketManager : MonoBehaviour
         {
             if (_choosingPocket)
             {
+
+
+
                 if (_pocketIdx == pockets.Count - 1) //Restart if at the end
                 {
                     _pocketIdx = 0;
@@ -344,6 +369,7 @@ public class PocketManager : MonoBehaviour
         {
             if (_choosingPocket)
             {
+                _selectedPocket = EventSystem.current.currentSelectedGameObject;
                 if (_pocketBlockActive) //Pocket Block - This must be above because both PUs could be called on same turn but this one would play first
                 {
                     RemovePocket();
@@ -351,6 +377,27 @@ public class PocketManager : MonoBehaviour
                 }
                 if (_reverseCardActive) //Reverse card
                 {
+                    _controlsUI.gameObject.SetActive(false); //UI
+                    _highlightObject.SetActive(false);
+                    _choosingPocket = false;
+
+
+                    GameObject respawnedBall = RetrieveBall();
+                    if (respawnedBall == null) //No balls to respawn must redo
+                    {
+                        StartChoosingPocket("No balls were scored in that pocket. Try Again.");
+                        return; //Exit early
+                    }
+                    else if (respawnedBall.tag == "StripedBall") //Remove score for player
+                    {
+                        ChangeStripeScore(false);
+                    }
+                    else
+                    {
+                        ChangeSolidScore(false);
+                    }
+                    StartCoroutine(RespawnBall(respawnedBall));
+                    InputManager.Instance.SwitchCurrentActionMap("Gameplay");
                     _reverseCardActive = false;
                 }
                 else if (_turnManager.ctsActive == true) //Call their shot
@@ -365,6 +412,79 @@ public class PocketManager : MonoBehaviour
                 }
             }
         }
+    }
+
+
+    private void AdjustAvailablePockets()
+    {
+        for (int i = 0; i < _pocketedBalls.Length; i++)
+        {
+            PocketedBallData data = _pocketedBalls[i];
+            if (data.balls.Count > 0)
+            {
+                _availablePockets.Add(data.pocket.gameObject); //Add pocket with balls
+                bool stay = false;
+                for (int j = 0; j < pockets.Count; j++) //Remove if the pocket is blocked
+                {
+                    if (pockets[j] == data.pocket)
+                    {
+                        stay = true;
+                        break;
+                    }
+                }
+                if (!stay)
+                {
+                    _availablePockets.Remove(data.pocket.gameObject);
+                }
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Return most recent ball scored in selected pocket
+    /// </summary>
+    /// <returns></returns>
+    private GameObject RetrieveBall()
+    {
+        for (int i = 0; i < _pocketedBalls.Length; i++)
+        {
+            if (_pocketedBalls[i].pocket.gameObject == pockets[_pocketIdx]) //Look at balls inside selected pocket
+            {
+                if (_pocketedBalls[i].balls.Count == 0) //Picked a pocket with no balls
+                {
+                    return null;
+                }
+                Collider targetBall;
+                targetBall = _pocketedBalls[i].balls[_pocketedBalls[i].balls.Count - 1]; // last ball (most recent)
+                _pocketedBalls[i].balls.Remove(targetBall); //Remove ball from scored list
+                return targetBall.gameObject;
+            }
+        }
+        Debug.Log("ERROR retrieved null ball");
+        return null;
+    }
+
+
+    /// <summary>
+    /// Respawn ball and push it towards table center.
+    /// After a short wait reenable pocket and call event
+    /// </summary>
+    /// <param name="ball"></param>
+    /// <returns></returns>
+    private IEnumerator RespawnBall(GameObject ball)
+    {
+        pockets[_pocketIdx].SetActive(false); //disable pocket so ball doesn't insta get eaten
+        Vector3 upDir = new Vector3(0, 3, 0);
+        ball.transform.position = pockets[_pocketIdx].transform.position + upDir; //Respawn it above pocket
+        ball.SetActive(true);
+
+        Vector3 targetPos = _tableCenter.transform.position - ball.transform.position;
+        ball.GetComponent<Rigidbody>().AddForce((targetPos.normalized + upDir) * (_pocketPushForce), ForceMode.Impulse); //Push it towards the table
+
+        yield return new WaitForSeconds(0.2f);
+        pockets[_pocketIdx].SetActive(true); //reenable pocket
+        BallRespawned?.Invoke(ball);
     }
 
 

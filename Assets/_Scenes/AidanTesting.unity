@@ -561,6 +561,8 @@ MonoBehaviour:
   - {fileID: 4958539204354093760}
   - {fileID: 2616756822121962577}
   _availablePUs:
+  - {fileID: 11400000, guid: e1053fe57721b3045bd99d9d9739bd4b, type: 2}
+  - {fileID: 11400000, guid: fb0343564af02ea4aab6706bf0758123, type: 2}
   - {fileID: 11400000, guid: e9ee3148d6b68bf42a59d79b307474c4, type: 2}
   _extraPowerUp: {fileID: 0}
 --- !u!1 &16446048197054167
