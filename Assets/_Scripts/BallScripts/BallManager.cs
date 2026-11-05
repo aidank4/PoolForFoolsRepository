@@ -57,8 +57,7 @@ public class BallManager : MonoBehaviour
     [SerializeField] private float _explosiveRadius = 5f;
     [SerializeField] private float _explodeUpOffset = 1f;
     [SerializeField] private Material _blinkRed;
-    [SerializeField] private Material _blinkYellow;
-    [SerializeField] private Material _blinkBaseColor;
+    private Material _blinkOriginal;
     [SerializeField] private float _initialBlinkSpeed = 0.5f;
     private float _blinkMultiplier = 1f;
     private int _blinkCount = 0;
@@ -66,6 +65,8 @@ public class BallManager : MonoBehaviour
     [Header("Rocket")]
     private bool _rocketShotPUActive = false; //When Rocket PU is active
     private Transform _rocketModel;
+    private Transform _magnetModel;
+    private Transform _bombModel;
     private Transform _baseCueBallModel;
     [Header("Magnet")]
     [SerializeField] private float _attractionRadius = 3f; 
@@ -93,6 +94,8 @@ public class BallManager : MonoBehaviour
         _poolCueScript = _poolCueRef.GetComponent<Player>();
         _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
         _rocketModel = _cueBall.transform.Find("Rocket Model");
+        _magnetModel = _cueBall.transform.Find("Magnet Model");
+        _bombModel = _cueBall.transform.Find("Bomb Model");
         _baseCueBallModel = _cueBall.transform.Find("Cue Ball Model");
         _pocketManager = _pocketManagerRef.GetComponent<PocketManager>();
         _turnManager = _turnManagerRef.GetComponent<TurnManager>();
@@ -100,6 +103,7 @@ public class BallManager : MonoBehaviour
         //hide
         #region
         _rocketModel.gameObject.SetActive(false);
+        _magnetModel.gameObject.SetActive(false);
         _baseCueBallModel.gameObject.SetActive(true);
         #endregion
 
@@ -160,6 +164,10 @@ public class BallManager : MonoBehaviour
         {
             RocketRotation();
         }
+        if (_magnetActive && !_checkBalls) //Rotate magnet while player aims
+        {
+            MagnetRotation();
+        }
     }
 
     private void Update()
@@ -167,6 +175,7 @@ public class BallManager : MonoBehaviour
         if (_magnetActive && _cueBall.GetComponent<Rigidbody>().linearVelocity.magnitude > .2f) //if under .2 balls should stop magnitizing to let cue ball stop
         {
             MagnetAttract();
+            LockMagnet();
         }
     }
 
@@ -255,14 +264,12 @@ public class BallManager : MonoBehaviour
         }
         if (_magnetActive)
         {
-            _magnetActive = false;
-            _vfxManager.MagnetOff();
+            MagnetBall();
         }
-        //if (_ballsBig)
-        //{
-        //    _ballsBig = false;
-        //    ResetGiantBalls();
-        //}
+        if (_bombModel.gameObject.activeSelf)
+        {
+            BombBall();
+        }
     }
 
 
@@ -427,8 +434,6 @@ public class BallManager : MonoBehaviour
     }
 
 
-
-
     /// <summary>
     /// Finds the 8 ball and sets is kinematic.
     /// Argument will set kinematic to true or false
@@ -467,6 +472,51 @@ public class BallManager : MonoBehaviour
 
 
     /// <summary>
+    /// Swap Magnet model and cue ball model and set magnet on or off.
+    /// </summary>
+    private void MagnetBall()
+    {
+        if (!_magnetModel.gameObject.activeSelf) //turn on magnet
+        {
+            _magnetActive = true;
+            MagnetRotation();
+            
+
+            _magnetModel.gameObject.SetActive(true);
+            _baseCueBallModel.gameObject.SetActive(false);
+            _vfxManager.MagnetOn(_cueBall.transform);
+        }
+        else //turn off magnet
+        {
+            _baseCueBallModel.gameObject.SetActive(true);
+            _cueBall.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+            _magnetModel.gameObject.SetActive(false);
+            _vfxManager.MagnetOff();
+            _magnetActive = false;
+        }
+    }
+
+
+    /// <summary>
+    /// Update magnet models rotation to orientation of pool cue
+    /// </summary>
+    private void MagnetRotation()
+    {
+        _magnetModel.rotation = Quaternion.LookRotation(_poolCueScript.poolCueParent.transform.up, -_poolCueScript.poolCueParent.transform.right);
+    }
+
+
+    /// <summary>
+    /// Constrain magnets y rotation
+    /// </summary>
+    private void LockMagnet()
+    {
+        Debug.Log("Lock");
+        _cueBall.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
+    }
+
+
+    /// <summary>
     /// Swap cue ball model with rocket and turn on vfx.
     /// If rocket is already active then reset back to standard cue ball
     /// </summary>
@@ -500,6 +550,24 @@ public class BallManager : MonoBehaviour
     }
 
 
+    private void BombBall()
+    {
+        if (!_bombModel.gameObject.activeSelf) //rocket on
+        {
+            _bombBlastActive = true;
+            //RocketRotation();
+            _bombModel.gameObject.SetActive(true);
+            _baseCueBallModel.gameObject.SetActive(false);
+        }
+        else // rocket off
+        {
+            _baseCueBallModel.gameObject.SetActive(true);
+            _bombModel.gameObject.SetActive(false);
+            //_cueBall.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None; // reset rotation constraints
+        }
+    }
+
+
     /// <summary>
     /// Adds explosive force to objects near cue ball
     /// </summary>
@@ -513,7 +581,7 @@ public class BallManager : MonoBehaviour
         yield return new WaitForSeconds(.5f); //After 0.5 secs blow up
         StopAllCoroutines();
         _blinkMultiplier = 1f; //reset
-        _cueBall.GetComponentInChildren<Renderer>().material = _blinkBaseColor;
+        _cueBall.GetComponentInChildren<Renderer>().material = _blinkOriginal;
         _vfxManager.ExplosionEffect(_cueBall.transform.position);
 
         Collider[] nearbyObjects = Physics.OverlapSphere(_cueBall.transform.position, _explosiveRadius);
@@ -542,7 +610,7 @@ public class BallManager : MonoBehaviour
         
         if (_blinkCount % 2 == 0)
         {
-            ballMesh.material = _blinkYellow;
+            ballMesh.material = _blinkOriginal;
             _blinkCount++;
         }
         else
@@ -644,6 +712,7 @@ public class BallManager : MonoBehaviour
         }
     }
 
+
     /// <summary>
     /// Add the respawned ball back into balls list. and check balls
     /// </summary>
@@ -666,8 +735,7 @@ public class BallManager : MonoBehaviour
         }
         if (_magnetActive)
         {
-            _magnetActive = false;
-            _vfxManager.MagnetOff();
+            MagnetBall();
         }
     }
 
@@ -684,8 +752,9 @@ public class BallManager : MonoBehaviour
         }
         if(powerUp.id == "Bomb Shot")
         {
-            _bombBlastActive = true;
-            Renderer ballMesh = _cueBall.GetComponentInChildren<Renderer>();
+            BombBall();
+            Renderer ballMesh = _cueBall.GetComponentInChildren<Renderer>(); //should grab bombs renderer as other children inactive
+            _blinkOriginal = ballMesh.material;
             StartCoroutine(BlastBlink(ballMesh));
         }
         if (powerUp.id == "Rocket Shot")
@@ -694,14 +763,14 @@ public class BallManager : MonoBehaviour
         }
         if (powerUp.id == "Magnetic Shot")
         {
-            _magnetActive = true;
-            _vfxManager.MagnetOn(_cueBall.transform);
+            MagnetBall();
         }
         if (powerUp.id == "Giant Balls")
         {
             _gbActive = true;
         }
     }
+
 
     /// <summary>
     /// Update power ups that affect next

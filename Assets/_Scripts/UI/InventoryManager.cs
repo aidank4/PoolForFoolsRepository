@@ -76,10 +76,10 @@ public class InventoryManager : MonoBehaviour
 
     private void Update()
     {
-        //if (Input.GetKeyDown(KeyCode.X)) //HACKS
-        //{
-        //    AddPowerUp();
-        //}
+        if (Input.GetKeyDown(KeyCode.X)) //HACKS
+        {
+            AddPowerUp();
+        }
 
         if (InputManager.Instance.currentActionMap.name == "UI")
         {
