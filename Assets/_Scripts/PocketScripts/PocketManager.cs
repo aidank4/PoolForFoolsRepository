@@ -25,6 +25,8 @@ public class PocketManager : MonoBehaviour
     private Scoreboard _scoreboard;
     [SerializeField] private GameObject _turnManagerRef;
     private TurnManager _turnManager;
+    [SerializeField] private GameObject _ballManagerRef;
+    private BallManager _ballManager;
     [SerializeField] private GameObject _inventoryRef;
     private InventoryManager _inventory;
     [SerializeField] private GameObject _highlightObject;
@@ -63,24 +65,28 @@ public class PocketManager : MonoBehaviour
     [Header("Misc Variables")]
     [SerializeField] private float _pocketPushRadius = 3f;
     [SerializeField] private float _pocketPushForce = 2f;
-    private bool _choosingPocket = false; //When true the player can cycle through pocket selections
     private int _pocketIdx;
     private GameObject _selectedPocket;
+    private bool _choosingPocket = false; //When true the player can cycle through pocket selections
+    private bool _releasingPockets = false; //For cts to know if pockets releasing
+    public bool corking { get; private set; } = false;
+    //private bool _sameTurn = false; //Used to differentiate balls stopping twice in a turn or for the first time
 
     [Header("PowerUps")]
     private bool _pocketBlockActive = false; //For differentiating what to do when a pocket is chosen
     private bool _reverseCardActive = false; //For differentiating what to do when a pocket is chosen
     private bool _callingShot = false; //For differentiating what to do when a pocket is chosen
-    private bool _mostPocketsCovered = false; //used to know when to release covered pockets at end of turn - all but one
-    private bool _allPocketsCovered = false; //used to know when to release covered pockets at end of turn - all pockets
+    public bool mostPocketsCovered { get; private set; } = false; //used to know when to release covered pockets at end of turn - all but one
+    public bool allPocketsCovered { get; private set; } = false; //used to know when to release covered pockets at end of turn - all pockets
     private bool _coverPockets = false; //Used to know when to cover pockets on turn switch
 
 
     //Events
     public event Action Scratched;
     public event Action PocketWorkCompleted;
-    public event Action PocketExplosion;
+    public event Action PocketsReleased;
     public event Action<GameObject> BallRespawned;
+    public event Action BigBallsShrunk;
 
 
     private void Awake()
@@ -91,6 +97,7 @@ public class PocketManager : MonoBehaviour
         _turnManager = _turnManagerRef.GetComponent<TurnManager>();
         _inventory = _inventoryRef.GetComponent<InventoryManager>();
         _fireworkScript = _fireworkRef.GetComponent<FireWorks>();
+        _ballManager = _ballManagerRef.GetComponent<BallManager>();
         #endregion
 
         //UI / Hide
@@ -119,10 +126,14 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     private void OnEnable()
     {
+        PocketsReleased += HandlePocketsReleased;
         if (_turnManager != null)
         {
-            _turnManager.TurnEnding += HandleTurnEnding;
             _turnManager.TurnSwitched += HandleTurnSwitched;
+        }
+        if(_ballManager != null)
+        {
+            _ballManager.BallsStopped += HandleBallsStopped;
         }
         SO_PowerUp.UsePU += HandlePUs;
     }
@@ -135,8 +146,11 @@ public class PocketManager : MonoBehaviour
     {
         if (_turnManager != null)
         {
-            _turnManager.TurnEnding -= HandleTurnEnding;
             _turnManager.TurnSwitched -= HandleTurnSwitched;
+        }
+        if (_ballManager != null)
+        {
+            _ballManager.BallsStopped -= HandleBallsStopped;
         }
         SO_PowerUp.UsePU -= HandlePUs;
     }
@@ -282,29 +296,29 @@ public class PocketManager : MonoBehaviour
             case "EightBall":
                 {
                     Debug.Log("EightBall");
-                    ////TEMP player has scored all the balls and 8 ball
-                    //if(_scoreboard.pOneScore == 7 && _turnManager.currentPlayer == _turnManager.playerOne)
-                    //{
-                    //    //Debug.Log("Player 1 Wins!");
-                    //    _winScreenPOne.gameObject.SetActive(true);
-                    //}
-                    //else if(_scoreboard.pTwoScore == 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
-                    //{
-                    //    //Debug.Log("Player 2 Wins!");
-                    //    _winScreenPTwo.gameObject.SetActive(true);
-                    //}
-                    //else //TEMP player scored 8 ball early
-                    //{
-                    //    //Debug.Log("Player " + _turnManagerScript.currentPlayer.ToString() + " loses");
-                    //    if(_turnManager.currentPlayer == _turnManager.playerOne)
-                    //    {
-                    //        _winScreenPTwo.gameObject.SetActive(true);
-                    //    }
-                    //    else if(_turnManager.currentPlayer == _turnManager.playerTwo)
-                    //    {
-                    //        _winScreenPOne.gameObject.SetActive(true);
-                    //    }
-                    //}
+                    //TEMP player has scored all the balls and 8 ball
+                    if (_scoreboard.pOneScore == 7 && _turnManager.currentPlayer == _turnManager.playerOne)
+                    {
+                        //Debug.Log("Player 1 Wins!");
+                        _winScreenPOne.gameObject.SetActive(true);
+                    }
+                    else if (_scoreboard.pTwoScore == 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
+                    {
+                        //Debug.Log("Player 2 Wins!");
+                        _winScreenPTwo.gameObject.SetActive(true);
+                    }
+                    else //TEMP player scored 8 ball early
+                    {
+                        //Debug.Log("Player " + _turnManagerScript.currentPlayer.ToString() + " loses");
+                        if (_turnManager.currentPlayer == _turnManager.playerOne)
+                        {
+                            _winScreenPTwo.gameObject.SetActive(true);
+                        }
+                        else if (_turnManager.currentPlayer == _turnManager.playerTwo)
+                        {
+                            _winScreenPOne.gameObject.SetActive(true);
+                        }
+                    }
                     Destroy(ball.gameObject); //Ball
                     break;
                 }
@@ -429,11 +443,11 @@ public class PocketManager : MonoBehaviour
                     _coverPockets = true;
                     _turnManager.ctsActive = false;
                     _callingShot = false;
-                    if (InputManager.Instance.currentActionMap.name != "Gameplay") //Potential edge case fix
-                    {
-                        InputManager.Instance.SwitchCurrentActionMap("Gameplay");
-                    }
                     StartCoroutine(CallPocketWorkComplete()); //Must wait till end of frame or else this input gets registered in the UI that appears after the event trigger
+                    //if (InputManager.Instance.currentActionMap.name != "Gameplay") //Potential edge case fix
+                    //{
+                    //    InputManager.Instance.SwitchCurrentActionMap("Gameplay");
+                    //}
                 }
             }
         }
@@ -487,6 +501,7 @@ public class PocketManager : MonoBehaviour
     /// <returns></returns>
     IEnumerator PlaceCork(GameObject pocket, bool check)
     {
+        corking = true;
         GameObject cork = Instantiate(_cork);
         cork.transform.SetParent(pocket.transform); //Set parent to pocket so we can later remove cork if needed
         cork.SetActive(true);
@@ -507,7 +522,7 @@ public class PocketManager : MonoBehaviour
         cork.transform.position = targetPos; //Set pos exactly on pocket
         cork.transform.rotation = Quaternion.identity;
 
-        if (InputManager.Instance.currentActionMap.name != "Gameplay") //Player cant shoot until cork is down
+        if (InputManager.Instance.currentActionMap.name != "Gameplay" && InputManager.Instance.currentActionMap.name != "SabotageUI") //Player cant shoot until cork is down and don't take it off UI maps
         {
             InputManager.Instance.SwitchCurrentActionMap("Gameplay");
         }
@@ -516,6 +531,26 @@ public class PocketManager : MonoBehaviour
         {
             ShowHiddenCorks();
         }
+        corking = false;
+    }
+
+
+
+    private IEnumerator RemoveCork(GameObject cork)
+    {
+        Vector3 startingPos = cork.transform.position;
+        Vector3 targetPos = startingPos + new Vector3(0, 5, 0);
+        float timer = 0;
+        float maxTime = 0.5f;
+        while (timer < maxTime) //Shoot cork up
+        {
+            float percent = timer / maxTime;
+            cork.transform.position = Vector3.Lerp(startingPos, targetPos, percent);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        Destroy(cork);
+
     }
 
 
@@ -620,10 +655,10 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     private void CoverPockets(bool coverAll)
     {
-        InputManager.Instance.SwitchCurrentActionMap("PocketPick");
+        InputManager.Instance.SwitchCurrentActionMap("SabotageUI"); //sabotage ui to both not accept input and hide the ui if it comes up at the same time as this
 
-        if (coverAll) _allPocketsCovered = true;
-        else _mostPocketsCovered = true;
+        if (coverAll) allPocketsCovered = true;
+        else mostPocketsCovered = true;
 
         for (int i = 0; i < pockets.Count; i++)
         {
@@ -651,8 +686,9 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     private IEnumerator ReleasePockets()
     {
-        _allPocketsCovered = false;
-        _mostPocketsCovered = false;
+        _releasingPockets = true;
+        allPocketsCovered = false;
+        mostPocketsCovered = false;
 
         foreach (GameObject pocket in _tempCoveredPockets) //Push away nearby balls so they dont score
         {
@@ -673,7 +709,7 @@ public class PocketManager : MonoBehaviour
         {
             if (pocket.transform.GetChild(0).gameObject != null)
             {
-                Destroy(pocket.transform.GetChild(0).gameObject); //Destroy cork
+                StartCoroutine(RemoveCork(pocket.transform.GetChild(0).gameObject));
             }
             else
             {
@@ -684,7 +720,8 @@ public class PocketManager : MonoBehaviour
 
 
         _tempCoveredPockets.Clear();
-        PocketExplosion?.Invoke(); //Moved balls so must tell ball manager to check movement
+        yield return new WaitForSeconds(0.5f); //CORK GONE TEMP BADDDDD
+        PocketsReleased?.Invoke(); //Moved balls so must tell ball manager to check movement
     }
 
 
@@ -825,7 +862,7 @@ public class PocketManager : MonoBehaviour
         float zPos = UnityEngine.Random.Range(_minZBounds.transform.position.x, _maxZBounds.transform.position.x);
         
         //Set positions the pocket will move between
-        _epHidePos = new Vector3 (xPos, _yHideValue ,zPos);
+        _epHidePos = new Vector3(xPos, _yHideValue ,zPos);
         _epShowPos = new Vector3(xPos, _yShowValue, zPos);
 
         //set pocket position and hide it
@@ -891,69 +928,119 @@ public class PocketManager : MonoBehaviour
     //HANDLE EVENTS
     #region
 
-    /// <summary>
-    /// turn is ending and going to switch to next player
-    /// </summary>
-    private void HandleTurnEnding()
-    {
-        Debug.Log("TurnENding");
-        bool epActive = EndPocketStatus();
 
-        //NON END POCKET
-        if (!epActive && _mostPocketsCovered || _allPocketsCovered) //release pockets at the end of the turn
-        {
-            StartCoroutine(ReleasePockets()); // Calls balls stopped retrigering this event handler
-        }
-        else if (_turnManager.ctsActive && !_turnManager.keepTurn) //choose only if goin to switch turn after
+    /// <summary>
+    /// Checks if cts needs to start and if so it does
+    /// </summary>
+    private void HandlePocketsReleased()
+    {
+        _releasingPockets = false;
+        if ((_turnManager.ctsActive && !_turnManager.keepTurn)) //Using cts when your pockets were covered
         {
             _callingShot = true;
             StartChoosingPocket("Choose only one pocket for your opponent to have available!");
         }
-        else //END POCKET RELATED
+    }
+
+
+    /// <summary>
+    /// balls came to a stop so turn may be ending
+    /// </summary>
+    private void HandleBallsStopped()
+    {
+        //if (!_sameTurn) //Can only run the first time balls stopped which happens after shot
+        //{
+        //    _sameTurn = true;
+
+        //}
+        bool nothingCalled = true; //Check if can move on
+
+        if (_ballManager.ballsBig)
         {
-            if (!epActive && _epRaised) //End Pocket needs to be lowered in case player reversed themselves on this turn
-            {
-                Debug.Log("Lower");
-                StartCoroutine(LowerEndPocket());
-                if (_allPocketsCovered) StartCoroutine(ReleasePockets());
-            }
-            else if (epActive && !_epRaised) //EndPocket needs to be raised
-            {
-                Debug.Log("Raise");
-                StartCoroutine(RaiseEndPocket());
-                if (_mostPocketsCovered) //Need to release these pockets to cover them
-                {
-                    StartCoroutine(ReleasePockets());
-                }
-                else if (_allPocketsCovered) //pockets already covered
-                {
-                    StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
-                }
-                else //not covered
-                {
-                    CoverPockets(true);
-                    StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
-                }
-            }
-            else if (epActive && _epRaised) //Had to release itll come back to this
-            {
-                if (!_allPocketsCovered)
-                {
-                    CoverPockets(true);
-                    StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
-                }
-                else
-                {
-                    StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
-                }
-            }
-            else //Covers any other scenario
-            {
-                StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
-            }
+            nothingCalled = false;
+            _ballManager.ballsBig = false;
+            _ballManager.ResetGiantBalls();
+            BigBallsShrunk?.Invoke(); //Starts ball check
+        }
+
+        if (mostPocketsCovered || allPocketsCovered) //Release pockets after a shot or turn switch
+        {
+            nothingCalled = false;
+            StartCoroutine(ReleasePockets());
+        }
+        else if ((_turnManager.ctsActive && !_turnManager.keepTurn) && !_releasingPockets) //Using cts when your pockets arent covered - don't need to wait for release
+        {
+            nothingCalled = false;
+            _callingShot = true;
+            StartChoosingPocket("Choose only one pocket for your opponent to have available!");
+        }
+        
+        
+        if (nothingCalled) //Ready to switch turn
+        {
+            StartCoroutine(CallPocketWorkComplete());
         }
 
 
+
+
+
+        //Debug.Log("TurnENding");
+        //bool epActive = EndPocketStatus();
+
+        ////NON END POCKET
+        //if (!epActive && mostPocketsCovered || allPocketsCovered) //release pockets at the end of the turn
+        //{
+        //    StartCoroutine(ReleasePockets()); // Calls balls stopped retrigering this event handler
+        //}
+        //else if (_turnManager.ctsActive && !_turnManager.keepTurn) //choose only if goin to switch turn after
+        //{
+        //    _callingShot = true;
+        //    StartChoosingPocket("Choose only one pocket for your opponent to have available!");
+        //}
+        //else //END POCKET RELATED
+        //{
+        //    if (!epActive && _epRaised) //End Pocket needs to be lowered in case player reversed themselves on this turn
+        //    {
+        //        Debug.Log("Lower");
+        //        StartCoroutine(LowerEndPocket());
+        //        if (allPocketsCovered) StartCoroutine(ReleasePockets());
+        //    }
+        //    else if (epActive && !_epRaised) //EndPocket needs to be raised
+        //    {
+        //        Debug.Log("Raise");
+        //        StartCoroutine(RaiseEndPocket());
+        //        if (mostPocketsCovered) //Need to release these pockets to cover them
+        //        {
+        //            StartCoroutine(ReleasePockets());
+        //        }
+        //        else if (allPocketsCovered) //pockets already covered
+        //        {
+        //            StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
+        //        }
+        //        else //not covered
+        //        {
+        //            CoverPockets(true);
+        //            StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
+        //        }
+        //    }
+        //    else if (epActive && _epRaised) //Had to release itll come back to this
+        //    {
+        //        if (!allPocketsCovered)
+        //        {
+        //            CoverPockets(true);
+        //            StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
+        //        }
+        //        else
+        //        {
+        //            StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
+        //        }
+        //    }
+        //    else //Covers any other scenario
+        //    {
+        //        StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
+        //    }
+        //}
     }
 
 
@@ -963,42 +1050,51 @@ public class PocketManager : MonoBehaviour
     /// <param name="sabotaged"></param>
     private void HandleTurnSwitched(bool sabotaged)
     {
-        Debug.Log("TurnSwitched");
-        //Check if this turn needs the End Pocket
-        bool epActive = EndPocketStatus();
-
-
-        if (epActive && !_epRaised) //EndPocket needs to be raise
-        {
-            Debug.Log("Raise");
-            StartCoroutine(RaiseEndPocket());
-            if (_mostPocketsCovered) //Need to release these pockets to cover them
-            {
-                StartCoroutine(ReleasePockets());
-            }
-            else if (_allPocketsCovered) //pockets already covered
-            {
-                //nothing
-            }
-            else //not covered
-            {
-                CoverPockets(true);
-            }
-        }
-        else if (!epActive && _epRaised) //End Pocket needs to be lowered
-        {
-            Debug.Log("Lower");
-            StartCoroutine(LowerEndPocket());
-            if (_allPocketsCovered) StartCoroutine(ReleasePockets());
-        }
-        
-
-
-        if (_coverPockets && !epActive) //Check for call their shot asking to cover pockets
+        //_sameTurn = false;
+        if (_coverPockets) //Check for call their shot asking to cover pockets
         {
             _coverPockets = false;
             CoverPockets(false);
         }
+
+
+
+        //Debug.Log("TurnSwitched");
+        ////Check if this turn needs the End Pocket
+        //bool epActive = EndPocketStatus();
+
+
+        //if (epActive && !_epRaised) //EndPocket needs to be raise
+        //{
+        //    Debug.Log("Raise");
+        //    StartCoroutine(RaiseEndPocket());
+        //    if (mostPocketsCovered) //Need to release these pockets to cover them
+        //    {
+        //        StartCoroutine(ReleasePockets());
+        //    }
+        //    else if (allPocketsCovered) //pockets already covered
+        //    {
+        //        //nothing
+        //    }
+        //    else //not covered
+        //    {
+        //        CoverPockets(true);
+        //    }
+        //}
+        //else if (!epActive && _epRaised) //End Pocket needs to be lowered
+        //{
+        //    Debug.Log("Lower");
+        //    StartCoroutine(LowerEndPocket());
+        //    if (allPocketsCovered) StartCoroutine(ReleasePockets());
+        //}
+
+
+
+        //if (_coverPockets && !epActive) //Check for call their shot asking to cover pockets
+        //{
+        //    _coverPockets = false;
+        //    CoverPockets(false);
+        //}
     }
 
 

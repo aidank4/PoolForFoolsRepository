@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_PowerUp
   id: Call Their Shot
   description: Pick one pocket for your opponent to use on their next turn!
-  sabDescription: 
+  sabDescription: You only have one pocket!
   sabotage: 1
-  affectNext: 0
+  affectNext: 1
   affectShot: 0
   icon: {fileID: 21300000, guid: 40102e2a3aa703f47948de0b836bc483, type: 3}
   prefab: {fileID: 0}

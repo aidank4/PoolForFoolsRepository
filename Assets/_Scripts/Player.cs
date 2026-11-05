@@ -62,6 +62,7 @@ public class Player : MonoBehaviour
     private float _ballRadius;
     private float _holdTimer;
     private Vector3 _startingPos; // when shot canceled need to remember where pool cue was to reset its position
+    private Vector3 _startingRot; // when shot canceled need to remember where pool cue was to reset its position
     private Vector2 _rotateInput;
     private float _tempRotateInput;
     private bool _holding = false; //Is true when player is holding the rotate pool cue input
@@ -90,10 +91,11 @@ public class Player : MonoBehaviour
 
         //Extra
         _ballRadius = _cueBall.GetComponent<SphereCollider>().radius; //used for shoot math but the radius only needs to be gathered once so I have it here in Awake.
-        _predictionLineParent.transform.position = _cueBall.transform.position + new Vector3(0, 0, _ballSeparation); //set up prediction lines position and rotation
-        _predictionLineParent.transform.eulerAngles = new Vector3(0, 0, 0);
-        _startingRotMult = _rotationMult;
         _startingPos = poolCueParent.transform.position;
+        _startingRot = poolCueParent.transform.eulerAngles;
+        _predictionLineParent.transform.position = _cueBall.transform.position + new Vector3(0, 0, _ballSeparation); //set up prediction lines position and rotation
+        _predictionLineParent.transform.eulerAngles = Vector3.zero;
+        _startingRotMult = _rotationMult;
         Shoot = DefaultShoot;
     }
 
@@ -141,10 +143,16 @@ public class Player : MonoBehaviour
         
         if (Shoot == MultiShoot)
         {
-            _extraCueBallA.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
-            _extraLineA.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
-            _extraCueBallB.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
-            _extraLineB.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), _rotationSpeed * Time.deltaTime);
+            if (_extraCueBallA != null)
+            {
+                _extraCueBallA.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), (_rotationSpeed * _rotationMult) * Time.deltaTime);
+                _extraLineA.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), (_rotationSpeed * _rotationMult) * Time.deltaTime);
+            }
+            if (_extraCueBallB != null)
+            {
+                _extraCueBallB.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), (_rotationSpeed * _rotationMult) * Time.deltaTime);
+                _extraLineB.transform.RotateAround(_cueBall.transform.position, new Vector3(0, _tempRotateInput, 0), (_rotationSpeed * _rotationMult) * Time.deltaTime);
+            }
         }//Rotate extra balls and lines when multi shoot active
         if (_holdStarted && !_stopShot)
         {
@@ -213,7 +221,7 @@ public class Player : MonoBehaviour
             //custom start shot
             _shooting = true;
             _stopShot = false;
-            _startingPos = poolCueParent.transform.position;
+            //_startingPos = poolCueParent.transform.position;
         }
         //On release
         if (stage == ClickStage.Released && _shooting && !_stopShot)
@@ -238,7 +246,7 @@ public class Player : MonoBehaviour
         {
             _shooting = true;
             _stopShot = false;
-            _startingPos = poolCueParent.transform.position;
+            //_startingPos = poolCueParent.transform.position;
             _holdTimer = UnityEngine.Random.Range(_minCharge, _maxCharge);
             _chargeVisual.gameObject.SetActive(true);
             //anim
@@ -422,13 +430,23 @@ public class Player : MonoBehaviour
     /// <param name="context"></param>
     public void CancelShot(InputAction.CallbackContext context) //NOTE called through unity events in the input action
     {
-        _stopShot = true;
+        if (context.performed && _shooting)
+        {
+            _stopShot = true;
+            _shooting = false;
 
-        //reset charge
-        _holdTimer = 0;
-        _chargeVisual.gameObject.SetActive(false);
+            //reset charge
+            _holdTimer = 0;
+            _chargeVisual.gameObject.SetActive(false);
 
-        poolCueParent.transform.position = _startingPos; //move stick back
+            //move stick back
+            poolCueParent.transform.position = _startingPos; 
+            poolCueParent.transform.eulerAngles = _startingRot;
+
+            //fix prediction line
+            _predictionLineParent.transform.position = poolCueParent.transform.position + new Vector3(0, 0, _ballSeparation * 2); // 2 pushes it further away from pool cue
+            _predictionLineParent.transform.eulerAngles = Vector3.zero;
+        }
     }
 
 
@@ -461,13 +479,14 @@ public class Player : MonoBehaviour
         _poolCueModel.gameObject.SetActive(true);
         poolCueParent.transform.position = _cueBall.transform.position - new Vector3(0f, 0f, _ballSeparation);
         _startingPos = poolCueParent.transform.position;
+        //poolCueParent.transform.eulerAngles = new Vector3(0, 90, 3); // model needs to have y 90 // 3 gives small tilt to not clip table
+        poolCueParent.transform.eulerAngles = _startingRot;
 
         //set up prediction lines position and rotation
         _predictionLineParent.gameObject.SetActive(true);
         _predictionLineParent.transform.position = poolCueParent.transform.position + new Vector3(0, 0, _ballSeparation * 2); // 2 pushes it further away from pool cue
-        _predictionLineParent.transform.eulerAngles = new Vector3(0, 0, 0);
+        _predictionLineParent.transform.eulerAngles = Vector3.zero;
 
-        poolCueParent.transform.eulerAngles = new Vector3(0, 90, 3); // model needs to have y 90 // 3 gives small tilt to not clip table
     }
 
 
@@ -570,7 +589,7 @@ public class Player : MonoBehaviour
         _chargeVisual.gameObject.SetActive(true);
         _chargeVisual.size = _holdTimer;
 
-        _startingPos = poolCueParent.transform.position; //Record pool cue position to move back to it incase of canceled shot
+        //_startingPos = poolCueParent.transform.position; //Record pool cue position to move back to it incase of canceled shot
     }
 
 

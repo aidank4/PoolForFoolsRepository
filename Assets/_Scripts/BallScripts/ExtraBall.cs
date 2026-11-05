@@ -48,6 +48,11 @@ public class ExtraBall : MonoBehaviour
                 Destroy(this.gameObject);
             }
         }
+        if (_ballRb.transform.position.y < -2f)
+        {
+            Destroy(this.gameObject);
+        }
+
         //run infinitely like a slow update
         yield return new WaitForSeconds(0.5f);
         StartCoroutine(MovementCheck());

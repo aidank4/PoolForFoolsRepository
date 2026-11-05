@@ -75,7 +75,7 @@ public class BallManager : MonoBehaviour
     private bool _eightBallPUActive = false; //When 8ball PU is active
     [Header("Giant Balls")]
     [SerializeField] private float _gbSizeScaler = 3f;
-    private bool _ballsBig = false; //The balls are currently big or not
+    public bool ballsBig = false; //The balls are currently big or not //public for pocketmanager to reset them at end of turn
     private bool _gbActive = false; //Giant Balls PU got activated -- affects following turn
 
 
@@ -116,13 +116,14 @@ public class BallManager : MonoBehaviour
     {
         if (_poolCueScript != null)
         {
-            _poolCueScript.ShotCompleted += HandleShotEvent;
+            _poolCueScript.ShotCompleted += HandleBallsMovingStart;
         }
         if (_pocketManager != null)
         {
             _pocketManager.Scratched += HandleScratch;
-            _pocketManager.PocketExplosion += HandleShotEvent; //Set checkballs to true again as balls got moved
+            _pocketManager.PocketsReleased += HandleBallsMovingStart; //Set checkballs to true again as balls got moved
             _pocketManager.BallRespawned += HandleBallRespawn;
+            _pocketManager.BigBallsShrunk += HandleBallsMovingStart;
         }
         if (_turnManager != null)
         {
@@ -139,13 +140,14 @@ public class BallManager : MonoBehaviour
     {
         if (_poolCueScript != null)
         {
-            _poolCueScript.ShotCompleted -= HandleShotEvent;
+            _poolCueScript.ShotCompleted -= HandleBallsMovingStart;
         }
         if (_pocketManager != null)
         {
             _pocketManager.Scratched -= HandleScratch;
-            _pocketManager.PocketExplosion -= HandleShotEvent;
+            _pocketManager.PocketsReleased -= HandleBallsMovingStart;
             _pocketManager.BallRespawned -= HandleBallRespawn;
+            _pocketManager.BigBallsShrunk -= HandleBallsMovingStart;
         }
         SO_PowerUp.UsePU -= HandlePowerUps;
     }
@@ -256,11 +258,11 @@ public class BallManager : MonoBehaviour
             _magnetActive = false;
             _vfxManager.MagnetOff();
         }
-        if (_ballsBig)
-        {
-            _ballsBig = false;
-            ResetGiantBalls();
-        }
+        //if (_ballsBig)
+        //{
+        //    _ballsBig = false;
+        //    ResetGiantBalls();
+        //}
     }
 
 
@@ -580,8 +582,12 @@ public class BallManager : MonoBehaviour
     /// <summary>
     /// aside from the cue ball, make all the balls grow in size. Also turn the pockets off
     /// </summary>
-    private void MakeGiantBalls()
+    private IEnumerator MakeGiantBalls()
     {
+        foreach (GameObject pocket in _pocketManager.pockets) //turn off pockets so they dont touch the ball as it grows
+        {
+            pocket.GetComponent<Collider>().enabled = false;
+        }
         foreach (GameObject ball in _spawnedBalls)
         {
             if (ball == _cueBall) // dont make cue ball big
@@ -590,8 +596,17 @@ public class BallManager : MonoBehaviour
             }
             ball.transform.localScale *= _gbSizeScaler;
             Rigidbody ballRb = ball.GetComponent<Rigidbody>(); //Turn off and on physics or else balls get stuck "flying"
+            
+            //off and on to let it clip up through floor
             ballRb.isKinematic = true;
             ballRb.isKinematic = false;
+        }
+
+        yield return new WaitForSeconds(1f); //wait 1 sec to give balls time to readjust
+
+        foreach (GameObject pocket in _pocketManager.pockets) //re activate pockets
+        {
+            pocket.GetComponent<Collider>().enabled = true;
         }
     }
 
@@ -599,7 +614,7 @@ public class BallManager : MonoBehaviour
     /// <summary>
     /// return the balls to regular size and turn pockets back on
     /// </summary>
-    private void ResetGiantBalls()
+    public void ResetGiantBalls()
     {
         foreach (GameObject ball in _spawnedBalls)
         {
@@ -616,9 +631,10 @@ public class BallManager : MonoBehaviour
 
 
     /// <summary>
-    /// Once the player has shot set _checkBalls to true to start the ball check
+    /// set _checkBalls to true to start the ball check
+    /// called by player shot, pockets released, big balls shrinking
     /// </summary>
-    private void HandleShotEvent()
+    private void HandleBallsMovingStart()
     {
         _checkBalls = true;
         if (_rocketShotPUActive) // Constrain rocket rotation on shot
@@ -635,7 +651,7 @@ public class BallManager : MonoBehaviour
     private void HandleBallRespawn(GameObject ball)
     {
         _spawnedBalls.Add(ball);
-        _checkBalls = true;
+        //_checkBalls = true;
     }
 
 
@@ -699,8 +715,8 @@ public class BallManager : MonoBehaviour
             if (_gbActive)
             {
                 _gbActive = false;
-                MakeGiantBalls();
-                _ballsBig = true;
+                StartCoroutine(MakeGiantBalls());
+                ballsBig = true;
             }
         }
     }

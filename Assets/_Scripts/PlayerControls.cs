@@ -10,6 +10,8 @@ public class PlayerControls : MonoBehaviour
     private PowerUpUI _powerUpUIScript; //need for highlighting the inventory buttons
     [SerializeField] private GameObject _inventoryRef;
     private InventoryManager _inventoryScript; // for UsePowerUp
+    [SerializeField] private GameObject _pocketManagerRef;
+    private PocketManager _pocketManager;
     [SerializeField] private GameObject _poolCueRef;
     private Player _poolCueScript; //need so we can check if shot is available
     [SerializeField] private TMP_Text _controlsExplained;
@@ -27,6 +29,7 @@ public class PlayerControls : MonoBehaviour
         _powerUpUIScript = _powerUpUIRef.GetComponent<PowerUpUI>();
         _inventoryScript = _inventoryRef.GetComponent<InventoryManager>();
         _poolCueScript = _poolCueRef.GetComponent<Player>();
+        _pocketManager = _pocketManagerRef.GetComponent<PocketManager>();
         #endregion
         //UI
         #region
@@ -97,7 +100,15 @@ public class PlayerControls : MonoBehaviour
         if (context.performed)
         {
             _powerUpUIScript.CornerSabotageUI();
-            InputManager.Instance.SwitchCurrentActionMap("Gameplay");
+
+            if (_pocketManager.corking) //If corks coming down dont set to gameplay
+            {
+                InputManager.Instance.SwitchCurrentActionMap("PocketPick");
+            }
+            else
+            {
+                InputManager.Instance.SwitchCurrentActionMap("Gameplay");
+            }
         }
     }
 

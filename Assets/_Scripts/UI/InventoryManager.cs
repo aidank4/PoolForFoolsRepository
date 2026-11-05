@@ -34,9 +34,10 @@ public class InventoryManager : MonoBehaviour
     [Header("Containers")] //inventory size is always maxed at 3
     [SerializeField] private Image[] _slots = new Image[3];
     [SerializeField] private List<SO_PowerUp> _availablePUs = new List<SO_PowerUp>();
-    private List<SO_PowerUp> _usedPUs = new List<SO_PowerUp>(); //Which power ups were used last turn
-    private bool _ctsInUse = false; //Bool is here because it acts the same as the lists but can only have one var so might as well be a bool
+    private List<SO_PowerUp> _usedPUs = new List<SO_PowerUp>(); //Which power ups were used last turn but you are still shooting
     public List<SO_PowerUp> usingPUs { get; private set; } = new List<SO_PowerUp>(); //Which powerups are being used this turn
+    private List<SO_PowerUp> _opPUs = new List<SO_PowerUp>(); //which power ups did your opponent use
+    private bool _ctsInUse = false; //Bool is here because it acts the same as the lists but can only have one var so might as well be a bool
     private SO_PowerUp[] _currentInventoryPUs = new SO_PowerUp[3]; //Power ups in inventory
     private SO_PowerUp[] _pOnePUs = new SO_PowerUp[3]; //player ones power ups
     private SO_PowerUp[] _pTwoPUs = new SO_PowerUp[3]; //player twos power ups
@@ -75,10 +76,10 @@ public class InventoryManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.X)) //HACKS
-        {
-            AddPowerUp();
-        }
+        //if (Input.GetKeyDown(KeyCode.X)) //HACKS
+        //{
+        //    AddPowerUp();
+        //}
 
         if (InputManager.Instance.currentActionMap.name == "UI")
         {
@@ -145,6 +146,7 @@ public class InventoryManager : MonoBehaviour
             _pBCounter++;
             if (_pBCounter > 5)
             {
+                _pBCounter = 0;
                 _availablePUs.Remove(rdmPowerUp);
                 rdmPowerUp = _availablePUs[UnityEngine.Random.Range(0, _availablePUs.Count)];
             }
@@ -265,10 +267,10 @@ public class InventoryManager : MonoBehaviour
         }
         _selectedPU.Activate();
         usingPUs.Add(_selectedPU);
-        if (_selectedPU.id == "Call Their Shot")
-        {
-            _ctsInUse = true;
-        }
+        //if (_selectedPU.id == "Call Their Shot")
+        //{
+        //    _ctsInUse = true;
+        //}
     }
 
 
@@ -277,21 +279,22 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     /// <param name="selectedPU"></param>
     /// <returns></returns>
-    private (bool dupe, bool reAffectingShot, bool reAffectingOpShot, bool shotSabotaged) UsablePUCheck(SO_PowerUp selectedPU)
+    private (bool puDupe, bool reAffectingShot, bool reAffectingOpShot, bool shotSabotaged, bool sabotageDupe) UsablePUCheck(SO_PowerUp selectedPU)
     {
-        bool dupe = false;
+        bool puDupe = false;
         bool reAffectingShot = false;
         bool reAffectingOpShot = false;
         bool shotSabotaged = false;
+        bool sabotageDupe = false;
 
         bool shotAffected = false;
         bool opShotAffected = false;
 
-        foreach (SO_PowerUp powerUp in usingPUs)
+        foreach (SO_PowerUp powerUp in usingPUs) //current
         {
             if (powerUp.id == selectedPU.id) // duplicate
             {
-                dupe = true;
+                puDupe = true;
             }
             if (powerUp.affectShot && !powerUp.sabotage) //shot is already affected
             {
@@ -303,15 +306,24 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
-        foreach (SO_PowerUp powerUp in _usedPUs)
+        foreach (SO_PowerUp powerUp in _usedPUs) //last turn
         {
-            if (powerUp.sabotage && powerUp.affectShot) //our shot is sabotaged
+            if (powerUp.affectShot && powerUp.sabotage) //op shot is already sabotaged
+            {
+                opShotAffected = true;
+            }
+        }
+
+        foreach (SO_PowerUp powerUp in _opPUs) //opponents used
+        {
+            if (powerUp.affectShot && powerUp.sabotage) //our shot is sabotaged
             {
                 shotAffected = true;
                 shotSabotaged = true;
             }
         }
 
+        //Compare selected PU with old PUs
         if (!_selectedPU.sabotage && _selectedPU.affectShot && shotAffected)
         {
             reAffectingShot = true;
@@ -320,7 +332,19 @@ public class InventoryManager : MonoBehaviour
         {
             reAffectingOpShot = true;
         }
-        return (dupe, reAffectingShot, reAffectingOpShot, shotSabotaged);
+        if (_selectedPU.affectNext && _selectedPU.sabotage) //Check for using same sabotage later after scoring
+        {
+            foreach (SO_PowerUp powerUp in _usedPUs)
+            {
+                if (_selectedPU.id == powerUp.id)
+                {
+                    sabotageDupe = true;
+                    break;
+                }
+            }
+        }
+
+        return (puDupe, reAffectingShot, reAffectingOpShot, shotSabotaged, sabotageDupe);
     }
 
 
@@ -337,7 +361,7 @@ public class InventoryManager : MonoBehaviour
         {
             //Check if cant use power up
             var accessPU = UsablePUCheck(_selectedPU);
-            if (accessPU.dupe)
+            if (accessPU.puDupe)
             {
                 StartCoroutine(PowerUpWarning("Cant use multiple times"));
             }
@@ -350,10 +374,14 @@ public class InventoryManager : MonoBehaviour
             {
                 StartCoroutine(PowerUpWarning("Opponents shot is already sabotaged"));
             }
-            else if (_ctsInUse == true && _selectedPU.id == "Call Their Shot") //call their shot been used and being used again after scoring
+            else if (accessPU.sabotageDupe)
             {
-                StartCoroutine(PowerUpWarning("Already active, will activate at the end of turn"));
+                StartCoroutine(PowerUpWarning("Sabotage already used, will activate during opponents turn"));
             }
+            //else if (_ctsInUse == true && _selectedPU.id == "Call Their Shot") //call their shot been used and being used again after scoring
+            //{
+            //    StartCoroutine(PowerUpWarning("Already active, will activate at the end of turn"));
+            //}
             else if (_selectedPU.id == "Reverse Card" && !_pocketManager.CanReverse())
             {
                 StartCoroutine(PowerUpWarning("No available pocket has a ball to respawn"));
@@ -452,16 +480,47 @@ public class InventoryManager : MonoBehaviour
     /// <summary>
     /// Reset using and used power up collections
     /// </summary>
-    public void ResetOldPUCollections()
+    public void UpdateUsingPUs(bool keepTurn)
     {
-        _ctsInUse = false;
-        _usedPUs.Clear();
-        foreach (SO_PowerUp powerup in usingPUs)
+        //_ctsInUse = false;
+
+        if (keepTurn)
         {
-            _usedPUs.Add(powerup);
+            foreach (SO_PowerUp powerup in usingPUs)
+            {
+                _usedPUs.Add(powerup);
+            }
+            _opPUs.Clear(); //Have passed one turn since opponents PUs so clear
         }
-        usingPUs.Clear();
+        else //Turn Switching
+        {
+            _opPUs.Clear(); //reset opponents PUs
+            foreach (SO_PowerUp powerup in usingPUs) //Turn is switching give all usings to opponent
+            {
+                _opPUs.Add(powerup);
+            }
+            for (int i = 0; i < _usedPUs.Count; i++) //Also give all used
+            {
+                bool dupe = false;
+                for (int j = 0; j < _opPUs.Count; j++) //Check for duplicates
+                {
+                    if (_opPUs[j].id == _usedPUs[i].id)
+                    {
+                        dupe = true;
+                        break;
+                    }
+                }
+                if (!dupe) //Add unique
+                {
+                    _opPUs.Add(_usedPUs[i]);
+                }
+            }
+            _usedPUs.Clear(); //reset used
+            
+        }
+        usingPUs.Clear(); //Always reset using
     }
+
 
     /// <summary>
     /// If there is an extra PU then player must deal with it.
@@ -471,7 +530,6 @@ public class InventoryManager : MonoBehaviour
     {
         if (_extraPowerUp != null)
         {
-            Debug.Log("Show Conflict");
             _powerUpUIScript.ShowPUConflictUI(_extraPowerUp); //have to swap or toss extra PU before turn switch
         }
         else

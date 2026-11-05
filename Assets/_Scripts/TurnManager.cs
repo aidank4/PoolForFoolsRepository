@@ -14,8 +14,8 @@ public class TurnManager : MonoBehaviour
     private Player _poolCueScript;
     [SerializeField] private GameObject _inventoryRef; //Inventory
     private InventoryManager _inventory;
-    [SerializeField] private GameObject _ballManagerRef; //Ball manager for balls stopped event
-    private BallManager _ballManager;
+    //[SerializeField] private GameObject _ballManagerRef; //Ball manager for balls stopped event
+    //private BallManager _ballManager;
     [SerializeField] private GameObject _pocketManagerRef;
     private PocketManager _pocketManager;
     [SerializeField] private TMP_Text _turnText; //Turn switch transition
@@ -54,7 +54,7 @@ public class TurnManager : MonoBehaviour
 
     //Events
     public event Action<bool> TurnSwitched;
-    public event Action TurnEnding;
+    //public event Action TurnEnding;
 
     private void Awake()
     {
@@ -64,7 +64,7 @@ public class TurnManager : MonoBehaviour
         _turnSwitchAnimScript = _turnSwitchUI.GetComponent<DartAnimEndController>();
         _inventory = _inventoryRef.GetComponent<InventoryManager>();
         _puUI = _puUIRef.GetComponent<PowerUpUI>();
-        _ballManager = _ballManagerRef.GetComponent<BallManager>();
+        //_ballManager = _ballManagerRef.GetComponent<BallManager>();
         _pocketManager = _pocketManagerRef.GetComponent<PocketManager>();
         #endregion
         //UI
@@ -88,10 +88,10 @@ public class TurnManager : MonoBehaviour
         {
             _turnSwitchAnimScript.OnAnimationComplete += TriggerTurnSwitchEvent; //Gets called when dart animation ends
         }
-        if (_ballManager != null)
-        {
-            _ballManager.BallsStopped += HandleBallsStopped; //gets called when balls are stopped
-        }
+        //if (_ballManager != null)
+        //{
+        //    _ballManager.BallsStopped += HandleBallsStopped; //gets called when balls are stopped
+        //}
         if (_inventory != null)
         {
             _inventory.InventoryReady += HandleInventoryReady; //When any extra power up conflict is resolved
@@ -113,10 +113,10 @@ public class TurnManager : MonoBehaviour
         {
             _turnSwitchAnimScript.OnAnimationComplete -= TriggerTurnSwitchEvent;
         }
-        if (_ballManager != null)
-        {
-            _ballManager.BallsStopped -= HandleBallsStopped;
-        }
+        //if (_ballManager != null)
+        //{
+        //    _ballManager.BallsStopped -= HandleBallsStopped;
+        //}
         if (_inventory != null)
         {
             _inventory.InventoryReady -= HandleInventoryReady;
@@ -279,7 +279,7 @@ public class TurnManager : MonoBehaviour
         if (!keepTurn) //Switch turn
         {
             _inventory.UpdateInventory();
-            _inventory.ResetOldPUCollections();
+            _inventory.UpdateUsingPUs(false);
             _puUI.ResetSabotageUI();
             _turnSwitchUI.SetActive(true); //Play the turn transition
             _turnText.text = string.Empty;
@@ -296,16 +296,15 @@ public class TurnManager : MonoBehaviour
             }
             _lostTurn = false; // reset lost turn once the switch turn has been called
             scratch = false;
-            keepTurn = true; //Set this true so that turn doesnt switch until after a shot
+            //keepTurn = true; //Set this true so that turn doesnt switch until after a shot
         }
         else //Keep turn
         {
-            Debug.Log("KeepTurn");
             //Normally handled by turn switch dart event.
             _poolCueScript.shootAvailable = true;
             _poolCueScript.RespawnPoolCue();
             _puUI.ResetSabotageUI();
-            _inventory.usingPUs.Clear();
+            _inventory.UpdateUsingPUs(true);
         }
     }
 
@@ -323,15 +322,23 @@ public class TurnManager : MonoBehaviour
         _inventory.AddPowerUp();
     }
 
+
     //EVENT HANDLING
     #region
     /// <summary>
     /// When balls are stopped invoke turn ending
     /// </summary>
-    private void HandleBallsStopped()
-    {
-        TurnEnding?.Invoke(); //Do stuff before switching turn
-    }
+    //private void HandleBallsStopped()
+    //{
+    //    if ((ctsActive && !keepTurn) || _pocketManager.allPocketsCovered || _pocketManager.mostPocketsCovered) //At end of turn player must call opponents shot or pockets must be unblocked
+    //    {
+    //        TurnEnding?.Invoke();
+    //    }
+    //    else
+    //    {
+    //        _inventory.CheckForUIConflict(); //This will call SwitchTurn
+    //    }
+    //}
 
 
     /// <summary>
