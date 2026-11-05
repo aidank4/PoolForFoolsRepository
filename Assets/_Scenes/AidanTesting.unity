@@ -5782,7 +5782,7 @@ MonoBehaviour:
   _blinkBaseColor: {fileID: 2100000, guid: 44d0d5bf950e44c45bf14951df500ffe, type: 2}
   _initialBlinkSpeed: 0.5
   _attractionRadius: 2
-  _attractionforce: 1
+  _attractionforce: 100
   _gbSizeScaler: 3
   ballsBig: 0
 --- !u!224 &645441384515535957
@@ -7340,7 +7340,7 @@ Transform:
 --- !u!73398921 &1472503925640428044
 VFXRenderer:
   serializedVersion: 1
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -9368,7 +9368,7 @@ RectTransform:
 --- !u!73398921 &3169720304084574954
 VFXRenderer:
   serializedVersion: 1
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -14816,7 +14816,7 @@ MonoBehaviour:
 --- !u!73398921 &3548607068195005038
 VFXRenderer:
   serializedVersion: 1
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -18932,7 +18932,7 @@ Transform:
 --- !u!73398921 &6138536033311954170
 VFXRenderer:
   serializedVersion: 1
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -32253,7 +32253,7 @@ GameObject:
 --- !u!73398921 &8766967348366174587
 VFXRenderer:
   serializedVersion: 1
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}

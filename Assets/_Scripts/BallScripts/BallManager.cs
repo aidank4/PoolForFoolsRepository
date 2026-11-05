@@ -571,7 +571,7 @@ public class BallManager : MonoBehaviour
                     float distance = direction.magnitude; //How far from cue ball
                     if (distance > 0.75f) //don't pull objects to close to the cue ball - or else they always push it
                     {
-                        rb.AddForce(direction.normalized * (-_attractionforce/distance), ForceMode.Force);
+                        rb.AddForce((direction.normalized * (-_attractionforce/distance)) * Time.deltaTime, ForceMode.Force);
                     }
                 }
             }
