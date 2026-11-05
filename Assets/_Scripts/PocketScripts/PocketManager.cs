@@ -64,7 +64,6 @@ public class PocketManager : MonoBehaviour
     [SerializeField] private float _pocketPushRadius = 3f;
     [SerializeField] private float _pocketPushForce = 2f;
     private bool _choosingPocket = false; //When true the player can cycle through pocket selections
-    private bool _endPocketActive = false; //For if the last pocket is active
     private int _pocketIdx;
     private GameObject _selectedPocket;
 
@@ -72,13 +71,14 @@ public class PocketManager : MonoBehaviour
     private bool _pocketBlockActive = false; //For differentiating what to do when a pocket is chosen
     private bool _reverseCardActive = false; //For differentiating what to do when a pocket is chosen
     private bool _callingShot = false; //For differentiating what to do when a pocket is chosen
-    public bool pocketsCovered { get; private set; } = false; //used to know when to release covered pockets at end of turn
+    private bool _mostPocketsCovered = false; //used to know when to release covered pockets at end of turn - all but one
+    private bool _allPocketsCovered = false; //used to know when to release covered pockets at end of turn - all pockets
     private bool _coverPockets = false; //Used to know when to cover pockets on turn switch
 
 
     //Events
     public event Action Scratched;
-    public event Action PocketSelected;
+    public event Action PocketWorkCompleted;
     public event Action PocketExplosion;
     public event Action<GameObject> BallRespawned;
 
@@ -429,7 +429,11 @@ public class PocketManager : MonoBehaviour
                     _coverPockets = true;
                     _turnManager.ctsActive = false;
                     _callingShot = false;
-                    StartCoroutine(CallPocketSelected()); //Must wait till end of frame or else this input gets registered in the UI that appears after the event trigger
+                    if (InputManager.Instance.currentActionMap.name != "Gameplay") //Potential edge case fix
+                    {
+                        InputManager.Instance.SwitchCurrentActionMap("Gameplay");
+                    }
+                    StartCoroutine(CallPocketWorkComplete()); //Must wait till end of frame or else this input gets registered in the UI that appears after the event trigger
                 }
             }
         }
@@ -617,7 +621,10 @@ public class PocketManager : MonoBehaviour
     private void CoverPockets(bool coverAll)
     {
         InputManager.Instance.SwitchCurrentActionMap("PocketPick");
-        pocketsCovered = true;
+
+        if (coverAll) _allPocketsCovered = true;
+        else _mostPocketsCovered = true;
+
         for (int i = 0; i < pockets.Count; i++)
         {
             if (coverAll) //Hide every pocket
@@ -644,7 +651,8 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     private IEnumerator ReleasePockets()
     {
-        pocketsCovered = false;
+        _allPocketsCovered = false;
+        _mostPocketsCovered = false;
 
         foreach (GameObject pocket in _tempCoveredPockets) //Push away nearby balls so they dont score
         {
@@ -684,10 +692,10 @@ public class PocketManager : MonoBehaviour
     /// Wait for next frame and invoke PocketSelected
     /// </summary>
     /// <returns></returns>
-    private IEnumerator CallPocketSelected()
+    private IEnumerator CallPocketWorkComplete()
     {
         yield return new WaitForEndOfFrame();
-        PocketSelected?.Invoke();
+        PocketWorkCompleted?.Invoke();
     }
 
     #endregion
@@ -788,6 +796,25 @@ public class PocketManager : MonoBehaviour
     //END POCKET
     #region
 
+    private bool EndPocketStatus()
+    {
+        bool epActive = false;
+        if (_scoreboard.pOneScore == 7 && _turnManager.currentPlayer == _turnManager.playerOne)
+        {
+            epActive = true;
+        }
+        else if (_scoreboard.pTwoScore == 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
+        {
+            epActive = true;
+        }
+        else
+        {
+            epActive = false;
+        }
+        return epActive;
+    }
+
+
     /// <summary>
     /// Set end pocket to random position on the table and hide it.
     /// </summary>
@@ -813,6 +840,7 @@ public class PocketManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator RaiseEndPocket()
     {
+        _epRaised = true;
         _endPocket.SetActive(true);
         
         //SFX
@@ -828,7 +856,6 @@ public class PocketManager : MonoBehaviour
         _endPocket.transform.position = _epShowPos; //Set it as the position will be almost there
 
         //VFX UI ON
-        _epRaised = true;
     }
 
 
@@ -838,6 +865,7 @@ public class PocketManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator LowerEndPocket()
     {
+        _epRaised = false;
         //Switch Action Map
         //SFX - VFX - UI Off
 
@@ -852,7 +880,6 @@ public class PocketManager : MonoBehaviour
         _endPocket.transform.position = _epHidePos;
 
         _endPocket.SetActive(false);
-        _epRaised = false;
     }
 
 
@@ -869,20 +896,64 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     private void HandleTurnEnding()
     {
-        //NOTE if both are active at end of turn - release pockets - then calls balls stopped which calls this and then start choosing pocket
-        if (pocketsCovered) //release pockets at the end of the turn
+        Debug.Log("TurnENding");
+        bool epActive = EndPocketStatus();
+
+        //NON END POCKET
+        if (!epActive && _mostPocketsCovered || _allPocketsCovered) //release pockets at the end of the turn
         {
-            StartCoroutine(ReleasePockets());
+            StartCoroutine(ReleasePockets()); // Calls balls stopped retrigering this event handler
         }
         else if (_turnManager.ctsActive && !_turnManager.keepTurn) //choose only if goin to switch turn after
         {
             _callingShot = true;
             StartChoosingPocket("Choose only one pocket for your opponent to have available!");
         }
-        else
+        else //END POCKET RELATED
         {
-            //do nothing
+            if (!epActive && _epRaised) //End Pocket needs to be lowered in case player reversed themselves on this turn
+            {
+                Debug.Log("Lower");
+                StartCoroutine(LowerEndPocket());
+                if (_allPocketsCovered) StartCoroutine(ReleasePockets());
+            }
+            else if (epActive && !_epRaised) //EndPocket needs to be raised
+            {
+                Debug.Log("Raise");
+                StartCoroutine(RaiseEndPocket());
+                if (_mostPocketsCovered) //Need to release these pockets to cover them
+                {
+                    StartCoroutine(ReleasePockets());
+                }
+                else if (_allPocketsCovered) //pockets already covered
+                {
+                    StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
+                }
+                else //not covered
+                {
+                    CoverPockets(true);
+                    StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
+                }
+            }
+            else if (epActive && _epRaised) //Had to release itll come back to this
+            {
+                if (!_allPocketsCovered)
+                {
+                    CoverPockets(true);
+                    StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
+                }
+                else
+                {
+                    StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
+                }
+            }
+            else //Covers any other scenario
+            {
+                StartCoroutine(CallPocketWorkComplete()); //Let turn manager switch turn / Reset turn
+            }
         }
+
+
     }
 
 
@@ -892,48 +963,41 @@ public class PocketManager : MonoBehaviour
     /// <param name="sabotaged"></param>
     private void HandleTurnSwitched(bool sabotaged)
     {
+        Debug.Log("TurnSwitched");
         //Check if this turn needs the End Pocket
-        if (_scoreboard.pOneScore == 7 && _turnManager.currentPlayer == _turnManager.playerOne)
-        {
-            _endPocketActive = true;
-        }
-        else if (_scoreboard.pTwoScore == 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
-        {
-            _endPocketActive = true;
-        }
-        else
-        {
-            _endPocketActive = false;
-        }
+        bool epActive = EndPocketStatus();
 
 
-
-
-
-       
-        if (_endPocketActive && _epRaised) //EndPocket time active and already raised
-        {
-            Debug.Log("Do Nothing");
-            //Do nothing
-        }
-        else if (_endPocketActive && !_epRaised) //EndPocket needs to be raise
+        if (epActive && !_epRaised) //EndPocket needs to be raise
         {
             Debug.Log("Raise");
             StartCoroutine(RaiseEndPocket());
-            CoverPockets(true);
+            if (_mostPocketsCovered) //Need to release these pockets to cover them
+            {
+                StartCoroutine(ReleasePockets());
+            }
+            else if (_allPocketsCovered) //pockets already covered
+            {
+                //nothing
+            }
+            else //not covered
+            {
+                CoverPockets(true);
+            }
         }
-        else if (!_endPocketActive && _epRaised) //End Pocket needs to be lowered
+        else if (!epActive && _epRaised) //End Pocket needs to be lowered
         {
             Debug.Log("Lower");
             StartCoroutine(LowerEndPocket());
+            if (_allPocketsCovered) StartCoroutine(ReleasePockets());
         }
-        else //NORMAL TURN
+        
+
+
+        if (_coverPockets && !epActive) //Check for call their shot asking to cover pockets
         {
-            if (_coverPockets) //Check for call their shot asking to cover pockets
-            {
-                _coverPockets = false;
-                CoverPockets(false);
-            }
+            _coverPockets = false;
+            CoverPockets(false);
         }
     }
 

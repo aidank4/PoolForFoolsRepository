@@ -425,27 +425,6 @@ public class BallManager : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// Once the player has shot set _checkBalls to true to start the ball check
-    /// </summary>
-    private void HandleShotEvent()
-    {
-        _checkBalls = true;
-        if (_rocketShotPUActive) // Constrain rocket rotation on shot
-        {
-            _cueBall.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-            _vfxManager.RocketOff();
-        }
-    }
-
-    /// <summary>
-    /// Add the respawned ball back into balls list
-    /// </summary>
-    /// <param name="ball"></param>
-    private void HandleBallRespawn(GameObject ball)
-    {
-        _spawnedBalls.Add(ball);
-    }
 
 
     /// <summary>
@@ -633,6 +612,30 @@ public class BallManager : MonoBehaviour
             ballRb.isKinematic = true;
             ballRb.isKinematic = false;
         }
+    }
+
+
+    /// <summary>
+    /// Once the player has shot set _checkBalls to true to start the ball check
+    /// </summary>
+    private void HandleShotEvent()
+    {
+        _checkBalls = true;
+        if (_rocketShotPUActive) // Constrain rocket rotation on shot
+        {
+            _cueBall.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            _vfxManager.RocketOff();
+        }
+    }
+
+    /// <summary>
+    /// Add the respawned ball back into balls list. and check balls
+    /// </summary>
+    /// <param name="ball"></param>
+    private void HandleBallRespawn(GameObject ball)
+    {
+        _spawnedBalls.Add(ball);
+        _checkBalls = true;
     }
 
 

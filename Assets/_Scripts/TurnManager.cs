@@ -98,7 +98,7 @@ public class TurnManager : MonoBehaviour
         }
         if (_pocketManager != null)
         {
-            _pocketManager.PocketSelected += HandlePocketSelected;
+            _pocketManager.PocketWorkCompleted += HandlePocketWorkCompleted;
         }
         SO_PowerUp.UsePU += HandlePU;
     }
@@ -123,7 +123,7 @@ public class TurnManager : MonoBehaviour
         }
         if (_pocketManager != null)
         {
-            _pocketManager.PocketSelected -= HandlePocketSelected;
+            _pocketManager.PocketWorkCompleted -= HandlePocketWorkCompleted;
         }
         SO_PowerUp.UsePU -= HandlePU;
     }
@@ -296,9 +296,11 @@ public class TurnManager : MonoBehaviour
             }
             _lostTurn = false; // reset lost turn once the switch turn has been called
             scratch = false;
+            keepTurn = true; //Set this true so that turn doesnt switch until after a shot
         }
         else //Keep turn
         {
+            Debug.Log("KeepTurn");
             //Normally handled by turn switch dart event.
             _poolCueScript.shootAvailable = true;
             _poolCueScript.RespawnPoolCue();
@@ -328,15 +330,7 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     private void HandleBallsStopped()
     {
-        if ((ctsActive && !keepTurn) || _pocketManager.pocketsCovered) //Pocket PU stuff to do before turn can switch
-        {
-            TurnEnding?.Invoke();
-        }
-        else
-        {
-            _inventory.CheckForUIConflict();
-        }
-    
+        TurnEnding?.Invoke(); //Do stuff before switching turn
     }
 
 
@@ -352,7 +346,7 @@ public class TurnManager : MonoBehaviour
     /// <summary>
     /// Pockets got covered so switch turn
     /// </summary>
-    private void HandlePocketSelected()
+    private void HandlePocketWorkCompleted()
     {
         _inventory.CheckForUIConflict(); //This will call SwitchTurn
     }
