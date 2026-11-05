@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class FireWorks : MonoBehaviour
@@ -17,7 +18,7 @@ public class FireWorks : MonoBehaviour
     /// </summary>
     /// <param name="sabotage"></param>
     /// <param name="spawnLocation"></param>
-    public void ActivateFirework(bool sabotage, Vector3 spawnLocation)
+    private void ActivateFirework(Vector3 spawnLocation, bool sabotage)
     {
         if(!sabotage)
         {
@@ -36,7 +37,7 @@ public class FireWorks : MonoBehaviour
     /// Set the particle to false
     /// </summary>
     /// <param name="sabotage"></param>
-    public void HideFireWork(bool sabotage)
+    private void HideFireWork(bool sabotage)
     {
         if (!sabotage)
         {
@@ -46,5 +47,18 @@ public class FireWorks : MonoBehaviour
         {
             _fireworkSabotage.SetActive(false);
         }
+    }
+
+    /// <summary>
+    /// Play PU or sabotage firework at pos
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="sabotage"></param>
+    /// <returns></returns>
+    public IEnumerator PlayFireworks(Vector3 pos, bool sabotage)
+    {
+        ActivateFirework(pos, sabotage);
+        yield return new WaitForSeconds(4f);
+        HideFireWork(sabotage);
     }
 }

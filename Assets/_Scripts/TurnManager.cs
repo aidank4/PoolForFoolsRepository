@@ -13,11 +13,15 @@ public class TurnManager : MonoBehaviour
     [SerializeField] private GameObject _poolCueRef; //Player Script
     private Player _poolCueScript;
     [SerializeField] private GameObject _inventoryRef; //Inventory
-    private InventoryManager _inventoryScript;
+    private InventoryManager _inventory;
+    //[SerializeField] private GameObject _ballManagerRef; //Ball manager for balls stopped event
+    //private BallManager _ballManager;
+    [SerializeField] private GameObject _pocketManagerRef;
+    private PocketManager _pocketManager;
     [SerializeField] private TMP_Text _turnText; //Turn switch transition
     [SerializeField] private GameObject _turnSwitchUI;
     private DartAnimEndController _turnSwitchAnimScript;
-    [SerializeField] private GameObject _puUIRef;
+    [SerializeField] private GameObject _puUIRef; //Power up UI
     private PowerUpUI _puUI;
     [SerializeField] private GameObject _teamAssignUI; //Team assignment UI
     [SerializeField] private Sprite _teamStripesSprite;
@@ -43,13 +47,14 @@ public class TurnManager : MonoBehaviour
     private bool _lostTurn = false; // fixes the issue where if a good ball was scored after bad ball then keep turn would still be made true
     public bool scratch = false; //Gets set true by the pocket manager
 
-
     [Header("PowerUps")]
     private bool _sabotaged = false; //Set true when the following player is sabotaged - Used to activate PU's at theh correct time
+    public bool ctsActive = false; //changed by pocket manager when the call their shot power up is used - if it is active can't switch turn
 
 
     //Events
     public event Action<bool> TurnSwitched;
+    //public event Action TurnEnding;
 
     private void Awake()
     {
@@ -57,8 +62,10 @@ public class TurnManager : MonoBehaviour
         #region
         _poolCueScript = _poolCueRef.GetComponent<Player>();
         _turnSwitchAnimScript = _turnSwitchUI.GetComponent<DartAnimEndController>();
-        _inventoryScript = _inventoryRef.GetComponent<InventoryManager>();
+        _inventory = _inventoryRef.GetComponent<InventoryManager>();
         _puUI = _puUIRef.GetComponent<PowerUpUI>();
+        //_ballManager = _ballManagerRef.GetComponent<BallManager>();
+        _pocketManager = _pocketManagerRef.GetComponent<PocketManager>();
         #endregion
         //UI
         #region
@@ -81,6 +88,18 @@ public class TurnManager : MonoBehaviour
         {
             _turnSwitchAnimScript.OnAnimationComplete += TriggerTurnSwitchEvent; //Gets called when dart animation ends
         }
+        //if (_ballManager != null)
+        //{
+        //    _ballManager.BallsStopped += HandleBallsStopped; //gets called when balls are stopped
+        //}
+        if (_inventory != null)
+        {
+            _inventory.InventoryReady += HandleInventoryReady; //When any extra power up conflict is resolved
+        }
+        if (_pocketManager != null)
+        {
+            _pocketManager.PocketWorkCompleted += HandlePocketWorkCompleted;
+        }
         SO_PowerUp.UsePU += HandlePU;
     }
 
@@ -92,49 +111,26 @@ public class TurnManager : MonoBehaviour
     {
         if (_turnSwitchAnimScript != null)
         {
-            _turnSwitchAnimScript.OnAnimationComplete -= TriggerTurnSwitchEvent; //Gets called when dart animation ends
+            _turnSwitchAnimScript.OnAnimationComplete -= TriggerTurnSwitchEvent;
+        }
+        //if (_ballManager != null)
+        //{
+        //    _ballManager.BallsStopped -= HandleBallsStopped;
+        //}
+        if (_inventory != null)
+        {
+            _inventory.InventoryReady -= HandleInventoryReady;
+        }
+        if (_pocketManager != null)
+        {
+            _pocketManager.PocketWorkCompleted -= HandlePocketWorkCompleted;
         }
         SO_PowerUp.UsePU -= HandlePU;
     }
 
-    
-    /// <summary>
-    /// Checks if the player keeps their turn. Then handles switching or keeping turn.
-    /// </summary>
-    public void SwitchTurn() //Used in the InventoryManager
-    {
-        if (!keepTurn) //Switch turn
-        {
-            _inventoryScript.UpdateInventory();
-            _inventoryScript.ResetOldPUCollections();
-            _puUI.ResetSabotageUI();
-            _turnSwitchUI.SetActive(true); //Play the turn transition
-            _turnText.text = string.Empty;
 
-            if (currentPlayer == playerOne)
-            {
-                currentPlayer = playerTwo;
-                _turnText.text = "Player 2";
-            }
-            else
-            {
-                currentPlayer = playerOne;
-                _turnText.text = "Player 1";
-            }
-            _lostTurn = false; // reset lost turn once the switch turn has been called
-            scratch = false;
-        }
-        else //Keep turn
-        {
-            //Normally handled by turn switch dart event.
-            _poolCueScript.shootAvailable = true;
-            _poolCueScript.RespawnPoolCue();
-            _puUI.ResetSabotageUI();
-            _inventoryScript.usingPUs.Clear();
-        }
-    }
-
-
+    //TEAM FUNCTIONS
+    #region
     /// <summary>
     /// Determines if stripes gets to keep turn
     /// </summary>
@@ -273,6 +269,44 @@ public class TurnManager : MonoBehaviour
             pOneGlow.transform.localScale = Vector3.zero;
         }
     }
+    #endregion
+
+    /// <summary>
+    /// Checks if the player keeps their turn. Then handles switching or keeping turn.
+    /// </summary>
+    private void SwitchTurn()
+    {
+        if (!keepTurn) //Switch turn
+        {
+            _inventory.UpdateInventory();
+            _inventory.UpdateUsingPUs(false);
+            _puUI.ResetSabotageUI();
+            _turnSwitchUI.SetActive(true); //Play the turn transition
+            _turnText.text = string.Empty;
+
+            if (currentPlayer == playerOne)
+            {
+                currentPlayer = playerTwo;
+                _turnText.text = "Player 2";
+            }
+            else
+            {
+                currentPlayer = playerOne;
+                _turnText.text = "Player 1";
+            }
+            _lostTurn = false; // reset lost turn once the switch turn has been called
+            scratch = false;
+            //keepTurn = true; //Set this true so that turn doesnt switch until after a shot
+        }
+        else //Keep turn
+        {
+            //Normally handled by turn switch dart event.
+            _poolCueScript.shootAvailable = true;
+            _poolCueScript.RespawnPoolCue();
+            _puUI.ResetSabotageUI();
+            _inventory.UpdateUsingPUs(true);
+        }
+    }
 
 
     /// <summary>
@@ -285,7 +319,43 @@ public class TurnManager : MonoBehaviour
         TurnSwitched?.Invoke(_sabotaged); // Call the turn switching and pass if following player is sabotaged
         _sabotaged = false;
         //TEMP GIVE PU on turn switch
-        _inventoryScript.AddPowerUp();
+        _inventory.AddPowerUp();
+    }
+
+
+    //EVENT HANDLING
+    #region
+    /// <summary>
+    /// When balls are stopped invoke turn ending
+    /// </summary>
+    //private void HandleBallsStopped()
+    //{
+    //    if ((ctsActive && !keepTurn) || _pocketManager.allPocketsCovered || _pocketManager.mostPocketsCovered) //At end of turn player must call opponents shot or pockets must be unblocked
+    //    {
+    //        TurnEnding?.Invoke();
+    //    }
+    //    else
+    //    {
+    //        _inventory.CheckForUIConflict(); //This will call SwitchTurn
+    //    }
+    //}
+
+
+    /// <summary>
+    /// Set inventory ready true and try to switch turns
+    /// </summary>
+    private void HandleInventoryReady()
+    {
+        SwitchTurn(); //if Ui is ready than everything is done to switch turn
+    }
+
+
+    /// <summary>
+    /// Pockets got covered so switch turn
+    /// </summary>
+    private void HandlePocketWorkCompleted()
+    {
+        _inventory.CheckForUIConflict(); //This will call SwitchTurn
     }
 
 
@@ -300,4 +370,6 @@ public class TurnManager : MonoBehaviour
             _sabotaged = true;
         }
     }
+    #endregion
+
 }

@@ -18,5 +18,5 @@ MonoBehaviour:
   sabotage: 1
   affectNext: 1
   affectShot: 0
-  icon: {fileID: 21300000, guid: 69f6db0858249804f85a0c62cf2b7914, type: 3}
+  icon: {fileID: 21300000, guid: 6c18e2c5eb15d37479b6c27845169502, type: 3}
   prefab: {fileID: 0}

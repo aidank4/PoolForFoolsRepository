@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,17 +20,18 @@ public class PowerUpUI : MonoBehaviour
     [SerializeField] private Button _swapButton; // do the swap button bc this will be first highlighted button and we dont want that to be toss
     [SerializeField] private Button _slotA; // when swap gets clicked highlight slotA
     [SerializeField] private TMP_Text _slotDescription;
-    [SerializeField] private Image _sabotageOverlay; //SabotageUI
-    [SerializeField] private Image _sabotageIconUI;
-    [SerializeField] private Image _sabotageDescriptionUI;
-    [SerializeField] private Image _sabotageCorner;
-    [SerializeField] private TMP_Text _sabotageText;
+
 
     [Header("Sabotage UI")]
+    [SerializeField] private Image _sabotageOverlay;
+    [SerializeField] private Image _sabotageBorderUI;
+    [SerializeField] private GameObject _sabotageBorderParent;
+    [SerializeField] private Image _sabotageCorner;
+    [SerializeField] private TMP_Text _sabotageText;
     private List<SO_PowerUp> _sPowerUps = new List<SO_PowerUp>(); //Sabotage Icons and descriptions that will appear
     private List<GameObject> _sIconsHolder = new List<GameObject>(); //Game Object to hold those icons
     private List<GameObject> _sDescriptionsHolder = new List<GameObject>(); //Game Object to hold those descriptions
-    private float _sabotageUIHeight;
+    private List<Image> _sBorders = new List<Image>();
 
     private void Awake()
     {
@@ -37,16 +39,16 @@ public class PowerUpUI : MonoBehaviour
         _turnManager = _turnManagerRef.GetComponent<TurnManager>();
         //UI
         #region
-        HidePUConflictUI();
+        _powerUpConflictUI.gameObject.SetActive(false);
+        _slotDescription.transform.parent.gameObject.SetActive(false);
+        ResetButtonHighlight();
         _powerUpIcon.gameObject.SetActive(false);
         _sabotageOverlay.gameObject.SetActive(false);
-        _sabotageIconUI.gameObject.SetActive(false);
-        _sabotageDescriptionUI.gameObject.SetActive(false);
+        _sabotageBorderUI.gameObject.SetActive(false);
+        _sabotageBorderParent.gameObject.SetActive(false);
         _sabotageCorner.gameObject.SetActive(false);
         _sabotageText.gameObject.SetActive(false);
         #endregion
-        //Extra
-        _sabotageUIHeight = _sabotageIconUI.GetComponent<RectTransform>().rect.height;
     }
 
 
@@ -156,8 +158,7 @@ public class PowerUpUI : MonoBehaviour
     {
         //Hide center sabotage UI
         _sabotageOverlay.gameObject.SetActive(false);
-        _sabotageIconUI.gameObject.SetActive(false);
-        _sabotageDescriptionUI.gameObject.SetActive(false);
+        _sabotageBorderParent.gameObject.SetActive(false);
 
         //Activate corner UI
         _sabotageCorner.gameObject.SetActive(true);
@@ -179,22 +180,25 @@ public class PowerUpUI : MonoBehaviour
     {
         //Activate UI
         _sabotageOverlay.gameObject.SetActive(true);
-        _sabotageIconUI.gameObject.SetActive(true);
-        _sabotageDescriptionUI.gameObject.SetActive(true);
+        _sabotageBorderUI.gameObject.SetActive(true);
+        _sabotageBorderParent.gameObject.SetActive(true);
 
-        //Size UI
-        RectTransform iRect = _sabotageIconUI.GetComponent<RectTransform>();
-        iRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, _sabotageUIHeight * powerUps.Length);
-        RectTransform dRect = _sabotageDescriptionUI.GetComponent<RectTransform>();
-        dRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, _sabotageUIHeight * powerUps.Length);
-
-        foreach (SO_PowerUp powerUp in powerUps) //Place UI in center
+        _sBorders.Add(_sabotageBorderUI);
+        for (int i = 1; i < powerUps.Length; i++) //Duplicate UI objects if there is more than one sabotage active
         {
+            Image dupeBorder = Instantiate(_sabotageBorderUI);
+            dupeBorder.transform.SetParent(_sabotageBorderParent.transform, false);
+            _sBorders.Add(dupeBorder);
+        }
+
+        for (int i = 0; i < _sBorders.Count; i++) //Place UI in center
+        {
+            SO_PowerUp powerUp = powerUps[i];
             //Create object with an image component
             GameObject iObj = new GameObject("powerUpIcon");
             Image iImage = iObj.AddComponent<Image>();
             iImage.sprite = powerUp.icon; //asiign image to sabotage icon
-            iObj.transform.SetParent(_sabotageIconUI.gameObject.transform, false); //Set icons as children of the center background and center them
+            iObj.transform.SetParent(_sBorders[i].transform.GetChild(0), false); //0 is icon parent - 1 is desc parent 
 
 
             //Create object with a text component
@@ -202,22 +206,16 @@ public class PowerUpUI : MonoBehaviour
             TextMeshProUGUI dText = dObj.AddComponent<TextMeshProUGUI>();
             dText.text = powerUp.sabDescription; //Assign text to sabotage description
             dText.alignment = TextAlignmentOptions.Center;
-            dObj.transform.SetParent(_sabotageDescriptionUI.gameObject.transform, false); //add as a child of background
-            GridLayoutGroup dGrid = _sabotageDescriptionUI.GetComponent<GridLayoutGroup>();
-
-            //Set grid size to change depending on amount of descriptions
-            float cellX = (dRect.rect.width - 50); //50 serves as padding
-            float cellY = (dRect.rect.height - 50) / powerUps.Length; //1 object takes full space but multiple share space
-            dGrid.cellSize = new Vector2(cellX, cellY);
+            dObj.transform.SetParent(_sBorders[i].transform.GetChild(1), false); //1 is desc parent - 0 is icon parent
 
 
             //save reference
             _sIconsHolder.Add(iObj);
             _sDescriptionsHolder.Add(dObj);
-
-            InputManager.Instance.SwitchCurrentActionMap("SabotageUI");
         }
+        InputManager.Instance.SwitchCurrentActionMap("SabotageUI");
     }
+
 
     /// <summary>
     /// Hide remaining sabotage UI and reset lists
@@ -236,8 +234,13 @@ public class PowerUpUI : MonoBehaviour
         {
             Destroy(obj);
         }
+        for (int i = 1; i < _sBorders.Count; i ++) // start at 1 to skip first object - never destroy original
+        {
+            Destroy(_sBorders[i].gameObject); // destroy all clones
+        }
         _sIconsHolder.Clear();
         _sDescriptionsHolder.Clear();
+        _sBorders.Clear();
     }
 
 
