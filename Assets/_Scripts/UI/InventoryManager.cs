@@ -69,6 +69,7 @@ public class InventoryManager : MonoBehaviour
         _imagePU.gameObject.SetActive(false);
         _vfxPU.SetActive(false);
         _vfxSabotage.SetActive(false);
+        SetIcons();
         #endregion
 
     }

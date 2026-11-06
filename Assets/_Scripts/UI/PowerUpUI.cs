@@ -164,9 +164,12 @@ public class PowerUpUI : MonoBehaviour
         _sabotageCorner.gameObject.SetActive(true);
         _sabotageText.gameObject.SetActive(true);
 
+        //Child of corner background
+        Transform corner = _sabotageCorner.gameObject.transform.GetChild(0); //this child has grid layout group
+
         foreach (GameObject obj in _sIconsHolder) //Place icons in corner
         {
-            obj.transform.SetParent(_sabotageCorner.gameObject.transform, false);
+            obj.transform.SetParent(corner, false);
         }
     }
 
