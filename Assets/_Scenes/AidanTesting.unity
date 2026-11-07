@@ -9259,7 +9259,7 @@ MonoBehaviour:
   - {fileID: 1758762968723748926}
   - {fileID: 6574641913047686489}
   _availablePUs:
-  - {fileID: 11400000, guid: e9ee3148d6b68bf42a59d79b307474c4, type: 2}
+  - {fileID: 11400000, guid: e1053fe57721b3045bd99d9d9739bd4b, type: 2}
   _extraPowerUp: {fileID: 0}
 --- !u!1 &2541635792210772670
 GameObject:
@@ -18575,8 +18575,8 @@ MonoBehaviour:
   _pOneGlow: {fileID: 8838356976425889640}
   _pTwoGlow: {fileID: 5182004271779693892}
   _turnManagerRef: {fileID: 6192416125277961120}
-  pOneScore: 0
-  pTwoScore: 0
+  pOneScore: 6
+  pTwoScore: 6
 --- !u!4 &5628699300941441876 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2112806458884451103, guid: ac05e0c8450799642969c510a450ca61, type: 3}

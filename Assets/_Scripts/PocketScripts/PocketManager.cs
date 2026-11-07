@@ -86,6 +86,7 @@ public class PocketManager : MonoBehaviour
     public event Action PocketWorkCompleted;
     public event Action PocketsReleased;
     public event Action<GameObject> BallRespawned;
+    public event Action Reversed;
     public event Action BigBallsShrunk;
 
 
@@ -127,9 +128,11 @@ public class PocketManager : MonoBehaviour
     private void OnEnable()
     {
         PocketsReleased += HandlePocketsReleased;
+        Reversed += HandleReverse;
         if (_turnManager != null)
         {
             _turnManager.TurnSwitched += HandleTurnSwitched;
+            _turnManager.KeepingTurn += HandleKeepTurn;
         }
         if(_ballManager != null)
         {
@@ -144,9 +147,12 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     private void OnDisable()
     {
+        PocketsReleased -= HandlePocketsReleased;
+        Reversed -= HandleReverse;
         if (_turnManager != null)
         {
             _turnManager.TurnSwitched -= HandleTurnSwitched;
+            _turnManager.KeepingTurn -= HandleKeepTurn;
         }
         if (_ballManager != null)
         {
@@ -821,6 +827,7 @@ public class PocketManager : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         _selectedPocket.SetActive(true); //reenable pocket
         ShowHiddenCorks(); //if theres hidden corks show them
+        Reversed?.Invoke();
         BallRespawned?.Invoke(ball);
     }
 
@@ -836,11 +843,11 @@ public class PocketManager : MonoBehaviour
     private bool EndPocketStatus()
     {
         bool epActive = false;
-        if (_scoreboard.pOneScore == 7 && _turnManager.currentPlayer == _turnManager.playerOne)
+        if (_scoreboard.pOneScore >= 7 && _turnManager.currentPlayer == _turnManager.playerOne)
         {
             epActive = true;
         }
-        else if (_scoreboard.pTwoScore == 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
+        else if (_scoreboard.pTwoScore >= 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
         {
             epActive = true;
         }
@@ -859,7 +866,7 @@ public class PocketManager : MonoBehaviour
     {
         //Get random location on the table
         float xPos = UnityEngine.Random.Range(_minXBounds.transform.position.x, _maxXBounds.transform.position.x);
-        float zPos = UnityEngine.Random.Range(_minZBounds.transform.position.x, _maxZBounds.transform.position.x);
+        float zPos = UnityEngine.Random.Range(_minZBounds.transform.position.z, _maxZBounds.transform.position.z);
         
         //Set positions the pocket will move between
         _epHidePos = new Vector3(xPos, _yHideValue ,zPos);
@@ -920,6 +927,35 @@ public class PocketManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Checks status of end pocket and raises or lowers it
+    /// </summary>
+    private void DetermineEndPocket(bool epActive)
+    {
+        //IF active not raised - raise
+        if (epActive && !_epRaised)
+        {
+            Debug.Log("Raising");
+            StartCoroutine(RaiseEndPocket());
+        }
+        //If in active - raised - lower
+        else if (!epActive && _epRaised)
+        {
+            Debug.Log("Lowering");
+            StartCoroutine(LowerEndPocket());
+        }
+        //If active - raise - nothing
+        else if (_epRaised && _epRaised)
+        {
+            Debug.Log("RAised and active - do nothin");
+            //do nothing
+        }
+        else
+        {
+            Debug.Log("determine end pocket ran the else");
+        }
+    }
+
     #endregion
 
 
@@ -944,6 +980,16 @@ public class PocketManager : MonoBehaviour
 
 
     /// <summary>
+    /// On player reverse determine end pocket and act on its status
+    /// </summary>
+    private void HandleReverse()
+    {
+        bool epActive = EndPocketStatus();
+        DetermineEndPocket(epActive);
+    }
+
+
+    /// <summary>
     /// balls came to a stop so turn may be ending
     /// </summary>
     private void HandleBallsStopped()
@@ -963,7 +1009,7 @@ public class PocketManager : MonoBehaviour
             BigBallsShrunk?.Invoke(); //Starts ball check
         }
 
-        if (mostPocketsCovered || allPocketsCovered) //Release pockets after a shot or turn switch
+        if (mostPocketsCovered || allPocketsCovered) //Release pockets after a shot or turn switch //SWITCH OONLY MOST
         {
             nothingCalled = false;
             StartCoroutine(ReleasePockets());
@@ -1045,13 +1091,27 @@ public class PocketManager : MonoBehaviour
 
 
     /// <summary>
+    /// If the player is keeping turn determine end pocket and act on its status
+    /// </summary>
+    private void HandleKeepTurn()
+    {
+        bool epActive = EndPocketStatus();
+        DetermineEndPocket(epActive);
+
+    }
+
+
+    /// <summary>
     /// On turn switch show the pockets being covered if player covered them
     /// </summary>
     /// <param name="sabotaged"></param>
     private void HandleTurnSwitched(bool sabotaged)
     {
+        bool epActive = EndPocketStatus();
+        DetermineEndPocket(epActive);
+
         //_sameTurn = false;
-        if (_coverPockets) //Check for call their shot asking to cover pockets
+        if (_coverPockets && !epActive) //Check for call their shot asking to cover pockets -- If end pocket active pockets already covered
         {
             _coverPockets = false;
             CoverPockets(false);

@@ -54,7 +54,7 @@ public class TurnManager : MonoBehaviour
 
     //Events
     public event Action<bool> TurnSwitched;
-    //public event Action TurnEnding;
+    public event Action KeepingTurn;
 
     private void Awake()
     {
@@ -64,7 +64,6 @@ public class TurnManager : MonoBehaviour
         _turnSwitchAnimScript = _turnSwitchUI.GetComponent<DartAnimEndController>();
         _inventory = _inventoryRef.GetComponent<InventoryManager>();
         _puUI = _puUIRef.GetComponent<PowerUpUI>();
-        //_ballManager = _ballManagerRef.GetComponent<BallManager>();
         _pocketManager = _pocketManagerRef.GetComponent<PocketManager>();
         #endregion
         //UI
@@ -88,10 +87,6 @@ public class TurnManager : MonoBehaviour
         {
             _turnSwitchAnimScript.OnAnimationComplete += TriggerTurnSwitchEvent; //Gets called when dart animation ends
         }
-        //if (_ballManager != null)
-        //{
-        //    _ballManager.BallsStopped += HandleBallsStopped; //gets called when balls are stopped
-        //}
         if (_inventory != null)
         {
             _inventory.InventoryReady += HandleInventoryReady; //When any extra power up conflict is resolved
@@ -113,10 +108,6 @@ public class TurnManager : MonoBehaviour
         {
             _turnSwitchAnimScript.OnAnimationComplete -= TriggerTurnSwitchEvent;
         }
-        //if (_ballManager != null)
-        //{
-        //    _ballManager.BallsStopped -= HandleBallsStopped;
-        //}
         if (_inventory != null)
         {
             _inventory.InventoryReady -= HandleInventoryReady;
@@ -271,6 +262,7 @@ public class TurnManager : MonoBehaviour
     }
     #endregion
 
+
     /// <summary>
     /// Checks if the player keeps their turn. Then handles switching or keeping turn.
     /// </summary>
@@ -305,6 +297,7 @@ public class TurnManager : MonoBehaviour
             _poolCueScript.RespawnPoolCue();
             _puUI.ResetSabotageUI();
             _inventory.UpdateUsingPUs(true);
+            KeepingTurn?.Invoke();
         }
     }
 
@@ -325,21 +318,6 @@ public class TurnManager : MonoBehaviour
 
     //EVENT HANDLING
     #region
-    /// <summary>
-    /// When balls are stopped invoke turn ending
-    /// </summary>
-    //private void HandleBallsStopped()
-    //{
-    //    if ((ctsActive && !keepTurn) || _pocketManager.allPocketsCovered || _pocketManager.mostPocketsCovered) //At end of turn player must call opponents shot or pockets must be unblocked
-    //    {
-    //        TurnEnding?.Invoke();
-    //    }
-    //    else
-    //    {
-    //        _inventory.CheckForUIConflict(); //This will call SwitchTurn
-    //    }
-    //}
-
 
     /// <summary>
     /// Set inventory ready true and try to switch turns
@@ -355,7 +333,7 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     private void HandlePocketWorkCompleted()
     {
-        _inventory.CheckForUIConflict(); //This will call SwitchTurn
+        _inventory.CheckForUIConflict(); //This will call inventory ready which leads to switch turn
     }
 
 
