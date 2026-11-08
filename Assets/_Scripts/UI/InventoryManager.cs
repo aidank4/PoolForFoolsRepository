@@ -37,7 +37,6 @@ public class InventoryManager : MonoBehaviour
     private List<SO_PowerUp> _usedPUs = new List<SO_PowerUp>(); //Which power ups were used last turn but you are still shooting
     public List<SO_PowerUp> usingPUs { get; private set; } = new List<SO_PowerUp>(); //Which powerups are being used this turn
     private List<SO_PowerUp> _opPUs = new List<SO_PowerUp>(); //which power ups did your opponent use
-    private bool _ctsInUse = false; //Bool is here because it acts the same as the lists but can only have one var so might as well be a bool
     private SO_PowerUp[] _currentInventoryPUs = new SO_PowerUp[3]; //Power ups in inventory
     private SO_PowerUp[] _pOnePUs = new SO_PowerUp[3]; //player ones power ups
     private SO_PowerUp[] _pTwoPUs = new SO_PowerUp[3]; //player twos power ups

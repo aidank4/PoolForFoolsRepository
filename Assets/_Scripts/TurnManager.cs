@@ -288,7 +288,7 @@ public class TurnManager : MonoBehaviour
             }
             _lostTurn = false; // reset lost turn once the switch turn has been called
             scratch = false;
-            //keepTurn = true; //Set this true so that turn doesnt switch until after a shot
+            keepTurn = true; //reser this true gets set false after shooting
         }
         else //Keep turn
         {

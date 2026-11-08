@@ -5,9 +5,12 @@ using UnityEngine.VFX;
 public class VFXManager : MonoBehaviour
 {
     [Header("References")]
+    [SerializeField] private GameObject _fireworkPU;
+    [SerializeField] private GameObject _fireworkSabotage;
     [SerializeField] private VisualEffect _explosion;
     [SerializeField] private VisualEffect _rocket;
     [SerializeField] private VisualEffect _magnet;
+    [SerializeField] private VisualEffect _endPocket;
 
 
     private bool _magnetPlaying = false; //Magnet Vfx is on
@@ -18,9 +21,12 @@ public class VFXManager : MonoBehaviour
     {
         //Hide
         #region
+        _fireworkPU.SetActive(false);
+        _fireworkSabotage.SetActive(false);
         _explosion.gameObject.SetActive(false);
         _rocket.gameObject.SetActive(false);
         _magnet.gameObject.SetActive(false);
+        _endPocket.gameObject.SetActive(false);
         #endregion
     }
 
@@ -39,6 +45,57 @@ public class VFXManager : MonoBehaviour
         {
             _magnet.gameObject.transform.rotation = Quaternion.identity;
         }
+    }
+
+
+    /// <summary>
+    /// Set position and turn on firework effect
+    /// </summary>
+    /// <param name="sabotage"></param>
+    /// <param name="spawnLocation"></param>
+    private void ActivateFirework(Vector3 spawnLocation, bool sabotage)
+    {
+        if (!sabotage)
+        {
+            _fireworkPU.transform.position = spawnLocation;
+            _fireworkPU.SetActive(true);
+        }
+        else
+        {
+            _fireworkSabotage.transform.position = spawnLocation;
+            _fireworkSabotage.SetActive(true);
+        }
+    }
+
+
+    /// <summary>
+    /// Set the particle to false
+    /// </summary>
+    /// <param name="sabotage"></param>
+    private void HideFireWork(bool sabotage)
+    {
+        if (!sabotage)
+        {
+            _fireworkPU.SetActive(false);
+        }
+        else
+        {
+            _fireworkSabotage.SetActive(false);
+        }
+    }
+
+
+    /// <summary>
+    /// Play PU or sabotage firework at pos
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="sabotage"></param>
+    /// <returns></returns>
+    public IEnumerator PlayFireworks(Vector3 pos, bool sabotage)
+    {
+        ActivateFirework(pos, sabotage);
+        yield return new WaitForSeconds(4f);
+        HideFireWork(sabotage);
     }
 
 
@@ -96,5 +153,35 @@ public class VFXManager : MonoBehaviour
         _magnetPlaying = false;
         _magnet.gameObject.transform.SetParent(this.gameObject.transform, false);
         _magnet.gameObject.SetActive(false);
+    }
+
+
+    /// <summary>
+    /// Place the end pocket vfx at a position
+    /// </summary>
+    /// <param name="spawnPos"></param>
+    public void PocketVFXPos(Vector3 spawnPos)
+    {
+        _endPocket.transform.position = new Vector3(spawnPos.x, _endPocket.transform.position.y, spawnPos.z); //keep y
+    }
+
+
+    /// <summary>
+    /// Turn on end pocket vfx
+    /// </summary>
+    /// <param name="spawnPos"></param>
+    public void PocketVFXOn()
+    {
+        _endPocket.gameObject.SetActive(true);
+    }
+
+
+    /// <summary>
+    /// Turn off end pocket vfx
+    /// </summary>
+    /// <param name="spawnPos"></param>
+    public void PocketVFXOff()
+    {
+        _endPocket.gameObject.SetActive(false);
     }
 }

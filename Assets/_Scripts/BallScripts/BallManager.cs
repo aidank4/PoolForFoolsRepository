@@ -47,6 +47,7 @@ public class BallManager : MonoBehaviour
     private bool _checkBalls; //Used to control if ball movement is being checked
     private float _timer;
     private float _maxTimer;
+    private bool _shot = false;
     private float _minWaitTime = 0.25f;
     //private float _maxWaitTime = 3f; //seconds
 
@@ -82,7 +83,7 @@ public class BallManager : MonoBehaviour
 
 
     //Events
-    public Action BallsStopped;
+    public Action<bool> BallsStopped;
     public Action CueBallHit;
 
 
@@ -251,7 +252,7 @@ public class BallManager : MonoBehaviour
         _checkBalls = false;
         _timer = 0;
         _maxTimer = 0;
-        BallsStoppedEvent();
+        BallsStoppedEvent(_shot);
 
         //Reset Power Ups
         if (_eightBallPUActive)
@@ -422,15 +423,6 @@ public class BallManager : MonoBehaviour
                 stripesIndex++;
             }
         }
-    }
-
-
-    /// <summary>
-    /// Once balls are stopped invoke event
-    /// </summary>
-    private void BallsStoppedEvent()
-    {
-        BallsStopped?.Invoke();
     }
 
 
@@ -699,15 +691,25 @@ public class BallManager : MonoBehaviour
 
 
     /// <summary>
+    /// Once balls are stopped invoke event
+    /// </summary>
+    private void BallsStoppedEvent(bool shot)
+    {
+        BallsStopped?.Invoke(shot);
+    }
+
+
+    /// <summary>
     /// set _checkBalls to true to start the ball check
     /// called by player shot, pockets released, big balls shrinking
     /// </summary>
-    private void HandleBallsMovingStart()
+    private void HandleBallsMovingStart(bool shot)
     {
+        _shot = shot; //When ball move assign if it was because of a shot or not
         _checkBalls = true;
         if (_rocketShotPUActive) // Constrain rocket rotation on shot
         {
-            _cueBall.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            _cueBall.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ; //COME BACK TO THIS -MOVE TO UPDATE
             _vfxManager.RocketOff();
         }
     }

@@ -73,7 +73,7 @@ public class Player : MonoBehaviour
 
 
     //EVENTS
-    public event Action ShotCompleted; //Event for the ball manager to start checking to see for time to switch turn
+    public event Action<bool> ShotCompleted; //Event for the ball manager to start checking to see for time to switch turn
     private event Action<ClickStage> Shoot; //Gets set to the correct shot type with power up usages
 
 
@@ -619,7 +619,7 @@ public class Player : MonoBehaviour
     /// </summary>
     private void ShotCompletedEvent()
     {
-        ShotCompleted?.Invoke();
+        ShotCompleted?.Invoke(true);
     }
 
 

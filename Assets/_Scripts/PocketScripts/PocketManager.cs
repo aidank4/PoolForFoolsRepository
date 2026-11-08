@@ -33,8 +33,8 @@ public class PocketManager : MonoBehaviour
     [SerializeField] private GameObject _tableCenter;
     [SerializeField] private Image _controlsUI; //Controls text when selecting a pocket to interact with
     [SerializeField] private TMP_Text _controlsUIDesc; //description
-    [SerializeField] private GameObject _fireworkRef;
-    private FireWorks _fireworkScript;
+    [SerializeField] private GameObject _vfxManagerRef;
+    private VFXManager _vfxManager;
     [SerializeField] private GameObject _cork;
     [SerializeField] private Image _winScreenPOne;
     [SerializeField] private Image _winScreenPTwo;
@@ -53,6 +53,7 @@ public class PocketManager : MonoBehaviour
     [SerializeField] private GameObject _maxXBounds;
     [SerializeField] private GameObject _minZBounds;
     [SerializeField] private GameObject _maxZBounds;
+    [SerializeField] private Vector3 _clearance = Vector3.one;
     [SerializeField] private float _yHideValue = -1;
     [SerializeField] private float _yShowValue = 1;
     [SerializeField] private float _epAnimTime = 3f;
@@ -84,10 +85,10 @@ public class PocketManager : MonoBehaviour
     //Events
     public event Action Scratched;
     public event Action PocketWorkCompleted;
-    public event Action PocketsReleased;
+    public event Action<bool> PocketsReleased; //bool is to say this was not a shot
     public event Action<GameObject> BallRespawned;
     public event Action Reversed;
-    public event Action BigBallsShrunk;
+    public event Action<bool> BigBallsShrunk; //bool is to say this was not a shot
 
 
     private void Awake()
@@ -97,7 +98,7 @@ public class PocketManager : MonoBehaviour
         _scoreboard = _scoreboardRef.GetComponent<Scoreboard>();
         _turnManager = _turnManagerRef.GetComponent<TurnManager>();
         _inventory = _inventoryRef.GetComponent<InventoryManager>();
-        _fireworkScript = _fireworkRef.GetComponent<FireWorks>();
+        _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
         _ballManager = _ballManagerRef.GetComponent<BallManager>();
         #endregion
 
@@ -118,7 +119,7 @@ public class PocketManager : MonoBehaviour
         }
 
         //Set End Pocket
-        SetEndPocketPos();
+        //SetEndPocketPos();
     }
 
 
@@ -246,11 +247,11 @@ public class PocketManager : MonoBehaviour
                     if (_turnManager.currentPlayer == _turnManager.teamStripes) //Add powerUp and playfireworks
                     {
                         _inventory.AddPowerUp();
-                        StartCoroutine(_fireworkScript.PlayFireworks(child.gameObject.transform.position, false));
+                        StartCoroutine(_vfxManager.PlayFireworks(child.gameObject.transform.position, false));
                     }
                     else //Play sabotage fireworks if player scored wrong ball
                     {
-                        StartCoroutine(_fireworkScript.PlayFireworks(child.gameObject.transform.position, true));
+                        StartCoroutine(_vfxManager.PlayFireworks(child.gameObject.transform.position, true));
                     }
 
                     _turnManager.TurnDeciderStripes();
@@ -278,11 +279,11 @@ public class PocketManager : MonoBehaviour
                     if (_turnManager.currentPlayer == _turnManager.teamSolids)//Add powerUp and playfireworks
                     {
                         _inventory.AddPowerUp();
-                        StartCoroutine(_fireworkScript.PlayFireworks(child.gameObject.transform.position, false));
+                        StartCoroutine(_vfxManager.PlayFireworks(child.gameObject.transform.position, false));
                     }
                     else //Play sabotage fireworks if player scored wrong ball
                     {
-                        StartCoroutine(_fireworkScript.PlayFireworks(child.gameObject.transform.position, true));
+                        StartCoroutine(_vfxManager.PlayFireworks(child.gameObject.transform.position, true));
                     }
 
                     _turnManager.TurnDeciderSolids();
@@ -727,7 +728,7 @@ public class PocketManager : MonoBehaviour
 
         _tempCoveredPockets.Clear();
         yield return new WaitForSeconds(0.5f); //CORK GONE TEMP BADDDDD
-        PocketsReleased?.Invoke(); //Moved balls so must tell ball manager to check movement
+        PocketsReleased?.Invoke(false); //Moved balls so must tell ball manager to check movement - not a shot
     }
 
 
@@ -861,13 +862,36 @@ public class PocketManager : MonoBehaviour
 
     /// <summary>
     /// Set end pocket to random position on the table and hide it.
+    /// Set vfx to the position
     /// </summary>
     private void SetEndPocketPos()
     {
-        //Get random location on the table
-        float xPos = UnityEngine.Random.Range(_minXBounds.transform.position.x, _maxXBounds.transform.position.x);
-        float zPos = UnityEngine.Random.Range(_minZBounds.transform.position.z, _maxZBounds.transform.position.z);
-        
+        float xPos;
+        float zPos;
+
+        bool retry = false;
+        do //Get random location on the table
+        {
+            xPos = UnityEngine.Random.Range(_minXBounds.transform.position.x, _maxXBounds.transform.position.x);
+            zPos = UnityEngine.Random.Range(_minZBounds.transform.position.z, _maxZBounds.transform.position.z);
+            Vector3 testPos = new Vector3(xPos, _yShowValue, zPos);
+
+            Collider[] colliders = Physics.OverlapBox(testPos, _clearance, Quaternion.identity, 3); //3 is the table layer - exclude the table from nearby colliders
+            if (colliders.Length == 0) //No balls in the way of spawn
+            {
+                Debug.Log("clear");
+                retry = false;
+                break;
+            }
+            else //Balls in the way find new location
+            {
+                Debug.Log("retry");
+                retry = true;
+            }
+        }
+        while (retry);
+
+
         //Set positions the pocket will move between
         _epHidePos = new Vector3(xPos, _yHideValue ,zPos);
         _epShowPos = new Vector3(xPos, _yShowValue, zPos);
@@ -875,6 +899,7 @@ public class PocketManager : MonoBehaviour
         //set pocket position and hide it
         _endPocket.transform.position = _epHidePos;
         _endPocket.SetActive(false);
+        _vfxManager.PocketVFXPos(_epShowPos);
     }
 
 
@@ -884,6 +909,7 @@ public class PocketManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator RaiseEndPocket()
     {
+        SetEndPocketPos();
         _epRaised = true;
         _endPocket.SetActive(true);
         
@@ -899,6 +925,7 @@ public class PocketManager : MonoBehaviour
         }
         _endPocket.transform.position = _epShowPos; //Set it as the position will be almost there
 
+        _vfxManager.PocketVFXOn();
         //VFX UI ON
     }
 
@@ -912,6 +939,7 @@ public class PocketManager : MonoBehaviour
         _epRaised = false;
         //Switch Action Map
         //SFX - VFX - UI Off
+        _vfxManager.PocketVFXOff();
 
         float timer = 0;
         while (timer < _epAnimTime)
@@ -937,12 +965,28 @@ public class PocketManager : MonoBehaviour
         {
             Debug.Log("Raising");
             StartCoroutine(RaiseEndPocket());
+            if (!allPocketsCovered)
+            {
+                CoverPockets(true);
+            }
+            else
+            {
+                Debug.Log("Pockets already covered");
+            }
         }
         //If in active - raised - lower
         else if (!epActive && _epRaised)
         {
             Debug.Log("Lowering");
             StartCoroutine(LowerEndPocket());
+            if (allPocketsCovered)
+            {
+                StartCoroutine(ReleasePockets());
+            }
+            else
+            {
+                Debug.Log("Pockets already gone");
+            }
         }
         //If active - raise - nothing
         else if (_epRaised && _epRaised)
@@ -952,7 +996,7 @@ public class PocketManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("determine end pocket ran the else");
+            Debug.Log("already not active or raised");
         }
     }
 
@@ -968,7 +1012,7 @@ public class PocketManager : MonoBehaviour
     /// <summary>
     /// Checks if cts needs to start and if so it does
     /// </summary>
-    private void HandlePocketsReleased()
+    private void HandlePocketsReleased(bool nevergonnaHappen)
     {
         _releasingPockets = false;
         if ((_turnManager.ctsActive && !_turnManager.keepTurn)) //Using cts when your pockets were covered
@@ -992,39 +1036,48 @@ public class PocketManager : MonoBehaviour
     /// <summary>
     /// balls came to a stop so turn may be ending
     /// </summary>
-    private void HandleBallsStopped()
+    private void HandleBallsStopped(bool shot)
     {
-        //if (!_sameTurn) //Can only run the first time balls stopped which happens after shot
-        //{
-        //    _sameTurn = true;
-
-        //}
-        bool nothingCalled = true; //Check if can move on
-
-        if (_ballManager.ballsBig)
+        if (shot) //player shot so turn is progressing
         {
-            nothingCalled = false;
-            _ballManager.ballsBig = false;
-            _ballManager.ResetGiantBalls();
-            BigBallsShrunk?.Invoke(); //Starts ball check
-        }
+            bool nothingCalled = true; //Check if can move on
 
-        if (mostPocketsCovered || allPocketsCovered) //Release pockets after a shot or turn switch //SWITCH OONLY MOST
-        {
-            nothingCalled = false;
-            StartCoroutine(ReleasePockets());
-        }
-        else if ((_turnManager.ctsActive && !_turnManager.keepTurn) && !_releasingPockets) //Using cts when your pockets arent covered - don't need to wait for release
-        {
-            nothingCalled = false;
-            _callingShot = true;
-            StartChoosingPocket("Choose only one pocket for your opponent to have available!");
-        }
+            if (_ballManager.ballsBig)
+            {
+                nothingCalled = false;
+                _ballManager.ballsBig = false;
+                _ballManager.ResetGiantBalls();
+                BigBallsShrunk?.Invoke(false); //Starts ball check - not a shot
+            }
+
+            if (mostPocketsCovered) //Release pockets after a shot or turn switch //SWITCH OONLY MOST
+            {
+                nothingCalled = false;
+                StartCoroutine(ReleasePockets());
+            }
+            else if ((_turnManager.ctsActive && !_turnManager.keepTurn) && !_releasingPockets) //Using cts when your pockets arent covered - don't need to wait for release
+            {
+                if (allPocketsCovered) //Release pockets so we can cover even if we don't end up covering them
+                {
+                    StartCoroutine(ReleasePockets());
+                }
+                else
+                {
+                    nothingCalled = false;
+                    _callingShot = true;
+                    StartChoosingPocket("Choose only one pocket for your opponent to have available!");
+                }
+            }
         
         
-        if (nothingCalled) //Ready to switch turn
+            if (nothingCalled) //Ready to switch turn
+            {
+                StartCoroutine(CallPocketWorkComplete());
+            }
+        }
+        else //balls moved before player shot - most likely because of release pockets
         {
-            StartCoroutine(CallPocketWorkComplete());
+            Debug.Log("balls moved but shot was false");
         }
 
 
