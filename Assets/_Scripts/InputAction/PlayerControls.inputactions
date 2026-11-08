@@ -509,6 +509,35 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Hold",
+            "id": "7ebde2f8-5529-43ea-8927-70ad6d8dc321",
+            "actions": [
+                {
+                    "name": "Escape",
+                    "type": "Button",
+                    "id": "1a9bf98b-62ed-4b3b-bae2-879f0eafd4fb",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "e14b7845-fa7b-49d6-b1be-ae3dcd88f327",
+                    "path": "<Keyboard>/anyKey",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Escape",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

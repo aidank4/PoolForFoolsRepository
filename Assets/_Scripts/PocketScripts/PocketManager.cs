@@ -29,6 +29,8 @@ public class PocketManager : MonoBehaviour
     private BallManager _ballManager;
     [SerializeField] private GameObject _inventoryRef;
     private InventoryManager _inventory;
+    [SerializeField] private GameObject _powerUpUIRef;
+    private PowerUpUI _powerUpUI;
     [SerializeField] private GameObject _highlightObject;
     [SerializeField] private GameObject _tableCenter;
     [SerializeField] private Image _controlsUI; //Controls text when selecting a pocket to interact with
@@ -77,8 +79,10 @@ public class PocketManager : MonoBehaviour
     private bool _pocketBlockActive = false; //For differentiating what to do when a pocket is chosen
     private bool _reverseCardActive = false; //For differentiating what to do when a pocket is chosen
     private bool _callingShot = false; //For differentiating what to do when a pocket is chosen
-    public bool mostPocketsCovered { get; private set; } = false; //used to know when to release covered pockets at end of turn - all but one
-    public bool allPocketsCovered { get; private set; } = false; //used to know when to release covered pockets at end of turn - all pockets
+    private bool _ctsActive = false; //when the call their shot power up is used - if it is active can't switch turn
+    private bool _mostPocketsCovered = false; //used to know when to release covered pockets at end of turn - all but one
+    private bool _mostPocketsWereCovered = false; //They just got released, we need to know this so we can manually switch turn
+    private bool _allPocketsCovered = false; //used to know when to release covered pockets at end of turn - all pockets
     private bool _coverPockets = false; //Used to know when to cover pockets on turn switch
 
 
@@ -100,6 +104,7 @@ public class PocketManager : MonoBehaviour
         _inventory = _inventoryRef.GetComponent<InventoryManager>();
         _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
         _ballManager = _ballManagerRef.GetComponent<BallManager>();
+        _powerUpUI = _powerUpUIRef.GetComponent<PowerUpUI>();
         #endregion
 
         //UI / Hide
@@ -448,7 +453,7 @@ public class PocketManager : MonoBehaviour
 
                     _choosingPocket = false;
                     _coverPockets = true;
-                    _turnManager.ctsActive = false;
+                    _ctsActive = false;
                     _callingShot = false;
                     StartCoroutine(CallPocketWorkComplete()); //Must wait till end of frame or else this input gets registered in the UI that appears after the event trigger
                     //if (InputManager.Instance.currentActionMap.name != "Gameplay") //Potential edge case fix
@@ -529,9 +534,13 @@ public class PocketManager : MonoBehaviour
         cork.transform.position = targetPos; //Set pos exactly on pocket
         cork.transform.rotation = Quaternion.identity;
 
-        if (InputManager.Instance.currentActionMap.name != "Gameplay" && InputManager.Instance.currentActionMap.name != "SabotageUI") //Player cant shoot until cork is down and don't take it off UI maps
+        if (InputManager.Instance.currentActionMap.name != "SabotageUI" && _powerUpUI._sabotageOverlay.gameObject.activeSelf) //Sabotage UI up but wrong input map -- corking overwrote it
         {
-            InputManager.Instance.SwitchCurrentActionMap("Gameplay");
+            InputManager.Instance.SwitchCurrentActionMap("SabotageUI");
+        }
+        else if (InputManager.Instance.currentActionMap.name != "Gameplay" && InputManager.Instance.currentActionMap.name != "SabotageUI") //Set it back to gameplay unless sabotage UI is up
+        {
+            InputManager.Instance.SwitchCurrentActionMap("Gameplay"); //Only do this once since we call place cork many times at once
         }
 
         if (check)
@@ -662,10 +671,10 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     private void CoverPockets(bool coverAll)
     {
-        InputManager.Instance.SwitchCurrentActionMap("SabotageUI"); //sabotage ui to both not accept input and hide the ui if it comes up at the same time as this
+        InputManager.Instance.SwitchCurrentActionMap("Hold"); //hold UI to not accept input
 
-        if (coverAll) allPocketsCovered = true;
-        else mostPocketsCovered = true;
+        if (coverAll) _allPocketsCovered = true;
+        else _mostPocketsCovered = true;
 
         for (int i = 0; i < pockets.Count; i++)
         {
@@ -694,8 +703,13 @@ public class PocketManager : MonoBehaviour
     private IEnumerator ReleasePockets()
     {
         _releasingPockets = true;
-        allPocketsCovered = false;
-        mostPocketsCovered = false;
+        _allPocketsCovered = false;
+        
+        if (_mostPocketsCovered)
+        {
+            _mostPocketsCovered = false;
+            _mostPocketsWereCovered = true;
+        }
 
         foreach (GameObject pocket in _tempCoveredPockets) //Push away nearby balls so they dont score
         {
@@ -965,7 +979,7 @@ public class PocketManager : MonoBehaviour
         {
             Debug.Log("Raising");
             StartCoroutine(RaiseEndPocket());
-            if (!allPocketsCovered)
+            if (!_allPocketsCovered)
             {
                 CoverPockets(true);
             }
@@ -979,7 +993,7 @@ public class PocketManager : MonoBehaviour
         {
             Debug.Log("Lowering");
             StartCoroutine(LowerEndPocket());
-            if (allPocketsCovered)
+            if (_allPocketsCovered)
             {
                 StartCoroutine(ReleasePockets());
             }
@@ -1015,10 +1029,15 @@ public class PocketManager : MonoBehaviour
     private void HandlePocketsReleased(bool nevergonnaHappen)
     {
         _releasingPockets = false;
-        if ((_turnManager.ctsActive && !_turnManager.keepTurn)) //Using cts when your pockets were covered
+        if ((_ctsActive && !_turnManager.keepTurn)) //Using cts when your pockets were covered
         {
             _callingShot = true;
             StartChoosingPocket("Choose only one pocket for your opponent to have available!");
+        }
+        else if(_mostPocketsWereCovered) //Most pockets were covered and we are not doing cts
+        {
+            _mostPocketsWereCovered = false;
+            StartCoroutine(CallPocketWorkComplete());
         }
     }
 
@@ -1040,7 +1059,7 @@ public class PocketManager : MonoBehaviour
     {
         if (shot) //player shot so turn is progressing
         {
-            bool nothingCalled = true; //Check if can move on
+            bool nothingCalled = true; //Check if can move on -- PUT IN ALL IFS
 
             if (_ballManager.ballsBig)
             {
@@ -1050,15 +1069,16 @@ public class PocketManager : MonoBehaviour
                 BigBallsShrunk?.Invoke(false); //Starts ball check - not a shot
             }
 
-            if (mostPocketsCovered) //Release pockets after a shot or turn switch //SWITCH OONLY MOST
+            if (_mostPocketsCovered) //Release pockets after a shot or turn switch //SWITCH OONLY MOST
             {
                 nothingCalled = false;
                 StartCoroutine(ReleasePockets());
             }
-            else if ((_turnManager.ctsActive && !_turnManager.keepTurn) && !_releasingPockets) //Using cts when your pockets arent covered - don't need to wait for release
+            else if ((_ctsActive && !_turnManager.keepTurn) && !_releasingPockets) //Using cts when your pockets arent covered - don't need to wait for release
             {
-                if (allPocketsCovered) //Release pockets so we can cover even if we don't end up covering them
+                if (_allPocketsCovered) //Release pockets so we can cover even if we don't end up covering them
                 {
+                    nothingCalled = false;
                     StartCoroutine(ReleasePockets());
                 }
                 else
@@ -1169,6 +1189,10 @@ public class PocketManager : MonoBehaviour
             _coverPockets = false;
             CoverPockets(false);
         }
+        else //Ignore cts
+        {
+            _coverPockets = false;
+        }
 
 
 
@@ -1225,7 +1249,7 @@ public class PocketManager : MonoBehaviour
         }
         if (powerUp.id == "Call Their Shot")
         {
-            _turnManager.ctsActive = true;
+            _ctsActive = true;
         }
         if (powerUp.id == "Reverse Card")
         {

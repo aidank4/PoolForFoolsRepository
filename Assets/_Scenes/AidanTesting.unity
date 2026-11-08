@@ -6845,6 +6845,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 402137966302149951}
     - target: {fileID: 4378250812818283918, guid: 5d6795b89673c54489264f53fb186b4e, type: 3}
+      propertyPath: _powerUpUIRef
+      value: 
+      objectReference: {fileID: 6403227082346297815}
+    - target: {fileID: 4378250812818283918, guid: 5d6795b89673c54489264f53fb186b4e, type: 3}
       propertyPath: _scoreboardRef
       value: 
       objectReference: {fileID: 2146272228052097417}
@@ -16417,6 +16421,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 0871e476-a6fa-4331-abd2-33d471be9113
     m_ActionName: 'SabotageUI/Close[/Keyboard/anyKey]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2573644990350180077}
+        m_TargetAssemblyTypeName: PlayerControls, Assembly-CSharp
+        m_MethodName: Escape
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 1a9bf98b-62ed-4b3b-bae2-879f0eafd4fb
+    m_ActionName: Hold/New action
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Gameplay

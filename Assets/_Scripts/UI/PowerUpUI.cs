@@ -23,7 +23,7 @@ public class PowerUpUI : MonoBehaviour
 
 
     [Header("Sabotage UI")]
-    [SerializeField] private Image _sabotageOverlay;
+    public Image _sabotageOverlay; //public so controls can check if its on screen
     [SerializeField] private Image _sabotageBorderUI;
     [SerializeField] private GameObject _sabotageBorderParent;
     [SerializeField] private Image _sabotageCorner;

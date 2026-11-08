@@ -49,8 +49,6 @@ public class TurnManager : MonoBehaviour
 
     [Header("PowerUps")]
     private bool _sabotaged = false; //Set true when the following player is sabotaged - Used to activate PU's at theh correct time
-    public bool ctsActive = false; //changed by pocket manager when the call their shot power up is used - if it is active can't switch turn
-
 
     //Events
     public event Action<bool> TurnSwitched;

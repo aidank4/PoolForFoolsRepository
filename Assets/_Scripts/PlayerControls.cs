@@ -99,19 +99,27 @@ public class PlayerControls : MonoBehaviour
     {
         if (context.performed)
         {
-            _powerUpUIScript.CornerSabotageUI();
-
-            if (_pocketManager.corking) //If corks coming down dont set to gameplay
-            {
-                InputManager.Instance.SwitchCurrentActionMap("PocketPick");
-            }
-            else
-            {
-                InputManager.Instance.SwitchCurrentActionMap("Gameplay");
-            }
+            SabotageUIHelper();
         }
     }
 
+
+    /// <summary>
+    /// Close sabotage UI and if corks coming down then change map to Hold
+    /// </summary>
+    private void SabotageUIHelper()
+    {
+        _powerUpUIScript.CornerSabotageUI();
+
+        if (_pocketManager.corking) //If corks coming down dont set to gameplay
+        {
+            InputManager.Instance.SwitchCurrentActionMap("Hold");
+        }
+        else
+        {
+            InputManager.Instance.SwitchCurrentActionMap("Gameplay");
+        }
+    }
 
 
     /// <summary>
@@ -162,6 +170,22 @@ public class PlayerControls : MonoBehaviour
             {
                 _controlsExplained.gameObject.SetActive(false);
                 _controlsHidden.gameObject.SetActive(true);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// If Sabotage UI is open on hold close it
+    /// </summary>
+    /// <param name="context"></param>
+    public void Escape(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            if (_powerUpUIScript._sabotageOverlay.gameObject.activeSelf)
+            {
+                SabotageUIHelper();
             }
         }
     }
