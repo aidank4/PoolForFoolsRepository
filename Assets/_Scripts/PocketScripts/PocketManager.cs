@@ -31,12 +31,16 @@ public class PocketManager : MonoBehaviour
     private InventoryManager _inventory;
     [SerializeField] private GameObject _powerUpUIRef;
     private PowerUpUI _powerUpUI;
+    [SerializeField] private GameObject _vfxManagerRef;
+    private VFXManager _vfxManager;
+    [SerializeField] private GameObject _poolCueRef;
+    private Player _poolCue;
     [SerializeField] private GameObject _highlightObject;
     [SerializeField] private GameObject _tableCenter;
     [SerializeField] private Image _controlsUI; //Controls text when selecting a pocket to interact with
     [SerializeField] private TMP_Text _controlsUIDesc; //description
-    [SerializeField] private GameObject _vfxManagerRef;
-    private VFXManager _vfxManager;
+    [SerializeField] private GameObject _pocketUIRef;
+    private PocketUI _pocketUI;
     [SerializeField] private GameObject _cork;
     [SerializeField] private Image _winScreenPOne;
     [SerializeField] private Image _winScreenPTwo;
@@ -62,6 +66,7 @@ public class PocketManager : MonoBehaviour
     private Vector3 _epHidePos;
     private Vector3 _epShowPos;
     private bool _epRaised = false; //If true on turn switch lower ep
+    private bool _lastPocketEnded = false; //Pockets got released on turn start and cue ball potentially moved
 
 
 
@@ -105,6 +110,8 @@ public class PocketManager : MonoBehaviour
         _vfxManager = _vfxManagerRef.GetComponent<VFXManager>();
         _ballManager = _ballManagerRef.GetComponent<BallManager>();
         _powerUpUI = _powerUpUIRef.GetComponent<PowerUpUI>();
+        _pocketUI = _pocketUIRef.GetComponent<PocketUI>();
+        _poolCue = _poolCueRef.GetComponent<Player>();
         #endregion
 
         //UI / Hide
@@ -926,7 +933,7 @@ public class PocketManager : MonoBehaviour
         SetEndPocketPos();
         _epRaised = true;
         _endPocket.SetActive(true);
-        
+        _pocketUI.Activate();
         //SFX
 
         float timer = 0;
@@ -938,9 +945,7 @@ public class PocketManager : MonoBehaviour
             yield return null;
         }
         _endPocket.transform.position = _epShowPos; //Set it as the position will be almost there
-
         _vfxManager.PocketVFXOn();
-        //VFX UI ON
     }
 
 
@@ -950,10 +955,12 @@ public class PocketManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator LowerEndPocket()
     {
+        InputManager.Instance.SwitchCurrentActionMap("Hold");
         _epRaised = false;
         //Switch Action Map
         //SFX - VFX - UI Off
         _vfxManager.PocketVFXOff();
+        _pocketUI.Close();
 
         float timer = 0;
         while (timer < _epAnimTime)
@@ -964,8 +971,8 @@ public class PocketManager : MonoBehaviour
             yield return null;
         }
         _endPocket.transform.position = _epHidePos;
-
         _endPocket.SetActive(false);
+        InputManager.Instance.SwitchCurrentActionMap("Gameplay");
     }
 
 
@@ -996,6 +1003,7 @@ public class PocketManager : MonoBehaviour
             if (_allPocketsCovered)
             {
                 StartCoroutine(ReleasePockets());
+                _lastPocketEnded = true;
             }
             else
             {
@@ -1098,6 +1106,12 @@ public class PocketManager : MonoBehaviour
         else //balls moved before player shot - most likely because of release pockets
         {
             Debug.Log("balls moved but shot was false");
+            //IF JUST RELEASED RESPAWN POOL CUE
+            if (_lastPocketEnded)
+            {
+                _lastPocketEnded = false;
+                _poolCue.RespawnPoolCue();
+            }
         }
 
 
