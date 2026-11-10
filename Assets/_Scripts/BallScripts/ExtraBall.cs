@@ -65,8 +65,7 @@ public class ExtraBall : MonoBehaviour
     /// <param name="other"></param>
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "CornerPocketA" || other.gameObject.tag == "CornerPocketB" || other.gameObject.tag == "CornerPocketC" ||
-            other.gameObject.tag == "CornerPocketD" || other.gameObject.tag == "SidePocketA" || other.gameObject.tag == "SidePocketB" && !_poolCueScript.shootAvailable)
+        if ((other.gameObject.tag == "Pocket" || other.gameObject.tag == "EndPocket") && !_poolCueScript.shootAvailable)
         {
             Destroy(this.gameObject);
         }

@@ -241,6 +241,41 @@ public class PocketManager : MonoBehaviour
 
 
     /// <summary>
+    /// Determine which player won based on if the 8 ball was scored early or not.
+    /// Return player number.
+    /// </summary>
+    /// <param name="early"></param>
+    /// <returns></returns>
+    private int DetermineWinner(bool early)
+    {
+        int winner; //Return 1 for p1 and 2 for p2
+        if (early) //8 ball scored early
+        {
+            if (_turnManager.currentPlayer == _turnManager.playerOne)
+            {
+                winner = 2;
+            }
+            else
+            {
+                winner = 1;
+            }
+        }
+        else //8 ball scored into last pocket
+        {
+            if (_turnManager.currentPlayer == _turnManager.playerOne)
+            {
+                winner = 1;
+            }
+            else
+            {
+                winner = 2;
+            }
+        }
+        return winner;
+    }
+
+
+    /// <summary>
     /// Handles pockets collisions with different types of balls.
     /// </summary>
     /// <param name="child"></param>
@@ -267,7 +302,6 @@ public class PocketManager : MonoBehaviour
                     }
 
                     _turnManager.TurnDeciderStripes();
-                    //Destroy(ball.gameObject); //ball
                     ChangeStripeScore(true);
 
                     for (int i = 0; i < _pocketedBalls.Length; i++)
@@ -279,6 +313,10 @@ public class PocketManager : MonoBehaviour
                         }
                     }
 
+                    if (child.gameObject.tag == "EndPocket") //If player scored opponents ball in endpocket still destroy ball and give points
+                    {
+                        Destroy(ball);
+                    }
 
                     break;
                 }
@@ -299,7 +337,6 @@ public class PocketManager : MonoBehaviour
                     }
 
                     _turnManager.TurnDeciderSolids();
-                    //Destroy(ball.gameObject); //ball
                     for (int i = 0; i < _pocketedBalls.Length; i++)
                     {
                         if (_pocketedBalls[i].pocket == child)
@@ -309,35 +346,39 @@ public class PocketManager : MonoBehaviour
                         }
                     }
 
+                    if (child.gameObject.tag == "EndPocket") //If player scored opponents ball in endpocket still destroy ball and give points
+                    {
+                        Destroy(ball);
+                    }
+
                     ChangeSolidScore(true);
                     break;
                 }
             case "EightBall":
                 {
                     Debug.Log("EightBall");
-                    //TEMP player has scored all the balls and 8 ball
-                    if (_scoreboard.pOneScore == 7 && _turnManager.currentPlayer == _turnManager.playerOne)
+                    int winner = 0;
+
+                    //Determine winner
+                    if (child.gameObject.tag == "EndPocket") //8 Ball got scored on end pocket
                     {
-                        //Debug.Log("Player 1 Wins!");
+                        winner = DetermineWinner(true);
+                    }
+                    else //8 ball got score preemptively
+                    {
+                        winner = DetermineWinner(false);
+                    }
+
+                    //Show Winner
+                    if (winner == _turnManager.playerOne)
+                    {
                         _winScreenPOne.gameObject.SetActive(true);
                     }
-                    else if (_scoreboard.pTwoScore == 7 && _turnManager.currentPlayer == _turnManager.playerTwo)
+                    else
                     {
-                        //Debug.Log("Player 2 Wins!");
                         _winScreenPTwo.gameObject.SetActive(true);
                     }
-                    else //TEMP player scored 8 ball early
-                    {
-                        //Debug.Log("Player " + _turnManagerScript.currentPlayer.ToString() + " loses");
-                        if (_turnManager.currentPlayer == _turnManager.playerOne)
-                        {
-                            _winScreenPTwo.gameObject.SetActive(true);
-                        }
-                        else if (_turnManager.currentPlayer == _turnManager.playerTwo)
-                        {
-                            _winScreenPOne.gameObject.SetActive(true);
-                        }
-                    }
+
                     Destroy(ball.gameObject); //Ball
                     break;
                 }

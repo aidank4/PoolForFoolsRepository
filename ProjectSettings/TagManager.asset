@@ -16,6 +16,8 @@ TagManager:
   - SidePocketA
   - SidePocketB
   - Wall
+  - EndPocket
+  - Pocket
   layers:
   - Default
   - TransparentFX
