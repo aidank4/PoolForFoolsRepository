@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class PlayerControls : MonoBehaviour
 {
     [Header("References")]
+    [SerializeField] private GameObject _cameraRef;
+    private CameraMovement _camera;
     [SerializeField] private GameObject _powerUpUIRef;
     private PowerUpUI _powerUpUIScript; //need for highlighting the inventory buttons
     [SerializeField] private GameObject _inventoryRef;
@@ -26,6 +28,7 @@ public class PlayerControls : MonoBehaviour
     {
         //ref
         #region
+        _camera = _cameraRef.GetComponent<CameraMovement>();
         _powerUpUIScript = _powerUpUIRef.GetComponent<PowerUpUI>();
         _inventoryScript = _inventoryRef.GetComponent<InventoryManager>();
         _poolCueScript = _poolCueRef.GetComponent<Player>();
@@ -174,6 +177,54 @@ public class PlayerControls : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Toggle camera controls
+    /// </summary>
+    /// <param name="context"></param>
+    public void CameraMap(InputAction.CallbackContext context)
+    {
+        if (context.performed && _poolCueScript.shootAvailable) //Only can move cam before shot
+        {
+            _camera.ToggleCamUI();
+            if (InputManager.Instance.currentActionMap.name == "CameraMove" || InputManager.Instance.currentActionMap.name == "CameraRot") //Switch to game
+            {
+                Debug.Log("Back to game");
+                InputManager.Instance.SwitchCurrentActionMap("Gameplay");
+                
+
+            }
+            else //Switch to cam
+            {
+                Debug.Log("Camera Time");
+                InputManager.Instance.SwitchCurrentActionMap("CameraMove");
+            }
+        }
+    }
+
+
+
+    /// <summary>
+    /// Toggle camera rotation controls
+    /// </summary>
+    /// <param name="context"></param>
+    public void CameraRot(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            if (InputManager.Instance.currentActionMap.name == "CameraMove") //Toggle
+            {
+                Debug.Log("Rotation");
+                InputManager.Instance.SwitchCurrentActionMap("CameraRot");
+
+            }
+            else
+            {
+                Debug.Log("back to cam");
+                InputManager.Instance.SwitchCurrentActionMap("CameraMove");
+            }
+        }
+    }
 
     /// <summary>
     /// If Sabotage UI is open on hold close it
