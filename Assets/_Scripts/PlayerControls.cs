@@ -202,30 +202,6 @@ public class PlayerControls : MonoBehaviour
         }
     }
 
-
-
-    /// <summary>
-    /// Toggle camera rotation controls
-    /// </summary>
-    /// <param name="context"></param>
-    public void CameraRot(InputAction.CallbackContext context)
-    {
-        if (context.performed)
-        {
-            if (InputManager.Instance.currentActionMap.name == "CameraMove") //Toggle
-            {
-                Debug.Log("Rotation");
-                InputManager.Instance.SwitchCurrentActionMap("CameraRot");
-
-            }
-            else
-            {
-                Debug.Log("back to cam");
-                InputManager.Instance.SwitchCurrentActionMap("CameraMove");
-            }
-        }
-    }
-
     /// <summary>
     /// If Sabotage UI is open on hold close it
     /// </summary>

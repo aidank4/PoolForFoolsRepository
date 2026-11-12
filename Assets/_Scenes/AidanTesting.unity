@@ -188,10 +188,11 @@ Transform:
   m_GameObject: {fileID: 145549982}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0.2, z: 0}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 714157200}
   m_Father: {fileID: 3639764500014045308}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &408510199
@@ -466,6 +467,68 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 829fdcb09ac7b82458bdd06a6ba07658, type: 3}
   m_PrefabInstance: {fileID: 6587617422186734284}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &714157199
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 145549983}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+      propertyPath: m_Name
+      value: Castle_test_FBX
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+--- !u!4 &714157200 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 5c28956341d14a9498729d64cd10b637, type: 3}
+  m_PrefabInstance: {fileID: 714157199}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &830382803
 GameObject:
   m_ObjectHideFlags: 0
@@ -627,7 +690,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 57.4, y: -315}
+  m_AnchoredPosition: {x: 57.399902, y: -315}
   m_SizeDelta: {x: 450, y: 505.3}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &951581391
@@ -16909,7 +16972,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1696605122451333756}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -17421,70 +17484,6 @@ MonoBehaviour:
     m_ActionName: 'Camera/GameMap[/Keyboard/tab]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2573644990350180077}
-        m_TargetAssemblyTypeName: PlayerControls, Assembly-CSharp
-        m_MethodName: CameraRot
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: c8e358ac-62ab-4d2f-b1e1-5862d413793d
-    m_ActionName: 'CameraMove/RotateMap[/Keyboard/r]'
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 408510201}
-        m_TargetAssemblyTypeName: CameraMovement, Assembly-CSharp
-        m_MethodName: Rotate
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: c505369e-fa8d-47d1-975e-dd2ddb151688
-    m_ActionName: 'CameraRot/Rotate[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2573644990350180077}
-        m_TargetAssemblyTypeName: PlayerControls, Assembly-CSharp
-        m_MethodName: CameraRot
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 2b042d92-9217-4fe7-9bb1-6e34b96e71d7
-    m_ActionName: 'CameraRot/CameraMap[/Keyboard/r]'
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2573644990350180077}
-        m_TargetAssemblyTypeName: PlayerControls, Assembly-CSharp
-        m_MethodName: CameraMap
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 5dd68e25-69ec-404a-816a-57b107b0e90b
-    m_ActionName: 'CameraRot/GameMap[/Keyboard/tab]'
-  - m_PersistentCalls:
-      m_Calls:
       - m_Target: {fileID: 408510201}
         m_TargetAssemblyTypeName: CameraMovement, Assembly-CSharp
         m_MethodName: ResetView
@@ -17503,7 +17502,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 408510201}
         m_TargetAssemblyTypeName: CameraMovement, Assembly-CSharp
-        m_MethodName: ResetView
+        m_MethodName: Rotate
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -17513,8 +17512,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_ActionId: 9db93681-bbff-4ce4-95df-4cbe30eef11b
-    m_ActionName: 'CameraRot/Reset[/Keyboard/r]'
+    m_ActionId: 96ff9331-92cb-4418-87cc-aaf4814cf871
+    m_ActionName: 'CameraMove/Rotate[/Keyboard/rightArrow,/Keyboard/leftArrow,/Keyboard/upArrow,/Keyboard/downArrow]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Gameplay
@@ -20594,7 +20593,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.4, y: 1.4, z: 1.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3639764500014045308}

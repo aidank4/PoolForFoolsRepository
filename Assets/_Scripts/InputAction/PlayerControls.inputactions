@@ -585,16 +585,6 @@
                     "priority": 0
                 },
                 {
-                    "name": "RotateMap",
-                    "type": "Button",
-                    "id": "c8e358ac-62ab-4d2f-b1e1-5862d413793d",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false,
-                    "priority": 0
-                },
-                {
                     "name": "Reset",
                     "type": "Button",
                     "id": "f5242940-088d-4e23-8400-b57a742840c9",
@@ -602,6 +592,16 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "Rotate",
+                    "type": "Value",
+                    "id": "96ff9331-92cb-4418-87cc-aaf4814cf871",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true,
                     "priority": 0
                 }
             ],
@@ -696,99 +696,7 @@
                 },
                 {
                     "name": "",
-                    "id": "c20cb759-3bc6-4f0e-9df2-af332a074d0b",
-                    "path": "<Keyboard>/q",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "RotateMap",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "19728208-6c93-4943-895b-62fde697c8cb",
-                    "path": "<Keyboard>/r",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Reset",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                }
-            ]
-        },
-        {
-            "name": "CameraRot",
-            "id": "aff97570-d2fe-4e0c-bf87-d9c06d5b8001",
-            "actions": [
-                {
-                    "name": "Rotate",
-                    "type": "Value",
-                    "id": "c505369e-fa8d-47d1-975e-dd2ddb151688",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true,
-                    "priority": 0
-                },
-                {
-                    "name": "CameraMap",
-                    "type": "Button",
-                    "id": "2b042d92-9217-4fe7-9bb1-6e34b96e71d7",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false,
-                    "priority": 0
-                },
-                {
-                    "name": "GameMap",
-                    "type": "Button",
-                    "id": "5dd68e25-69ec-404a-816a-57b107b0e90b",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false,
-                    "priority": 0
-                },
-                {
-                    "name": "Reset",
-                    "type": "Button",
-                    "id": "9db93681-bbff-4ce4-95df-4cbe30eef11b",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false,
-                    "priority": 0
-                }
-            ],
-            "bindings": [
-                {
-                    "name": "",
-                    "id": "4d1f9d1e-e7f5-4834-89f9-f90b0fe404b3",
-                    "path": "<Keyboard>/q",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "CameraMap",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "2363063b-3ec9-4ea5-af49-0fdf87fc0fcb",
-                    "path": "<Keyboard>/tab",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "GameMap",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "17aca6b8-3187-401b-add8-ad12cc4d1830",
                     "path": "<Keyboard>/r",
                     "interactions": "",
                     "processors": "",
@@ -799,7 +707,7 @@
                 },
                 {
                     "name": "2D Vector",
-                    "id": "c9a2c80c-260a-4885-ba46-9516524b3f26",
+                    "id": "af52b349-7b12-4ba7-8fe0-98c1f3558dc3",
                     "path": "2DVector",
                     "interactions": "",
                     "processors": "",
@@ -810,8 +718,8 @@
                 },
                 {
                     "name": "up",
-                    "id": "7fd16aed-5575-49cb-b050-bd9f83dae293",
-                    "path": "<Keyboard>/d",
+                    "id": "2c022bdc-da43-4097-b4c7-7a50e549709b",
+                    "path": "<Keyboard>/rightArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -821,8 +729,8 @@
                 },
                 {
                     "name": "down",
-                    "id": "34c66018-a4b5-4d2d-a424-18ceaf399dff",
-                    "path": "<Keyboard>/a",
+                    "id": "97571c1e-a9df-45ba-a9ed-deada349f8ba",
+                    "path": "<Keyboard>/leftArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -832,8 +740,8 @@
                 },
                 {
                     "name": "left",
-                    "id": "821980b8-9327-40b9-9bfc-4b13f759a2df",
-                    "path": "<Keyboard>/w",
+                    "id": "f7a9e57f-3672-4599-8a8c-a7abf3f1bee9",
+                    "path": "<Keyboard>/upArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -843,8 +751,8 @@
                 },
                 {
                     "name": "right",
-                    "id": "53c37ffb-81a5-44a2-835b-aee927c35934",
-                    "path": "<Keyboard>/s",
+                    "id": "7fcd2779-9b21-4413-b34a-9c14fa1f9c68",
+                    "path": "<Keyboard>/downArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
