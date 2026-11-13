@@ -13,14 +13,14 @@ public class CameraMovement : MonoBehaviour
     private Vector3 _moveInput;
     private Vector2 _rotateInput;
 
-    private Vector3 _startingPos;
-    private Vector3 _startingRot;
+    private Vector3 _topDownPos;
+    private Vector3 _topDownRot;
 
     private void Awake()
     {
         _controlsUI.SetActive(false);
-        _startingPos = transform.position;
-        _startingRot = transform.rotation.eulerAngles;
+        _topDownPos = new Vector3(0, 20, 2);
+        _topDownRot = new Vector3(90, -90, 0);
     }
 
 
@@ -50,10 +50,10 @@ public class CameraMovement : MonoBehaviour
     /// Return camera to starting position and rotation.
     /// </summary>
     /// <param name="context"></param>
-    public void ResetView(InputAction.CallbackContext context)
+    public void TopDownView(InputAction.CallbackContext context)
     {
-        transform.position = _startingPos;
-        transform.rotation = Quaternion.Euler(_startingRot);
+        transform.position = _topDownPos;
+        transform.rotation = Quaternion.Euler(_topDownRot);
     }
 
 
@@ -75,7 +75,8 @@ public class CameraMovement : MonoBehaviour
 
     private void Update()
     {
-        transform.Translate(_moveInput * _movSpeed * Time.deltaTime, Space.Self);
+        transform.Translate(new Vector3(_moveInput.x, 0, _moveInput.z) * _movSpeed * Time.deltaTime, Space.Self); //WASD local
+        transform.Translate(new Vector3(0, _moveInput.y, 0) * _movSpeed * Time.deltaTime, Space.World); //Space Shift up down world space
 
         transform.Rotate(new Vector3(0, _rotateInput.y, 0) * (_rotSpeed * Time.deltaTime), Space.World); //Yaw
         transform.Rotate(new Vector3(_rotateInput.x, 0, 0) * (_rotSpeed * Time.deltaTime), Space.Self); //Pitch

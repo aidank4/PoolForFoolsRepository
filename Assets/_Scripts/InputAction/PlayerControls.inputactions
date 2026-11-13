@@ -585,7 +585,7 @@
                     "priority": 0
                 },
                 {
-                    "name": "Reset",
+                    "name": "TopDown",
                     "type": "Button",
                     "id": "f5242940-088d-4e23-8400-b57a742840c9",
                     "expectedControlType": "",
@@ -697,11 +697,11 @@
                 {
                     "name": "",
                     "id": "19728208-6c93-4943-895b-62fde697c8cb",
-                    "path": "<Keyboard>/r",
+                    "path": "<Keyboard>/t",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Reset",
+                    "action": "TopDown",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
