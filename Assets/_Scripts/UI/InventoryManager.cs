@@ -43,6 +43,7 @@ public class InventoryManager : MonoBehaviour
 
 
     [Header("Misc Variables")]
+    [SerializeField] private bool _testingPowerUps; //REMOVE FOR BUILDS - Used to test individual power ups - without test mode on we need multiple powerups available or infinite loop
     [SerializeField]private SO_PowerUp _extraPowerUp = null; //if an extra power up gets claimed, this ref is used to swap it or delete it later
     private int _pBCounter = 0; //Cant use pocket block more than 5 times
     private SO_PowerUp _selectedPU; //The power up the player tries to use
@@ -135,22 +136,87 @@ public class InventoryManager : MonoBehaviour
 
 
     /// <summary>
+    /// Return whether a power up can be added
+    /// </summary>
+    /// <param name="powerUp"></param>
+    /// <returns></returns>
+    private bool CheckPowerUp(SO_PowerUp powerUp)
+    {
+        bool result = true;
+
+        //Check if player has this power up already
+        foreach (SO_PowerUp pu in _currentInventoryPUs) // no empty array check because it is size 3 even if empty
+        {
+            if (pu != null) //null pu check
+            {
+                if (pu.id == powerUp.id)
+                {
+                    result = false;
+                    break;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else //null pu
+            {
+                continue;
+            }
+        }
+
+        //Check if result is not already false or if this is pocket block
+        if (result != false && powerUp.id == "Pocket Block") // Can only get 5 pocketblocks per game
+        {
+            _pBCounter++;
+            if (_pBCounter > 5)
+            {
+                _availablePUs.Remove(powerUp);
+                result = false;
+            }
+            else //Valid Pocket block
+            {
+                // Not dupe or 6th pocket block
+            }
+        }
+        else //Valid power up
+        {
+            //Not dupe or pocket block
+        }
+
+        return result;
+    }
+
+
+    /// <summary>
     /// Returns a random PU from the available PU's
     /// </summary>
     /// <returns>SO_Powerup</returns>
     private SO_PowerUp SelectPowerUp()
     {
-        SO_PowerUp rdmPowerUp = _availablePUs[UnityEngine.Random.Range(0, _availablePUs.Count)];
-        if (rdmPowerUp.id == "Pocket Block") // Can only get 5 pocketblocks per game
+        SO_PowerUp rdmPowerUp = default;
+        bool checkComplete = false;
+        while (!checkComplete && !_testingPowerUps) //Testing is for check individual PUS REMOVE FOR BUILD
         {
-            _pBCounter++;
-            if (_pBCounter > 5)
+            rdmPowerUp = _availablePUs[UnityEngine.Random.Range(0, _availablePUs.Count)];
+            if (CheckPowerUp(rdmPowerUp))
             {
-                _pBCounter = 0;
-                _availablePUs.Remove(rdmPowerUp);
-                rdmPowerUp = _availablePUs[UnityEngine.Random.Range(0, _availablePUs.Count)];
+                Debug.Log("Valid PU");
+                checkComplete = true;
+                break;
+            }
+            else //Check Again
+            {
+                Debug.Log("Invalid PU check again");
+                checkComplete = false;
             }
         }
+
+        if (_testingPowerUps) //FOR TESTING REMOVE FOR BUILD
+        {
+            rdmPowerUp = _availablePUs[UnityEngine.Random.Range(0, _availablePUs.Count)];
+        }
+
         return rdmPowerUp;
     }
 

@@ -56,6 +56,7 @@ public class Player : MonoBehaviour
     private bool _shooting = false; //Can't release shot without this bool - Without this there is an error where you can release shot before starting shot
     private bool _stopShot = false; //Set true by CancelShot() and false when shot started
     private bool _holdStarted = false; //Set true when shot started and false when shot released
+    private bool _chargeUpwards = true; //Whether charge is going up or down
 
 
     [Header("Misc Variables")]
@@ -156,16 +157,52 @@ public class Player : MonoBehaviour
         }//Rotate extra balls and lines when multi shoot active
         if (_holdStarted && !_stopShot)
         {
-            _holdTimer += Time.deltaTime;
-            _chargeVisual.size = (_holdTimer / _maxCharge); // divide by _maxHold because scrollBarSize is capped to 1.
+            //_holdTimer += Time.deltaTime;
+            //_chargeVisual.size = (_holdTimer / _maxCharge); // divide by _maxHold because scrollBarSize is capped to 1.
 
-            if (_holdTimer < _maxCharge) //dont let the pool cue pull back further than max power
-            {
-                poolCueParent.transform.position += poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime; // .right is moving the cue back
-            }
+            //if (_holdTimer < _maxCharge) //dont let the pool cue pull back further than max power
+            //{
+            //    poolCueParent.transform.position += poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime; // .right is moving the cue back
+            //}
+            ChargeShot();
         }
 
     }
+
+
+    /// <summary>
+    /// Move the charrge visual and pool cue up or down
+    /// </summary>
+    private void ChargeShot()
+    {
+        //Determine charge direction
+        if (_holdTimer <= _minCharge) //At bottom head up
+        {
+            _chargeUpwards = true;
+        }
+        else if (_holdTimer >= _maxCharge) //At top head down
+        {
+            _chargeUpwards = false;
+        }
+        else //Stay the same
+        {
+            //nothing
+        }
+
+
+        //Adjust the timer and pool cue
+        if (_chargeUpwards) //Up
+        {
+            _holdTimer += Time.deltaTime;
+            poolCueParent.transform.position += poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime;
+        }
+        else //Down
+        {
+            _holdTimer -= Time.deltaTime;
+            poolCueParent.transform.position -= poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime;
+        }
+        _chargeVisual.size = (_holdTimer / _maxCharge);
+    }   
 
 
     /// <summary>
