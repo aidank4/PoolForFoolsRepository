@@ -120,6 +120,7 @@ public class PocketManager : MonoBehaviour
         _controlsUI.gameObject.SetActive(false);
         _winScreenPOne.gameObject.SetActive(false);
         _winScreenPTwo.gameObject.SetActive(false);
+        _endPocket.SetActive(false);
         #endregion
 
         //Initialize struct Lists
