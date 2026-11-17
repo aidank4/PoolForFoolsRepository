@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
     private TurnManager _turnManagerScript;
     [SerializeField] private GameObject _predictionLineParent;
     [SerializeField] Scrollbar _chargeVisual;
+    [SerializeField] GameObject _clock;
     [SerializeField] private GameObject _cueBall; //Ball Object
     private CueBall _cueBallScript; //Ball Script
     [SerializeField] private GameObject _cueBallExtra;
@@ -89,6 +90,7 @@ public class Player : MonoBehaviour
         #endregion
         //UI
         _chargeVisual.gameObject.SetActive(false);
+        _clock.SetActive(false);
 
         //Extra
         _ballRadius = _cueBall.GetComponent<SphereCollider>().radius; //used for shoot math but the radius only needs to be gathered once so I have it here in Awake.
@@ -286,6 +288,7 @@ public class Player : MonoBehaviour
             //_startingPos = poolCueParent.transform.position;
             _holdTimer = UnityEngine.Random.Range(_minCharge, _maxCharge);
             _chargeVisual.gameObject.SetActive(true);
+            _clock.SetActive(true);
             //anim
             StartCoroutine((RdmPowerAnim(_holdTimer))); //Handles shot release stuff in here because must happen at the end of coroutine
 
@@ -379,6 +382,7 @@ public class Player : MonoBehaviour
         _shooting = false;
         _turnManagerScript.keepTurn = false;
         _chargeVisual.gameObject.SetActive(false);
+        _clock.SetActive(false);
         CalculateShot(_cueBall, _predictionLineParent);
         StartCoroutine(EndShot());
         Shoot = DefaultShoot;
