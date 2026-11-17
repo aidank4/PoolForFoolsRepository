@@ -316,7 +316,7 @@ public class PocketManager : MonoBehaviour
 
                     if (child.gameObject.tag == "EndPocket") //If player scored opponents ball in endpocket still destroy ball and give points
                     {
-                        Destroy(ball);
+                        Destroy(ball.gameObject);
                     }
 
                     break;
@@ -349,7 +349,7 @@ public class PocketManager : MonoBehaviour
 
                     if (child.gameObject.tag == "EndPocket") //If player scored opponents ball in endpocket still destroy ball and give points
                     {
-                        Destroy(ball);
+                        Destroy(ball.gameObject);
                     }
 
                     ChangeSolidScore(true);

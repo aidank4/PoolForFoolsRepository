@@ -201,13 +201,11 @@ public class InventoryManager : MonoBehaviour
             rdmPowerUp = _availablePUs[UnityEngine.Random.Range(0, _availablePUs.Count)];
             if (CheckPowerUp(rdmPowerUp))
             {
-                Debug.Log("Valid PU");
                 checkComplete = true;
                 break;
             }
             else //Check Again
             {
-                Debug.Log("Invalid PU check again");
                 checkComplete = false;
             }
         }
