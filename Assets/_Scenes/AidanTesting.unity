@@ -1928,7 +1928,7 @@ Animator:
   m_GameObject: {fileID: 1406430025}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 3b73d2c9d3983f3448790f3585cbb9f3, type: 2}
+  m_Controller: {fileID: 9100000, guid: 2b6d3eb7fcc115042b299c276b638b9c, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1989,7 +1989,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1243967568, guid: 3aea3359df90cf2458912db742ed62d8, type: 3}
+  m_Sprite: {fileID: -1831568917, guid: 3a4eea952283d7a4abdd2b629a82a511, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -22406,7 +22406,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5795993226912930031, guid: 15612147a48dd1149894f367c25f843e, type: 3}
       propertyPath: _rdmChargeSpeed
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5795993226912930031, guid: 15612147a48dd1149894f367c25f843e, type: 3}
       propertyPath: _turnManagerRef

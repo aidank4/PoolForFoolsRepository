@@ -1023,10 +1023,9 @@ public class PocketManager : MonoBehaviour
     /// </summary>
     private void DetermineEndPocket(bool epActive)
     {
-        //IF active not raised - raise
+        //Raise
         if (epActive && !_epRaised)
         {
-            Debug.Log("Raising");
             StartCoroutine(RaiseEndPocket());
             if (!_allPocketsCovered)
             {
@@ -1034,13 +1033,14 @@ public class PocketManager : MonoBehaviour
             }
             else
             {
-                Debug.Log("Pockets already covered");
+                //Pockets already covered
+                //do nothing
             }
         }
-        //If in active - raised - lower
+
+        //Lower
         else if (!epActive && _epRaised)
         {
-            Debug.Log("Lowering");
             StartCoroutine(LowerEndPocket());
             if (_allPocketsCovered)
             {
@@ -1049,18 +1049,20 @@ public class PocketManager : MonoBehaviour
             }
             else
             {
-                Debug.Log("Pockets already gone");
+                //Pockets already released
+                //do nothing
             }
         }
         //If active - raise - nothing
         else if (_epRaised && _epRaised)
         {
-            Debug.Log("RAised and active - do nothin");
+            //Already raised and active
             //do nothing
         }
         else
         {
-            Debug.Log("already not active or raised");
+            //Already not active or raised
+            //Do nothing
         }
     }
 

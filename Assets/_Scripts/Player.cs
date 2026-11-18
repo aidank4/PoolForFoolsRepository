@@ -333,39 +333,48 @@ public class Player : MonoBehaviour
         bool goingDown = false;
         bool goTarget = false;
         float tempholdTimer = 0f;
+        int count = 0;
 
-        while (goingUp)
+
+        //Visually charge up and down multiple times
+        while (count < 4)
         {
-            if (tempholdTimer >= _maxCharge)
+            while (goingUp)
             {
-                goingUp = false;
-                goingDown = true;
+                if (tempholdTimer >= _maxCharge) //Switch direction
+                {
+                    goingUp = false;
+                    goingDown = true;
+                    count++; //Amount of times going up
+                }
+                else //Charge back
+                {
+                    tempholdTimer += Time.deltaTime * _rdmChargeSpeed;
+                    _chargeVisual.size = (tempholdTimer / _maxCharge);
+                    yield return null;
+                }
             }
-            else
+            while (goingDown)
             {
-                tempholdTimer += Time.deltaTime * _rdmChargeSpeed;
-                _chargeVisual.size = (tempholdTimer / _maxCharge);
-                yield return null;
+                if (tempholdTimer <= 0) //Switch direction
+                {
+                    goingDown = false;
+                    goingUp = true;
+                }
+                else //Charge Forward
+                {
+                    tempholdTimer -= Time.deltaTime * _rdmChargeSpeed;
+                    _chargeVisual.size = (tempholdTimer /  (_maxCharge));
+                    yield return null;
+                }
             }
         }
-        while (goingDown)
-        {
-            if (tempholdTimer <= 0)
-            {
-                goingDown = false;
-                goTarget = true;
-            }
-            else
-            {
-                tempholdTimer -= Time.deltaTime * _rdmChargeSpeed;
-                _chargeVisual.size = (tempholdTimer /  (_maxCharge));
-                yield return null;
-            }
 
-        }
+        //Charge to randomly decided shot speed
+        goTarget = true;
         while (goTarget)
         {
-            if (Mathf.Abs(tempholdTimer - targetCharge) < 0.01)
+            if (Mathf.Abs(tempholdTimer - targetCharge) < 0.1)
             {
                 goTarget = false;
                 _chargeVisual.size = (targetCharge / _maxCharge);
