@@ -345,7 +345,7 @@ public class Player : MonoBehaviour
                 {
                     goingUp = false;
                     goingDown = true;
-                    count++; //Amount of times going up
+                    
                 }
                 else //Charge back
                 {
@@ -360,6 +360,7 @@ public class Player : MonoBehaviour
                 {
                     goingDown = false;
                     goingUp = true;
+                    count++; //Amount of times going up
                 }
                 else //Charge Forward
                 {
@@ -418,8 +419,8 @@ public class Player : MonoBehaviour
             _holdStarted = false;
             _turnManagerScript.keepTurn = false;
 
-            CalculateShot(_extraCueBallA, _extraLineA);
-            CalculateShot(_extraCueBallB, _extraLineB);
+            if (_extraCueBallA != null) CalculateShot(_extraCueBallA, _extraLineA);
+            if (_extraCueBallB != null) CalculateShot(_extraCueBallB, _extraLineB);
             CalculateShot(_cueBall, _predictionLineParent);
 
             StartCoroutine(EndShot());

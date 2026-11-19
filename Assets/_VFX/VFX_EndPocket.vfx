@@ -360,7 +360,7 @@ MonoBehaviour:
   - {fileID: 114780028408030698}
   - {fileID: 114063133802684794}
   dataType: 0
-  capacity: 1
+  capacity: 5
   stripCapacity: 16
   particlePerStripCount: 16
   needsComputeBounds: 0
@@ -497,7 +497,7 @@ MonoBehaviour:
       slotIndex: 0
   integration: 0
   angularIntegration: 0
-  ageParticles: 1
+  ageParticles: 0
   reapParticles: 0
   skipZeroDeltaUpdate: 0
 --- !u!114 &114920711487922656

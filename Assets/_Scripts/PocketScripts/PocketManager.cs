@@ -363,11 +363,11 @@ public class PocketManager : MonoBehaviour
                     //Determine winner
                     if (child.gameObject.tag == "EndPocket") //8 Ball got scored on end pocket
                     {
-                        winner = DetermineWinner(true);
+                        winner = DetermineWinner(false);
                     }
                     else //8 ball got score preemptively
                     {
-                        winner = DetermineWinner(false);
+                        winner = DetermineWinner(true);
                     }
 
                     //Show Winner
@@ -566,7 +566,7 @@ public class PocketManager : MonoBehaviour
         GameObject cork = Instantiate(_cork);
         cork.transform.SetParent(pocket.transform); //Set parent to pocket so we can later remove cork if needed
         cork.SetActive(true);
-        Vector3 targetPos = pocket.transform.position;
+        Vector3 targetPos = pocket.transform.position; //+ new Vector3(0, 0.54f, 0);
         cork.transform.position = targetPos + new Vector3(0, 5, 0); // set cork pos above target pocket - Should make 5 a variable for designer
         Vector3 startingPos = cork.transform.position;
 
@@ -670,6 +670,7 @@ public class PocketManager : MonoBehaviour
 
         StartCoroutine(PlaceCork(_selectedPocket, true));
         _selectedPocket.GetComponent<Collider>().enabled = false;
+        _selectedPocket.transform.GetChild(0).gameObject.SetActive(true);
         pockets.Remove(_selectedPocket);
     }
 
@@ -681,9 +682,9 @@ public class PocketManager : MonoBehaviour
     {
         foreach (GameObject obj in _tempCoveredPockets)
         {
-            if (obj.transform.GetChild(0) != null)
+            if (obj.transform.GetChild(1) != null) //1 is the cork
             {
-                obj.transform.GetChild(0).gameObject.SetActive(true); // corks were false
+                obj.transform.GetChild(1).gameObject.SetActive(true); // corks were false
             }
             else
             {
@@ -700,9 +701,9 @@ public class PocketManager : MonoBehaviour
     {
         foreach (GameObject pocket in _tempCoveredPockets)
         {
-            if (pocket.transform.GetChild(0) != null)
+            if (pocket.transform.GetChild(1) != null) //1 is the cork
             {
-                pocket.transform.GetChild(0).gameObject.SetActive(false); //hide all temp corks while player picks a pocket to block
+                pocket.transform.GetChild(1).gameObject.SetActive(false); //hide all temp corks while player picks a pocket to block
             }
         }
     }
@@ -731,6 +732,7 @@ public class PocketManager : MonoBehaviour
             {
                 StartCoroutine(PlaceCork(pockets[i], false));
                 pockets[i].gameObject.GetComponent<Collider>().enabled = false;
+                pockets[i].transform.GetChild(0).gameObject.SetActive(true); //turn on blocking collider
                 _tempCoveredPockets.Add(pockets[i]); //add here to re enable later
             }
             else //Hide all pockets except selected
@@ -739,6 +741,7 @@ public class PocketManager : MonoBehaviour
                 {
                     StartCoroutine(PlaceCork(pockets[i], false));
                     pockets[i].gameObject.GetComponent<Collider>().enabled = false;
+                    pockets[i].transform.GetChild(0).gameObject.SetActive(true); //turn on blocking collider
                     _tempCoveredPockets.Add(pockets[i]); //add here to re enable later
                 }
             }
@@ -777,15 +780,16 @@ public class PocketManager : MonoBehaviour
 
         foreach (GameObject pocket in _tempCoveredPockets) //Remove temporary corks
         {
-            if (pocket.transform.GetChild(0).gameObject != null)
+            if (pocket.transform.GetChild(1).gameObject != null) //1 is cork object
             {
-                StartCoroutine(RemoveCork(pocket.transform.GetChild(0).gameObject));
+                StartCoroutine(RemoveCork(pocket.transform.GetChild(1).gameObject));
             }
             else
             {
                 Debug.Log("null");
             }
             pocket.GetComponent<Collider>().enabled = true;
+            pocket.transform.GetChild(0).gameObject.SetActive(false); //Turn off pocket covering collider
         }
 
 
@@ -1042,7 +1046,7 @@ public class PocketManager : MonoBehaviour
         else if (!epActive && _epRaised)
         {
             StartCoroutine(LowerEndPocket());
-            if (_allPocketsCovered)
+            if (_allPocketsCovered) //PROBABLY ADD || MOSTPOCKETSCOVERED
             {
                 StartCoroutine(ReleasePockets());
                 _lastPocketEnded = true;
@@ -1118,7 +1122,7 @@ public class PocketManager : MonoBehaviour
                 nothingCalled = false;
                 _ballManager.ballsBig = false;
                 _ballManager.ResetGiantBalls();
-                BigBallsShrunk?.Invoke(false); //Starts ball check - not a shot
+                BigBallsShrunk?.Invoke(true); //Starts ball check - true so it comes back through and ends turn
             }
 
             if (_mostPocketsCovered) //Release pockets after a shot or turn switch //SWITCH OONLY MOST
