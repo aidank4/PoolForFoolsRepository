@@ -245,17 +245,17 @@ public class TurnManager : MonoBehaviour
     /// <summary>
     /// highlights which team is currently going. Used by the scoreboard
     /// </summary>
-    public void ShowTeam(Image pOneGlow, Image pTwoGlow)
+    public void ShowTeam(GameObject pOneGlow, GameObject pTwoGlow)
     {
         if (currentPlayer == playerOne)
         {
-            pOneGlow.transform.localScale = Vector3.one; //show it by scaling it on
-            pTwoGlow.transform.localScale = Vector3.zero; //hide it by scaling it off
+            pOneGlow.SetActive(true);
+            pTwoGlow.SetActive(false);
         }
         else if (currentPlayer == playerTwo)
         {
-            pTwoGlow.transform.localScale = Vector3.one;
-            pOneGlow.transform.localScale = Vector3.zero;
+            pTwoGlow.SetActive(true);
+            pOneGlow.SetActive(false);
         }
     }
     #endregion

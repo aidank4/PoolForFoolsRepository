@@ -20,6 +20,7 @@ public class PowerUpUI : MonoBehaviour
     [SerializeField] private Button _swapButton; // do the swap button bc this will be first highlighted button and we dont want that to be toss
     [SerializeField] private Button _slotA; // when swap gets clicked highlight slotA
     [SerializeField] private TMP_Text _slotDescription;
+    [SerializeField] private GameObject _star;
 
 
     [Header("Sabotage UI")]
@@ -48,6 +49,7 @@ public class PowerUpUI : MonoBehaviour
         _sabotageBorderParent.gameObject.SetActive(false);
         _sabotageCorner.gameObject.SetActive(false);
         _sabotageText.gameObject.SetActive(false);
+        //_star.SetActive(true);
         #endregion
     }
 
@@ -76,7 +78,6 @@ public class PowerUpUI : MonoBehaviour
         }
         SO_PowerUp.UsePU -= HandlePU;
     }
-
 
 
     /// <summary>

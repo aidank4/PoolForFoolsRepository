@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
     private TurnManager _turnManagerScript;
     [SerializeField] private GameObject _predictionLineParent;
     [SerializeField] Scrollbar _chargeVisual;
+    [SerializeField] GameObject _clock;
     [SerializeField] private GameObject _cueBall; //Ball Object
     private CueBall _cueBallScript; //Ball Script
     [SerializeField] private GameObject _cueBallExtra;
@@ -56,6 +57,7 @@ public class Player : MonoBehaviour
     private bool _shooting = false; //Can't release shot without this bool - Without this there is an error where you can release shot before starting shot
     private bool _stopShot = false; //Set true by CancelShot() and false when shot started
     private bool _holdStarted = false; //Set true when shot started and false when shot released
+    private bool _chargeUpwards = true; //Whether charge is going up or down
 
 
     [Header("Misc Variables")]
@@ -88,6 +90,7 @@ public class Player : MonoBehaviour
         #endregion
         //UI
         _chargeVisual.gameObject.SetActive(false);
+        _clock.SetActive(false);
 
         //Extra
         _ballRadius = _cueBall.GetComponent<SphereCollider>().radius; //used for shoot math but the radius only needs to be gathered once so I have it here in Awake.
@@ -156,16 +159,52 @@ public class Player : MonoBehaviour
         }//Rotate extra balls and lines when multi shoot active
         if (_holdStarted && !_stopShot)
         {
-            _holdTimer += Time.deltaTime;
-            _chargeVisual.size = (_holdTimer / _maxCharge); // divide by _maxHold because scrollBarSize is capped to 1.
+            //_holdTimer += Time.deltaTime;
+            //_chargeVisual.size = (_holdTimer / _maxCharge); // divide by _maxHold because scrollBarSize is capped to 1.
 
-            if (_holdTimer < _maxCharge) //dont let the pool cue pull back further than max power
-            {
-                poolCueParent.transform.position += poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime; // .right is moving the cue back
-            }
+            //if (_holdTimer < _maxCharge) //dont let the pool cue pull back further than max power
+            //{
+            //    poolCueParent.transform.position += poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime; // .right is moving the cue back
+            //}
+            ChargeShot();
         }
 
     }
+
+
+    /// <summary>
+    /// Move the charrge visual and pool cue up or down
+    /// </summary>
+    private void ChargeShot()
+    {
+        //Determine charge direction
+        if (_holdTimer <= _minCharge) //At bottom head up
+        {
+            _chargeUpwards = true;
+        }
+        else if (_holdTimer >= _maxCharge) //At top head down
+        {
+            _chargeUpwards = false;
+        }
+        else //Stay the same
+        {
+            //nothing
+        }
+
+
+        //Adjust the timer and pool cue
+        if (_chargeUpwards) //Up
+        {
+            _holdTimer += Time.deltaTime;
+            poolCueParent.transform.position += poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime;
+        }
+        else //Down
+        {
+            _holdTimer -= Time.deltaTime;
+            poolCueParent.transform.position -= poolCueParent.transform.right * _pullBackSpeed * Time.deltaTime;
+        }
+        _chargeVisual.size = (_holdTimer / _maxCharge);
+    }   
 
 
     /// <summary>
@@ -249,6 +288,7 @@ public class Player : MonoBehaviour
             //_startingPos = poolCueParent.transform.position;
             _holdTimer = UnityEngine.Random.Range(_minCharge, _maxCharge);
             _chargeVisual.gameObject.SetActive(true);
+            _clock.SetActive(true);
             //anim
             StartCoroutine((RdmPowerAnim(_holdTimer))); //Handles shot release stuff in here because must happen at the end of coroutine
 
@@ -293,39 +333,48 @@ public class Player : MonoBehaviour
         bool goingDown = false;
         bool goTarget = false;
         float tempholdTimer = 0f;
+        int count = 0;
 
-        while (goingUp)
+
+        //Visually charge up and down multiple times
+        while (count < 4)
         {
-            if (tempholdTimer >= _maxCharge)
+            while (goingUp)
             {
-                goingUp = false;
-                goingDown = true;
+                if (tempholdTimer >= _maxCharge) //Switch direction
+                {
+                    goingUp = false;
+                    goingDown = true;
+                    count++; //Amount of times going up
+                }
+                else //Charge back
+                {
+                    tempholdTimer += Time.deltaTime * _rdmChargeSpeed;
+                    _chargeVisual.size = (tempholdTimer / _maxCharge);
+                    yield return null;
+                }
             }
-            else
+            while (goingDown)
             {
-                tempholdTimer += Time.deltaTime * _rdmChargeSpeed;
-                _chargeVisual.size = (tempholdTimer / _maxCharge);
-                yield return null;
+                if (tempholdTimer <= 0) //Switch direction
+                {
+                    goingDown = false;
+                    goingUp = true;
+                }
+                else //Charge Forward
+                {
+                    tempholdTimer -= Time.deltaTime * _rdmChargeSpeed;
+                    _chargeVisual.size = (tempholdTimer /  (_maxCharge));
+                    yield return null;
+                }
             }
         }
-        while (goingDown)
-        {
-            if (tempholdTimer <= 0)
-            {
-                goingDown = false;
-                goTarget = true;
-            }
-            else
-            {
-                tempholdTimer -= Time.deltaTime * _rdmChargeSpeed;
-                _chargeVisual.size = (tempholdTimer /  (_maxCharge));
-                yield return null;
-            }
 
-        }
+        //Charge to randomly decided shot speed
+        goTarget = true;
         while (goTarget)
         {
-            if (Mathf.Abs(tempholdTimer - targetCharge) < 0.01)
+            if (Mathf.Abs(tempholdTimer - targetCharge) < 0.1)
             {
                 goTarget = false;
                 _chargeVisual.size = (targetCharge / _maxCharge);
@@ -342,6 +391,7 @@ public class Player : MonoBehaviour
         _shooting = false;
         _turnManagerScript.keepTurn = false;
         _chargeVisual.gameObject.SetActive(false);
+        _clock.SetActive(false);
         CalculateShot(_cueBall, _predictionLineParent);
         StartCoroutine(EndShot());
         Shoot = DefaultShoot;

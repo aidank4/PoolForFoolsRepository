@@ -30,7 +30,6 @@ public class CameraMovement : MonoBehaviour
     /// <param name="context"></param>
     public void Fly(InputAction.CallbackContext context)
     {
-        Debug.Log("Fly");
         _moveInput = context.ReadValue<Vector3>();
     }
 
@@ -41,7 +40,6 @@ public class CameraMovement : MonoBehaviour
     /// <param name="context"></param>
     public void Rotate(InputAction.CallbackContext context)
     {
-        Debug.Log("Rotate input");
         _rotateInput = context.ReadValue<Vector2>();
     }
 

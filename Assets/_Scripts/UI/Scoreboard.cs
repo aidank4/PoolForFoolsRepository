@@ -8,8 +8,8 @@ public class Scoreboard : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _pOneScoreText;
     [SerializeField] private TextMeshProUGUI _pTwoScoreText;
     [SerializeField] private TextMeshProUGUI _playerXText;
-    [SerializeField] private Image _pOneGlow;
-    [SerializeField] private Image _pTwoGlow;
+    [SerializeField] private GameObject _pOneGlow;
+    [SerializeField] private GameObject _pTwoGlow;
     [SerializeField] private GameObject _turnManagerRef;
     private TurnManager _turnManagerScript;
 
@@ -30,8 +30,8 @@ public class Scoreboard : MonoBehaviour
         _pOneScoreText.text = pOneScore.ToString();
         _pTwoScoreText.text = pTwoScore.ToString();
         //initialize glows to invisible
-        _pOneGlow.transform.localScale = Vector3.zero;
-        _pTwoGlow.transform.localScale = Vector3.zero;
+        _pOneGlow.SetActive(false);
+        _pTwoGlow.SetActive(false);
         #endregion
     }
 
