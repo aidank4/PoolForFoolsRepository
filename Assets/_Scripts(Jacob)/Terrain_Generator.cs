@@ -14,35 +14,36 @@ public class Terrain_Generator : MonoBehaviour
     [SerializeField]
     private Animation risingAnim;
 
-    [SerializeField] private GameObject _turnManagerRef;
-    private TurnManager _turnManager;
+    [SerializeField]
+    private GameObject _ballManagerRef;
+    private BallManager _ballManager;
 
     private bool _hasSpawned = false;
 
     void Awake()
     {
-        _turnManager = _turnManagerRef.GetComponent<TurnManager>();
+        _ballManager = _ballManagerRef.GetComponent<BallManager>();
         riseAnimator = GetComponent<Animator>();
     }
 
     private void OnEnable()
     {
-        if (_turnManager != null)
+        if (_ballManager != null)
         {
-            _turnManager.TurnSwitched += HandleTurnSwitch;
+            _ballManager.BallsStopped += HandleBallsStopped;
         }
     }
 
     private void OnDisable()
     {
-        if (_turnManager != null)
+        if (_ballManager != null)
         {
-            _turnManager.TurnSwitched -= HandleTurnSwitch;
+            _ballManager.BallsStopped -= HandleBallsStopped;
         }
     }
 
 
-    private void HandleTurnSwitch(bool dontCare)
+    private void HandleBallsStopped(bool dontCare)
     {
         if (!_hasSpawned)
         {

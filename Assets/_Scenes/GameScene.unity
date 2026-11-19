@@ -172,6 +172,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 8.5, z: 0}
+--- !u!1 &83857314 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2226760428100106598, guid: 50bd60bae94760640a69403f2df488de, type: 3}
+  m_PrefabInstance: {fileID: 1005815325}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &438918510 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7152622315240359893, guid: 50bd60bae94760640a69403f2df488de, type: 3}
@@ -450,6 +455,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2779956140695071913, guid: 2ff6a869d9637564b84849d9163af85d, type: 3}
+      propertyPath: _ballManagerRef
+      value: 
+      objectReference: {fileID: 83857314}
     - target: {fileID: 2779956140695071913, guid: 2ff6a869d9637564b84849d9163af85d, type: 3}
       propertyPath: _turnManagerRef
       value: 
